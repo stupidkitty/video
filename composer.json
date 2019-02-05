@@ -1,0 +1,21 @@
+{
+    "name": "stupidkitty/video",
+    "description": "Video module. Yii2",
+    "type": "yii2-extension",
+    "keywords": ["yii2","video"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "StupidKitty",
+            "email": "adx.informer@protonmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0.15"
+    },
+    "autoload": {
+        "psr-4": {
+            "SK\\VideoModule\\": "./src"
+        }
+    }
+}
