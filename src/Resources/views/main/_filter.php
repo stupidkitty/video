@@ -4,20 +4,9 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-use ytubes\videos\admin\models\finders\CategoryFinder;
-use ytubes\videos\models\VideoStatus;
-use common\models\users\User;
-
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\videos\VideoSearch */
-/* @var $form yii\widgets\ActiveForm */
-
 if (!empty($filterForm->videos_ids)) {
     $filterForm->videos_ids = implode(',', $filterForm->videos_ids);
 }
-//$searchModel->categories_ids = implode(',', $searchModel->categories_ids);
-
-/*$user = Yii::$app->user->identity;*/
 
 ?>
 

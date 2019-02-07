@@ -2,16 +2,17 @@
 namespace SK\VideoModule\Controller\Api;
 
 use Yii;
+use yii\web\User;
 use yii\base\Event;
 use yii\filters\Cors;
 use yii\rest\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use yii\web\NotFoundHttpException;
-use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
+use yii\web\NotFoundHttpException;
+use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Form\Api\VideoForm;
 use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
@@ -105,6 +106,7 @@ class VideoController extends Controller
 
         if ($form->load(Yii::$app->getRequest()->post()) && $form->isValid()) {
             $db = Yii::$app->db;
+            $user = Yii::$container->get(User::class);
             $transaction = $db->beginTransaction();
 
             try {
@@ -113,7 +115,7 @@ class VideoController extends Controller
 
                 $video->setAttributes($form->getAttributes());
                 $video->generateSlug($form->slug);
-                $video->user_id = Yii::$app->user->getId();
+                $video->user_id = $user->getId();
                 $video->updated_at = $currentDatetime;
                 $video->created_at = $currentDatetime;
                 $video->published_at = $form->published_at;
