@@ -170,13 +170,6 @@ class AjaxController extends Controller
             return;
         }
 
-        //$images_ids = implode(',', $images_ids);
-
-        /*$db->createCommand("UPDATE `videos_stats` SET `current_shows`=`current_shows`+1 WHERE  FIND_IN_SET (`image_id`, :array) AND `category_id`=:category_id")
-            ->bindParam(':array', $images_ids)
-            ->bindParam(':category_id', $category_id)
-            ->execute();*/
-
         RotationStats::updateAllCounters(['current_shows' => 1], ['image_id' => $images_ids, 'category_id' => $category_id]);
     }
 
@@ -195,12 +188,6 @@ class AjaxController extends Controller
             return '';
         }
 
-        /*$db = Yii::$app->db;
-
-        $sql = 'UPDATE `videos` SET `likes` = `likes` + 1 WHERE `video_id` = :video_id';
-        $db->createCommand($sql)
-            ->bindParam(':video_id', $video_id)
-            ->execute();*/
         Video::updateAllCounters(['likes' => 1], '`video_id` = :video_id', [':video_id' => $video_id]);
 
         return '';
@@ -223,10 +210,6 @@ class AjaxController extends Controller
 
         $db = Yii::$app->db;
 
-        /*$sql = 'UPDATE `videos` SET `dislikes` = `dislikes` + 1 WHERE `video_id` = :video_id';
-        $db->createCommand($sql)
-            ->bindParam(':video_id', $video_id)
-            ->execute();*/
         Video::updateAllCounters(['dislikes' => 1], '`video_id` = :video_id', [':video_id' => $video_id]);
 
         return '';
