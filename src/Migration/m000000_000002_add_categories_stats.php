@@ -12,7 +12,7 @@ class m000000_000002_add_categories_stats extends Migration
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB';
         }
 
-        $tableName = 'videos_categories';
+        /*$tableName = 'videos_categories';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
 
         if ($tableSchema !== null) {
@@ -24,9 +24,9 @@ class m000000_000002_add_categories_stats extends Migration
             $this->addColumn($tableName, 'last_period_clicks', ' MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT 0 AFTER `enabled`');
 
             $this->createIndex('last_period_clicks', $tableName, 'last_period_clicks');
-        }
+        }*/
 
-        $tableName = 'videos_categories_stats';
+        /*$tableName = 'videos_categories_stats';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
 
         if ($tableSchema === null) {
@@ -62,7 +62,7 @@ class m000000_000002_add_categories_stats extends Migration
             'cron_expression' => '01 00 * * *',
             'priority' => 30,
             'enabled' => 1,
-        ]);
+        ]);*/
         //INSERT INTO `cron_jobs` (`module`, `handler_class`, `cron_expression`, `priority`, `enabled`) VALUES ('videos', 'RS\\Module\\VideoModule\\Cron\\Job\\CategoryClicksUpdateJob', '0 * * * *', 10, 1)
         //INSERT INTO `cron_jobs` (`module`, `handler_class`, `cron_expression`, `priority`, `enabled`) VALUES ('videos', 'RS\\Module\\VideoModule\\Cron\\Job\\RecalculateVideosJob', '01 00 * * *', 20, 1)
         //INSERT INTO `cron_jobs` (`module`, `handler_class`, `cron_expression`, `priority`, `enabled`) VALUES ('videos', 'RS\\Module\\VideoModule\\Cron\\Job\\RemoveOldDataJob', '01 00 * * *', 30, 1)

@@ -13,17 +13,17 @@ class m000000_000003_add_indexes extends Migration
         }
 
         /** VIDEOS */
-        $this->dropIndex('title_2', 'videos');
+        /*$this->dropIndex('title_2', 'videos');
 
         $this->addColumn('videos', 'max_ctr', ' DOUBLE UNSIGNED NOT NULL DEFAULT 0 AFTER `views`');
 
         $this->createIndex('views', 'videos', 'views');
         $this->createIndex('likes', 'videos', 'likes');
-        $this->createIndex('max_ctr', 'videos', 'max_ctr');
+        $this->createIndex('max_ctr', 'videos', 'max_ctr');*
 
         /** CATEGORIES */
-        $this->createIndex('title', 'videos_categories', 'title');
-        $this->createIndex('enabled', 'videos_categories', 'enabled');
+        /*$this->createIndex('title', 'videos_categories', 'title');
+        $this->createIndex('enabled', 'videos_categories', 'enabled');*/
 
         /** VIDEOS_STATS */
         $this->dropForeignKey('videos_stats_ibfk_1', 'videos_stats');

@@ -13,7 +13,7 @@ class m000000_000001_create_videos extends Migration
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('videos', [
+        /*$this->createTable('videos', [
             'video_id' => 'int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY',
             'image_id' => 'int(10) UNSIGNED NOT NULL DEFAULT 0',
             'user_id' => 'int(10) UNSIGNED NOT NULL DEFAULT 0',
@@ -45,10 +45,10 @@ class m000000_000001_create_videos extends Migration
         $this->createIndex('source_url', 'videos', 'source_url');
         $this->createIndex('embed', 'videos', 'embed');
         $this->execute("ALTER TABLE `videos` ADD FULLTEXT KEY `title` (`title`,`description`,`short_description`)");
-        $this->execute("ALTER TABLE `videos` ADD FULLTEXT KEY `title_2` (`title`)");
+        $this->execute("ALTER TABLE `videos` ADD FULLTEXT KEY `title_2` (`title`)");*/
 
 
-        $tableName = 'videos_categories';
+        /*$tableName = 'videos_categories';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
 
         if ($tableSchema === null) {
@@ -81,9 +81,9 @@ class m000000_000001_create_videos extends Migration
             $this->execute("ALTER TABLE `{$tableName}` MODIFY `category_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT");
             $this->createIndex('slug', $tableName, 'slug', true);
             $this->createIndex('position', $tableName, 'position');
-        }
+        }*/
 
-        $tableName = 'videos_categories_map';
+        /*$tableName = 'videos_categories_map';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
 
         if ($tableSchema === null) {
@@ -113,9 +113,9 @@ class m000000_000001_create_videos extends Migration
                 'CASCADE',
                 'CASCADE'
             );
-        }
+        }*/
 
-        $tableName = 'videos_images';
+        /*$tableName = 'videos_images';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
 
         if ($tableSchema === null) {
@@ -145,9 +145,9 @@ class m000000_000001_create_videos extends Migration
                 null,
                 'CASCADE'
             );
-        }
+        }*/
 
-        $tableName = 'videos_import_feeds';
+        /*$tableName = 'videos_import_feeds';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
 
         if ($tableSchema === null) {
@@ -168,10 +168,10 @@ class m000000_000001_create_videos extends Migration
 
             $this->addPrimaryKey('feed_id', $tableName, 'feed_id');
             $this->execute("ALTER TABLE `{$tableName}` MODIFY `feed_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT");
-        }
+        }*/
 
 
-        $tableName = 'videos_related_map';
+        /*$tableName = 'videos_related_map';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
 
         if ($tableSchema === null) {
@@ -201,7 +201,7 @@ class m000000_000001_create_videos extends Migration
                 'CASCADE',
                 'CASCADE'
             );
-        }
+        }*/
 
         $tableName = 'videos_stats';
         $tableSchema = Yii::$app->db->schema->getTableSchema($tableName);
