@@ -107,6 +107,7 @@ class VideoController extends Controller
         if ($form->load(Yii::$app->getRequest()->post()) && $form->isValid()) {
             $db = Yii::$app->db;
             $user = Yii::$container->get(User::class);
+
             $transaction = $db->beginTransaction();
 
             try {
