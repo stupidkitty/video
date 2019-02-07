@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m190206_092629_videos_create
+ * Class m190206_092629_create_videos
  */
-class m190206_092629_videos_create extends Migration
+class m190206_092629_create_videos extends Migration
 {
     /**
      * {@inheritdoc}
