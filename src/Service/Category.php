@@ -85,7 +85,7 @@ class Category
         $settings = Yii::$container->get(SettingsInterface::class);
 
         $categories = CategoryModel::find()
-            ->select(['category_id', 'title'])
+            ->select(['category_id', 'title', 'enabled'])
             ->where(['enabled' => 1])
             ->all();
 
@@ -122,10 +122,12 @@ class Category
             // Если уникальные иды остались, то выбрать первую и установить ее как обложку категории.
             if (!empty($unusedIds)) {
                 $firstId = array_shift($unusedIds);
-                $image = Image::findOne(['image_id' => $firstId, 'enabled' => 1]);
+                $image = Image::findOne(['image_id' => $firstId]);
 
                 if (null !== $image) {
-                    $category->setCoverImage($image);
+                    //$category->setCoverImage($image);
+                    $category->image = $image->filepath;
+                    $category->save();
                 }
 
                 // Записать, что данная тумба уже используется.
