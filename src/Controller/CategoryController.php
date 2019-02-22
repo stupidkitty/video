@@ -28,12 +28,6 @@ class CategoryController extends Controller implements ViewContextInterface
     public function behaviors()
     {
         return [
-            /*'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'click' => ['post'],
-                ],
-            ],*/
             'queryParams' => [
                 'class' => QueryParamsFilter::class,
                 'actions' => [
@@ -42,7 +36,7 @@ class CategoryController extends Controller implements ViewContextInterface
                     'views' => ['id', 'slug', 'page', 't'],
                     'likes' => ['id', 'slug', 'page', 't'],
                     'ctr' => ['id', 'slug', 'page', 't'],
-                    'list-all' => ['sort'],
+                    'all-categories' => ['sort'],
                 ],
             ],
             'pageCache' => [
@@ -428,7 +422,7 @@ class CategoryController extends Controller implements ViewContextInterface
      *
      * @return mixed
      */
-    public function actionListAll($sort = '')
+    public function actionAllCategories($sort = '') // Переименовать этот метод в AllCategories (template too)
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 
@@ -465,7 +459,7 @@ class CategoryController extends Controller implements ViewContextInterface
             ->asArray()
             ->all();
 
-        return $this->render('categories_list', [
+        return $this->render('all_categories', [
             'categories' => $categories,
             'settings' => $settings,
             'sort' => $sort,
