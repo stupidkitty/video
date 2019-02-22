@@ -45,6 +45,11 @@ class RelatedVideos extends Widget
         }
     }
 
+    public function getViewPath()
+    {
+        return Yii::getAlias('@root/views/videos');
+    }
+
     /**
      * Runs the widget
      *
@@ -68,7 +73,7 @@ class RelatedVideos extends Widget
             $videos = array_slice($videos, $rangeStart, $rangeEnd);
         }
 
-        return $this->renderFile($this->template, [
+        return $this->render($this->template, [
             'videos' => $videos,
         ]);
     }
