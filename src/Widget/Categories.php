@@ -46,6 +46,11 @@ class Categories extends Widget
         }
     }
 
+    public function getViewPath()
+    {
+        return Yii::getAlias('@root/views/videos');
+    }
+
     /**
      * Runs the widget
      *
@@ -63,12 +68,12 @@ class Categories extends Widget
                 return;
             }
 
-            $html = $this->renderFile($this->template, [
+            $html = $this->render($this->template, [
                 'categories' => $categories,
                 'active_id' => $this->active_id,
             ]);
 
-               Yii::$app->cache->set($cacheKey, $html, $this->cacheDuration);
+            Yii::$app->cache->set($cacheKey, $html, $this->cacheDuration);
         }
 
         return $html;
