@@ -113,7 +113,7 @@ class SearchController extends Controller implements ViewContextInterface
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
 
-        if (empty($videos) && '' !== Yii::$app->request->get('q', '')) {
+        if (empty($videos)) {
             Yii::$app->response->statusCode = 404;
         }
 
