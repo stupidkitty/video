@@ -81,7 +81,7 @@ class BestVideos extends Widget
                 'videos' => $videos,
             ]);
 
-            //Yii::$app->cache->set($cacheKey, $html, $this->cacheDuration);
+            Yii::$app->cache->set($cacheKey, $html, $this->cacheDuration);
         }
 
         return $html;
