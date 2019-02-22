@@ -72,7 +72,8 @@ class SearchController extends Controller implements ViewContextInterface
         if (Yii::$app->request->isPost && '' !== Yii::$app->request->post('q', '')) {
             Yii::$app->request->setQueryParams(['q' => Yii::$app->request->post('q', ''), 'page' => $page]);
             Yii::$app->request->resolve();
-            $this->redirect(Url::to(['/videos/search/index', 'q' =>  Yii::$app->request->post('q')]), 301);
+
+            $this->redirect(Url::toRoute(['search/index', 'q' =>  Yii::$app->request->post('q')]), 301);
         }
 
         if ('' !== $q) {
