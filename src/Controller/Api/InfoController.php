@@ -6,7 +6,6 @@ use yii\filters\Cors;
 use yii\db\Expression;
 use yii\rest\Controller;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
 use yii\filters\auth\HttpBearerAuth;
@@ -23,17 +22,6 @@ class InfoController extends Controller
     public function behaviors()
     {
         return [
-            /*'access' => [
-                'class' => AccessControl::class,
-                'only' => ['index'],
-                'rules' => [
-                    [
-                        'actions' => ['index'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],*/
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
