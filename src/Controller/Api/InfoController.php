@@ -3,12 +3,13 @@ namespace SK\VideoModule\Controller\Api;
 
 use Yii;
 use yii\filters\Cors;
+use yii\db\Expression;
 use yii\rest\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
+use yii\filters\auth\HttpBearerAuth;
 use RS\Component\Core\Settings\SettingsInterface;
 
 /**
@@ -62,7 +63,7 @@ class InfoController extends Controller
         $data['active_videos_num'] = Video::find()->onlyActive()->count();
 
         $data['autoposting_queue_num'] = Video::find()
-            ->andWhere(['>=', 'published_at', new \yii\db\Expression('NOW()')])
+            ->andWhere(['>=', 'published_at', new Expression('NOW()')])
             ->onlyActive()
             ->count();
 
