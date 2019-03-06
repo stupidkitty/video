@@ -9,27 +9,40 @@ use SK\VideoModule\Model\Category;
 class Categories extends Widget
 {
     private $cacheKey = 'video:widget:categories:';
+
     /**
      * @var int Идентификатор текущей активной категории;
      */
     public $active_id = null;
+
     /**
      * @var string path to template
      */
     public $template;
+
     /**
-     * @var array|string сортировка элементов
      * Можно использовать следующие параметры:
      * - id: integer, идентификатор категории
      * - title: string, название
      * - position: integer, порядковый номер при ручной сортировке
      * - clicks: integer, клики по категориям тумб.
+     * 
+     * @var array|string сортировка элементов
      */
     public $order = 'title';
+    
+    /**
+     * Лимит вывода категорий.
+     *
+     * @var integer
+     */
+    public $limit;
+    
     /**
      * @var int Время жизни кеша темплейта (html)
      */
     public $cacheDuration = 300;
+    
     /**
      * @var array Коллекция массивов категорий.
      */
@@ -91,14 +104,17 @@ class Categories extends Widget
             $order = ['last_period_clicks' => SORT_DESC];
         }
 
-        $items = Category::find()
+        $query = Category::find()
             ->select(['category_id', 'slug', 'image', 'title', 'description', 'param1', 'param2', 'param3', 'on_index', 'videos_num'])
             ->where(['enabled' => 1])
             ->orderBy($order)
-            ->asArray()
-            ->all();
+            ->asArray();
 
-        return $items;
+        if (null !== $this->limit) {
+            $query->limit((int) $this->limit);
+        }
+
+        return $query->all();
     }
 
     private function buildCacheKey()
