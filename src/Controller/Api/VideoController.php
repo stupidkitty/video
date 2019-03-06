@@ -4,6 +4,7 @@ namespace SK\VideoModule\Controller\Api;
 use Yii;
 use yii\web\User;
 use yii\base\Event;
+use yii\web\Request;
 use yii\filters\Cors;
 use yii\rest\Controller;
 use yii\filters\VerbFilter;
@@ -102,9 +103,10 @@ class VideoController extends Controller
      */
     public function actionCreate()
     {
+        $request = Yii::$container->get(Request::class);
         $form = new VideoForm;
 
-        if ($form->load(Yii::$app->getRequest()->post()) && $form->isValid()) {
+        if ($form->load($request->post()) && $form->isValid()) {
             $db = Yii::$app->db;
             $user = Yii::$container->get(User::class);
 
@@ -209,8 +211,9 @@ class VideoController extends Controller
     public function actionUpdate($id)
     {
         $video = $this->findById($id);
+        $request = Yii::$container->get(Request::class);
 
-        $video->load(['Video' => Yii::$app->getRequest()->getBodyParams()]);
+        $video->load(['Video' => $request->getBodyParams()]);
 
         if ($video->save()) {
             return [
