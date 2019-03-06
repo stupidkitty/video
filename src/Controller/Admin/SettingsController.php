@@ -2,11 +2,12 @@
 namespace SK\VideoModule\Controller\Admin;
 
 use Yii;
+use yii\web\Request;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Form\Admin\SettingsForm;
+use RS\Component\Core\Settings\SettingsInterface;
 
 /**
  * SettingsController

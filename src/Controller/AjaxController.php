@@ -2,9 +2,10 @@
 namespace SK\VideoModule\Controller;
 
 use Yii;
+use yii\web\Request;
 use yii\web\Controller;
-use yii\filters\VerbFilter;
 
+use yii\filters\VerbFilter;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\RotationStats;
 use RS\Component\Core\Settings\SettingsInterface;

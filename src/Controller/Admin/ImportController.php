@@ -2,14 +2,15 @@
 namespace SK\VideoModule\Controller\Admin;
 
 use Yii;
-use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
-use yii\data\ActiveDataProvider;
+use yii\web\Request;
 use yii\web\Controller;
 use yii\web\UploadedFile;
-use yii\web\NotFoundHttpException;
-use RS\Component\User\Model\User;
+use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 use SK\VideoModule\Model\Video;
+use yii\data\ActiveDataProvider;
+use RS\Component\User\Model\User;
+use yii\web\NotFoundHttpException;
 use SK\VideoModule\Model\ImportFeed;
 use SK\VideoModule\Form\Admin\VideosImport;
 use SK\VideoModule\Form\Admin\CategoriesImportForm;

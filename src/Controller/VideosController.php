@@ -2,12 +2,13 @@
 namespace SK\VideoModule\Controller;
 
 use Yii;
+use yii\web\Request;
 use yii\web\Controller;
 use yii\filters\PageCache;
+use SK\VideoModule\Model\Video;
 use yii\data\ActiveDataProvider;
 use yii\base\ViewContextInterface;
 use yii\web\NotFoundHttpException;
-use SK\VideoModule\Model\Video;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
 

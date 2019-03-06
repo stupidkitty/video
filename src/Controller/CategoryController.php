@@ -3,18 +3,19 @@ namespace SK\VideoModule\Controller;
 
 use Yii;
 use yii\data\Sort;
+use yii\web\Request;
 use yii\web\Controller;
 use yii\filters\PageCache;
 use yii\filters\VerbFilter;
+use SK\VideoModule\Model\Video;
 use yii\data\ActiveDataProvider;
+use SK\VideoModule\Model\Category;
 use yii\base\ViewContextInterface;
 use yii\web\NotFoundHttpException;
-use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\Category;
-use RS\Component\Core\Filter\QueryParamsFilter;
-use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Model\VideosCategoriesMap;
+use RS\Component\Core\Filter\QueryParamsFilter;
 use SK\VideoModule\Provider\RotateVideoProvider;
+use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
 
 /**

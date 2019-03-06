@@ -3,13 +3,14 @@ namespace SK\VideoModule\Controller\Admin;
 
 use Yii;
 use yii\base\Event;
+use yii\web\Request;
 use yii\web\Controller;
 use yii\base\DynamicModel;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use yii\web\NotFoundHttpException;
 
 use SK\VideoModule\Model\Category;
+use yii\web\NotFoundHttpException;
 use SK\VideoModule\Form\Admin\CategoryForm;
 use SK\VideoModule\EventSubscriber\CategorySubscriber;
 

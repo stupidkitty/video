@@ -2,23 +2,24 @@
 namespace SK\VideoModule\Controller\Admin;
 
 use Yii;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\base\Event;
-use yii\base\DynamicModel;
 use yii\helpers\Url;
+use yii\web\Request;
+use yii\web\Controller;
+use yii\base\DynamicModel;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\filters\AccessControl;
 
-use RS\Component\User\Model\User;
 use SK\VideoModule\Model\Video;
+use RS\Component\User\Model\User;
 use SK\VideoModule\Model\Category;
+use yii\web\NotFoundHttpException;
 use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\Form\Admin\VideoForm;
 use SK\VideoModule\Form\Admin\VideoFilterForm;
-use SK\VideoModule\Form\Admin\VideosBatchActionsForm;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use SK\VideoModule\Form\Admin\VideosBatchActionsForm;
 
 /**
  * MainController implements the CRUD actions for Video model.
