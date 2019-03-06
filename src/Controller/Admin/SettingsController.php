@@ -47,7 +47,7 @@ class SettingsController extends Controller
 
         $form = new SettingsForm($settings->getAll('videos'));
 
-        if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
+        if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             foreach ($form->getAttributes() as $name => $value) {
                 $settings->set($name, $value, 'videos');
             }
@@ -58,5 +58,15 @@ class SettingsController extends Controller
         return $this->render('index', [
             'form' => $form,
         ]);
+    }
+
+    /**
+     * Get request class form DI container
+     *
+     * @return \yii\web\Request
+     */
+    protected function getRequest()
+    {
+        return Yii::$container->get(Request::class);
     }
 }

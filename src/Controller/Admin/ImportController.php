@@ -62,7 +62,7 @@ class ImportController extends Controller
 
         $model->csv_file = UploadedFile::getInstance($model, 'csv_file');
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($model->load($this->getRequest()->post()) && $model->validate()) {
             $model->save();
 
             if (0 < $model->getImportedRowsNum()) {
@@ -102,7 +102,7 @@ class ImportController extends Controller
 
         $form->csv_file = UploadedFile::getInstance($form, 'csv_file');
 
-        if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
+        if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $form->save();
 
             if (0 < $form->getImportedRowsNum()) {
@@ -147,7 +147,7 @@ class ImportController extends Controller
     {
         $feed = new ImportFeed();
 
-        if ($feed->load(Yii::$app->request->post()) && $feed->save()) {
+        if ($feed->load($this->getRequest()->post()) && $feed->save()) {
             return $this->redirect(['videos', 'preset' => $feed->feed_id]);
         }
 
@@ -165,7 +165,7 @@ class ImportController extends Controller
     {
         $feed = $this->findById($id);
 
-        if ($feed->load(Yii::$app->request->post()) && $feed->save()) {
+        if ($feed->load($this->getRequest()->post()) && $feed->save()) {
             return $this->redirect(['videos', 'preset' => $feed->feed_id]);
         }
 
@@ -205,5 +205,15 @@ class ImportController extends Controller
         }
 
         return $feed;
+    }
+
+    /**
+     * Get request class form DI container
+     *
+     * @return \yii\web\Request
+     */
+    protected function getRequest()
+    {
+        return Yii::$container->get(Request::class);
     }
 }

@@ -42,7 +42,7 @@ final class VideoSubscriber
     public static function onView($event)
     {
         $crawlerDetect = Yii::$container->get('crawler.detect');
-        $request = Yii::$app->getRequest();
+        $request = Yii::$container->get(Request::class);
 
         if ($crawlerDetect->isCrawler()) {
             return;
@@ -112,6 +112,7 @@ final class VideoSubscriber
     public static function onShowCategoryThumbs($event)
     {
         $crawlerDetect = Yii::$container->get('crawler.detect');
+        $request = Yii::$container->get(Request::class);
 
         if ($crawlerDetect->isCrawler()) {
             return;
@@ -124,8 +125,8 @@ final class VideoSubscriber
         RotationStats::updateAllCounters(['current_shows' => 1], ['image_id' => $event->data['images_ids'], 'category_id' => $event->data['category_id']]);
 
         // Обновление клика по категории
-        $referHost = parse_url(Yii::$app->request->getReferrer(), PHP_URL_HOST);
-        $currentHost = Yii::$app->request->getHostName();
+        $referHost = parse_url($request->getReferrer(), PHP_URL_HOST);
+        $currentHost = $request->getHostName();
 
         if ($referHost === $currentHost && $event->data['page'] <= 1) {
             $dateTime = new \DateTime('now', new \DateTimeZone('utc'));

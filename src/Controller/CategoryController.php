@@ -51,11 +51,11 @@ class CategoryController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    Yii::$app->request->get('id', 0),
-                    Yii::$app->request->get('slug', ''),
-                    Yii::$app->request->get('page', 1),
-                    Yii::$app->request->get('o', ''),
-                    Yii::$app->request->get('t', 'all-time'),
+                    $this->getRequest()->get('id', 0),
+                    $this->getRequest()->get('slug', ''),
+                    $this->getRequest()->get('page', 1),
+                    $this->getRequest()->get('o', ''),
+                    $this->getRequest()->get('t', 'all-time'),
                     $this->isMobile(),
                 ],
             ],
@@ -603,5 +603,15 @@ class CategoryController extends Controller implements ViewContextInterface
         $deviceDetect = Yii::$container->get('device.detect');
         
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
+    }
+
+    /**
+     * Get request class form DI container
+     *
+     * @return \yii\web\Request
+     */
+    protected function getRequest()
+    {
+        return Yii::$container->get(Request::class);
     }
 }

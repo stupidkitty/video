@@ -144,6 +144,11 @@ class SearchController extends Controller implements ViewContextInterface
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 
+    /**
+     * Get request class form DI container
+     *
+     * @return \yii\web\Request
+     */
     protected function getRequest()
     {
         return Yii::$container->get(Request::class);

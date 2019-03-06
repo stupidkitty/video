@@ -65,7 +65,7 @@ class AjaxController extends Controller
 
         $db = Yii::$app->db;
 
-        $categoryId = Yii::$app->request->post('id', 0);
+        $categoryId = $this->getRequest()->post('id', 0);
         $dateTime = new \DateTime('now', new \DateTimeZone('utc'));
 
         $currentDate = $dateTime->format('Y-m-d');
@@ -110,7 +110,7 @@ class AjaxController extends Controller
         }
 
         $db = Yii::$app->db;
-        $request = Yii::$app->request;
+        $request = $this->getRequest();
 
         $video_id = (int) $request->post('video_id', 0);
         $image_id = (int) $request->post('image_id', 0);
@@ -160,7 +160,7 @@ class AjaxController extends Controller
         }
 
         $db = Yii::$app->db;
-        $request = Yii::$app->request;
+        $request = $this->getRequest();
 
         $category_id = (int) $request->post('category_id', 0);
         $images_ids = $request->post('images', '');
@@ -180,7 +180,7 @@ class AjaxController extends Controller
      */
     public function actionLike()
     {
-        $video_id = (int) Yii::$app->request->post('id', 0);
+        $video_id = (int) $this->getRequest()->post('id', 0);
 
         if (!$video_id) {
             Yii::$app->response->setStatusCode(404);
@@ -200,7 +200,7 @@ class AjaxController extends Controller
      */
     public function actionDislike()
     {
-        $video_id = (int) Yii::$app->request->post('id', 0);
+        $video_id = (int) $this->getRequest()->post('id', 0);
 
         if (!$video_id) {
             Yii::$app->response->setStatusCode(404);
@@ -213,5 +213,15 @@ class AjaxController extends Controller
         Video::updateAllCounters(['dislikes' => 1], '`video_id` = :video_id', [':video_id' => $video_id]);
 
         return '';
+    }
+
+    /**
+     * Get request class form DI container
+     *
+     * @return \yii\web\Request
+     */
+    protected function getRequest()
+    {
+        return Yii::$container->get(Request::class);
     }
 }

@@ -76,7 +76,7 @@ class MainController extends Controller
     {
         $filerForm = new VideoFilterForm();
 
-        $dataProvider = $filerForm->search(Yii::$app->request->get());
+        $dataProvider = $filerForm->search($this->getRequest()->get());
 
         return $this->render('index', [
             'page' => $page,
@@ -137,7 +137,7 @@ class MainController extends Controller
         ]);
         $form->setAttributes($video->getAttributes());
 
-        if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
+        if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $currentDatetime = gmdate('Y-m-d H:i:s');
 
             $video->setAttributes($form->getAttributes());
@@ -200,7 +200,7 @@ class MainController extends Controller
         ]);
         $form->setAttributes($video->getAttributes());
 
-        if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
+        if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $currentDatetime = gmdate('Y-m-d H:i:s');
 
             $video->setAttributes($form->getAttributes());
@@ -292,7 +292,7 @@ class MainController extends Controller
         $ajaxForm->addRule('videos_ids', 'filter', ['filter' => 'array_filter']);
         $ajaxForm->addRule('videos_ids', 'required', ['message' => 'Videos not select']);
 
-        $ajaxForm->load(Yii::$app->request->post(), '');
+        $ajaxForm->load($this->getRequest()->post(), '');
         // Валидация массива идентификаторов видео.
         if (!$ajaxForm->validate()) {
             return $this->asJson([
@@ -326,7 +326,7 @@ class MainController extends Controller
     {
         $form = new VideosBatchActionsForm();
 
-        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+        if ($form->load($this->getRequest()->post()) && $form->validate()) {
             try {
                 $form->handle();
 
@@ -383,5 +383,15 @@ class MainController extends Controller
     		Video::STATUS_MODERATE => Yii::t('videos', 'status_moderate'),
     		Video::STATUS_DELETED => Yii::t('videos', 'status_deleted'),
     	];
+    }
+
+    /**
+     * Get request class form DI container
+     *
+     * @return \yii\web\Request
+     */
+    protected function getRequest()
+    {
+        return Yii::$container->get(Request::class);
     }
 }

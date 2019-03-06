@@ -138,7 +138,7 @@ class CategoriesController extends Controller
     {
         $form = new CategoryForm;
 
-        if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
+        if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $category = new Category;
             $category->setAttributes($form->getAttributes());
             $category->generateSlug($form->slug);
@@ -177,7 +177,7 @@ class CategoriesController extends Controller
         $form = new CategoryForm;
         $form->setAttributes($category->getAttributes());
 
-        if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
+        if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $category->setAttributes($form->getAttributes());
             $category->generateSlug($form->slug);
 
@@ -229,7 +229,7 @@ class CategoriesController extends Controller
     public function actionSaveOrder()
     {
             // Валидация массива идентификаторов категорий.
-        $validationModel = DynamicModel::validateData(['categories_ids' => Yii::$app->request->post('order')], [
+        $validationModel = DynamicModel::validateData(['categories_ids' => $this->getRequest()->post('order')], [
             ['categories_ids', 'each', 'rule' => ['integer']],
             ['categories_ids', 'filter', 'filter' => 'array_filter'],
             ['categories_ids', 'required', 'message' => 'Categories not select'],
@@ -291,5 +291,15 @@ class CategoriesController extends Controller
         }
 
         return $category;
+    }
+
+    /**
+     * Get request class form DI container
+     *
+     * @return \yii\web\Request
+     */
+    protected function getRequest()
+    {
+        return Yii::$container->get(Request::class);
     }
 }
