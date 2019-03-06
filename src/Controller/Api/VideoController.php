@@ -8,7 +8,6 @@ use yii\web\Request;
 use yii\filters\Cors;
 use yii\rest\Controller;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
