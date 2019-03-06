@@ -3,17 +3,18 @@ namespace SK\VideoModule\Controller;
 
 use Yii;
 use yii\helpers\Url;
+use yii\web\Request;
 use yii\web\Controller;
 use yii\filters\PageCache;
+use SK\VideoModule\Model\Video;
 use yii\data\ActiveDataProvider;
 use yii\base\ViewContextInterface;
-use SK\VideoModule\Model\Video;
 use SK\VideoModule\Form\SearchForm;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
 
 /**
- * SearchController implements the CRUD actions for Videos model.
+ * SearchController implements the search action.
  */
 class SearchController extends Controller implements ViewContextInterface
 {
@@ -40,8 +41,8 @@ class SearchController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    Yii::$app->request->get('page', 1),
-                    Yii::$app->request->getBodyParam('q', ''),
+                    $this->getRequest()->get('page', 1),
+                    $this->getRequest()->getBodyParam('q', ''),
                     $this->isMobile(),
                 ],
             ],
@@ -67,17 +68,18 @@ class SearchController extends Controller implements ViewContextInterface
     {
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
+        $request = $this->getRequest();
 
         // задрочка для чпу, форма доложна быть методом POST --begin
-        if (Yii::$app->request->isPost && '' !== Yii::$app->request->post('q', '')) {
-            Yii::$app->request->setQueryParams(['q' => Yii::$app->request->post('q', ''), 'page' => $page]);
-            Yii::$app->request->resolve();
+        if ($request->isPost && '' !== $request->post('q', '')) {
+            $request->setQueryParams(['q' => $request->post('q', ''), 'page' => $page]);
+            $request->resolve();
 
-            $this->redirect(Url::toRoute(['search/index', 'q' =>  Yii::$app->request->post('q')]), 301);
+            $this->redirect(Url::toRoute(['search/index', 'q' =>  $request->post('q')]), 301);
         }
 
         if ('' !== $q) {
-            Yii::$app->request->setQueryParams(['q' => $q, 'page' => $page]);
+            $request->setQueryParams(['q' => $q, 'page' => $page]);
         }
         // задрочка для чпу --end
 
@@ -95,7 +97,7 @@ class SearchController extends Controller implements ViewContextInterface
 
         $form = new SearchForm();
 
-        if ($form->load(Yii::$app->request->get()) && $form->validate()) {
+        if ($form->load($request->get()) && $form->validate()) {
             $query
                 ->select('*, MATCH (`title`, `description`, `short_description`) AGAINST (:query) AS `relevance`')
                 ->where('MATCH (`title`, `description`, `short_description`) AGAINST (:query)', [
@@ -112,6 +114,7 @@ class SearchController extends Controller implements ViewContextInterface
         }
 
         $videos = $dataProvider->getModels();
+        $totalCount = $dataProvider->getTotalCount();
         $pagination = $dataProvider->getPagination();
 
         if (empty($videos)) {
@@ -124,6 +127,8 @@ class SearchController extends Controller implements ViewContextInterface
             'settings' => $settings,
             'pagination' => $pagination,
             'videos' => $videos,
+            'totalCount' => $totalCount,
+            'query' => $form->getQuery(),
         ]);
     }
 
@@ -137,5 +142,10 @@ class SearchController extends Controller implements ViewContextInterface
         $deviceDetect = Yii::$container->get('device.detect');
         
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
+    }
+
+    protected function getRequest()
+    {
+        return Yii::$container->get(Request::class);
     }
 }
