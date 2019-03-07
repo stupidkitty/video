@@ -16,8 +16,8 @@ class Video
      *     WHERE `ctr` != 0
      *     GROUP BY `video_id`
      * ) as `vs` ON `v`.`video_id` = `vs`.`video_id`
-     * SET `v`.`max_ctr`=IFNULL(`vs`.`max_ctr`, 0)
-     * WHERE `v`.`published_at` <= NOW() AND `v`.`status` = 10 AND `v`.`max_ctr`!=`vs`.`max_ctr`
+     * SET `v`.`max_ctr` = IFNULL(`vs`.`max_ctr`, 0)
+     * WHERE `v`.`max_ctr`!=`vs`.`max_ctr`
      * ```
      * 
      * @return void
@@ -32,8 +32,8 @@ class Video
                 WHERE `ctr` != 0
                 GROUP BY `video_id`
             ) as `vs` ON `v`.`video_id` = `vs`.`video_id`
-            SET `v`.`max_ctr`=IFNULL(`vs`.`max_ctr`, 0)
-            WHERE `v`.`published_at` <= NOW() AND `v`.`status` = 10 AND `v`.`max_ctr`!=`vs`.`max_ctr`
+            SET `v`.`max_ctr` = IFNULL(`vs`.`max_ctr`, 0)
+            WHERE `v`.`max_ctr`!=`vs`.`max_ctr`
         ";
 
         Yii::$app->db
