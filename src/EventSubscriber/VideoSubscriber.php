@@ -41,8 +41,8 @@ final class VideoSubscriber
      */
     public static function onView($event)
     {
-        $crawlerDetect = Yii::$container->get('crawler.detect');
         $request = Yii::$container->get(Request::class);
+        $crawlerDetect = Yii::$container->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
             return;
@@ -59,23 +59,22 @@ final class VideoSubscriber
             return;
         }
 
-        $urlParts = parse_url($request->getReferrer());
+        $refererHost = parse_url($request->getReferrer(), PHP_URL_HOST);
         $currentHostName = $request->getHostName();
 
         // также если рефер не с сайта, нет смысла учитывать.
-        if ($urlParts['host'] !== $currentHostName) {
+        if ($refererHost !== $currentHostName) {
             return;
         }
 
         // Анализируем рефер
-        $request = new Request([
+        $refererRequest = new Request([
             'baseUrl' => Yii::$app->urlManager->baseUrl,
-            'url' => $urlParts['path'],
+            'url' => $refererHost,
         ]);
 
-        $route = Yii::$app->urlManager->parseRequest($request);
+        $route = Yii::$app->urlManager->parseRequest($refererRequest);
 
-        // Определим, был ли клик со страницы категории.
         // Определим, был ли клик со страницы категории.
         if (
             $route[0] === 'videos/category/ctr'
@@ -111,8 +110,8 @@ final class VideoSubscriber
      */
     public static function onShowCategoryThumbs($event)
     {
-        $crawlerDetect = Yii::$container->get('crawler.detect');
         $request = Yii::$container->get(Request::class);
+        $crawlerDetect = Yii::$container->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
             return;
