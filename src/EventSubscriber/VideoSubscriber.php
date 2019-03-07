@@ -59,18 +59,18 @@ final class VideoSubscriber
             return;
         }
 
-        $refererHost = parse_url($request->getReferrer(), PHP_URL_HOST);
+        $urlParts = parse_url($request->getReferrer());
         $currentHostName = $request->getHostName();
 
         // также если рефер не с сайта, нет смысла учитывать.
-        if ($refererHost !== $currentHostName) {
+        if ($urlParts['host'] !== $currentHostName) {
             return;
         }
 
         // Анализируем рефер
         $refererRequest = new Request([
             'baseUrl' => Yii::$app->urlManager->baseUrl,
-            'url' => $refererHost,
+            'url' => $urlParts['path'],
         ]);
 
         $route = Yii::$app->urlManager->parseRequest($refererRequest);
