@@ -76,13 +76,7 @@ final class VideoSubscriber
         $route = Yii::$app->urlManager->parseRequest($refererRequest);
 
         // Определим, был ли клик со страницы категории.
-        if (
-            $route[0] === 'videos/category/ctr'
-            || $route[0] === 'videos/category/date'
-            || $route[0] === 'videos/category/views'
-            || $route[0] === 'videos/category/likes'
-            || $route[0] === 'videos/category/index'
-        ) {
+        if (isset($route[0]) && false !== strpos($route[0], 'category')) {
             $slug = isset($route[1]['slug']) ? (string) $route[1]['slug'] : null;
             $cid = isset($route[1]['id']) ? (int) $route[1]['id'] : null;
 
