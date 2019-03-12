@@ -17,6 +17,7 @@ use SK\VideoModule\Query\VideoQuery;
  * @property string $short_description
  * @property integer $orientation
  * @property integer $duration
+ * @property string $video_preview
  * @property string $video_url
  * @property string $embed
  * @property integer $on_index
@@ -53,7 +54,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     public function rules()
     {
         return [
-            [['slug', 'title', 'description', 'short_description', 'video_url', 'source_url', 'embed', 'template'], 'string'],
+            [['slug', 'title', 'description', 'short_description', 'video_preview', 'video_url', 'source_url', 'embed', 'template'], 'string'],
             [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'on_index', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
             [['published_at', 'created_at', 'updated_at'], 'safe'],
         ];
@@ -62,6 +63,46 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     public static function find()
     {
         return new VideoQuery(get_called_class());
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getId()
+    {
+        return $this->video_id;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setTitle($title)
+    {
+        $this->title = (string) $title;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = (string) $slug;
     }
 
     /**
@@ -131,6 +172,38 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @return boolean
      */
+    public function hasScreenshots()
+    {
+        return !empty($this->screenshots);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery[]
+     */
+    public function getScreenshots()
+    {
+        return $this->hasMany(Screenshot::class, ['video_id' => 'video_id']);
+    }
+
+    /**
+     * @inheritdoc
+     */
+     public function addScreenshot(Screenshot $screenshot)
+     {
+         $this->link('screenshots', $screenshot);
+     }
+
+    /**
+     * @inheritdoc
+     */
+     public function removeScreenshot(Screenshot $screenshot)
+     {
+         $this->unlink('screenshots', $screenshot);
+     }
+
+    /**
+     * @return boolean
+     */
     public function hasCategories()
     {
         return !empty($this->categories);
@@ -192,45 +265,5 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
             self::STATUS_MODERATE  => 'На модерации',
             self::STATUS_DELETED   => 'Удалено',
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getId()
-    {
-        return $this->video_id;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getTitle()
-    {
-        return $this->title;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setTitle($title)
-    {
-        $this->title = (string) $title;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getSlug()
-    {
-        return $this->slug;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setSlug($slug)
-    {
-        $this->slug = (string) $slug;
     }
 }
