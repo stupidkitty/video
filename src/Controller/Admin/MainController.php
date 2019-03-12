@@ -98,8 +98,7 @@ class MainController extends Controller
         $video = $this->findById($id);
 
         $rotationStats = RotationStats::find()
-            ->with('image')
-            ->with('category')
+            ->with(['image', 'category'])
             ->where(['video_id' => $video->getId()])
             ->orderBy(['ctr' => SORT_DESC])
             ->all();
@@ -359,8 +358,7 @@ class MainController extends Controller
     protected function findById($id)
     {
         $video = Video::find()
-            ->with('poster')
-            ->with('categories')
+            ->with(['poster', 'categories', 'screenshots'])
             ->where(['video_id' => $id])
             ->one();
 
