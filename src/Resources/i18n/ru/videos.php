@@ -1,8 +1,12 @@
 <?php
 
 return [
+	'id' => 'Ид',
+	'video' => 'Видео',
 	'videos' => 'Видео',
+	'overview' => 'Обзор',
 	'create' => 'Создать',
+	'new' => 'Новое',
 	'add' => 'Добавить',
 	'edit' => 'Редактирование',
 	'update' => 'Обновить',
@@ -15,4 +19,18 @@ return [
 	'status_active' => 'Опубликовано',
 	'status_moderate' => 'На модерации',
 	'status_deleted' => 'Удалено',
+    'user' => 'Пользователь',
+    'status' => 'Статус',
+    'add_categories' => 'Добавить категории',
+    'remove_categories' => 'Удалить категории',
+    'save_changes' => 'Сохранить изменения',
+    'close' => 'Закрыть',
+    'batch_action' => 'Массовые действия',
+    'title' => 'Название',
+    'description' => 'Описание',
+    'slug' => 'Слаг',
+    'published_at' => 'Опубликовано в',
+    'actions' => 'Действия',
+	'orientation' => 'Ориентация',
+	'crop_profiles' => 'Форматы изображений',
 ];
