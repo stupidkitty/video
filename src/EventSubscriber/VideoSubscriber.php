@@ -4,35 +4,11 @@ namespace SK\VideoModule\EventSubscriber;
 use Yii;
 use yii\web\Request;
 use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Category;
 use SK\VideoModule\Model\RotationStats;
-use SK\VideoModule\Model\VideosRelatedMap;
-use SK\VideoModule\Model\VideosCategoriesMap;
 
 final class VideoSubscriber
 {
-    /**
-     * Событие должно подключаться к удаляемому объекту.
-     */
-    public static function onDelete($event)
-    {
-        $video = $event->sender;
-
-        $images = Image::find()
-            ->where(['video_id' => $video->getId()])
-            ->all();
-
-        foreach ($images as $image) {
-            $image->delete();
-        }
-
-        VideosCategoriesMap::deleteAll(['video_id' => $video->getId()]);
-        VideosRelatedMap::deleteAll(['video_id' => $video->getId()]);
-        VideosRelatedMap::deleteAll(['related_id' => $video->getId()]);
-        RotationStats::deleteAll(['video_id' => $video->getId()]);
-    }
-
     /**
      * Событие при показе одного видео.
      * Регистрирует показ. Также регистрирует клик, если посетитель перешел с категории.
