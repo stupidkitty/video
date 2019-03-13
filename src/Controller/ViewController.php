@@ -17,6 +17,8 @@ use SK\VideoModule\EventSubscriber\VideoSubscriber;
  */
 class ViewController extends Controller implements ViewContextInterface
 {
+    protected $request;
+
     /**
      * @inheritdoc
      */
@@ -49,6 +51,16 @@ class ViewController extends Controller implements ViewContextInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        $this->request = Yii::$container->get(Request::class);
+
+        parent::init();
+    }
+
+    /**
      * Переопределяет дефолтный путь шаблонов модуля.
      * Путь задается в конфиге модуля, в компонентах приложения.
      *
@@ -71,13 +83,7 @@ class ViewController extends Controller implements ViewContextInterface
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        if (0 !== (int) $id) {
-            $video = $this->findById($id);
-        } elseif (!empty($slug)) {
-            $video = $this->findBySlug($slug);
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        $video = $this->findByIdOrSlug((int) $id, (string) $slug);
 
         $template = !empty($video['template']) ? $video['template'] : 'view';
 
@@ -92,65 +98,18 @@ class ViewController extends Controller implements ViewContextInterface
     }
 
     /**
-     * Find video by slug
-     *
-     * @param string $slug
-     *
-     * @return null|Video
-     *
-     * @throws NotFoundHttpException
-     */
-    protected function findBySlug($slug)
-    {
-        $video = Video::find()
-            ->with(['poster' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }])
-            ->with(['images' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url'])
-                    ->indexBy('image_id');
-            }])
-            ->with(['categories' => function ($query) {
-                $query->select(['category_id', 'title', 'slug', 'h1'])
-                    ->where(['enabled' => 1]);
-            }])
-            ->where(['slug' => $slug])
-            ->untilNow()
-            ->onlyActive()
-            ->asArray()
-            ->one();
-
-        if (null === $video) {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
-
-        return $video;
-    }
-
-    /**
-     * Find video by id
+     * Find video by id or slug
      *
      * @param integer $id
-     *
+     * @param string $slug
      * @return null|Video
-     *
      * @throws NotFoundHttpException
      */
-    protected function findById($id)
+    protected function findByIdOrSlug($id, $slug)
     {
         $video = Video::find()
-            ->with(['poster' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }])
-            ->with(['images' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url'])
-                    ->indexBy('image_id');
-            }])
-            ->with(['categories' => function ($query) {
-                $query->select(['category_id', 'title', 'slug', 'h1'])
-                    ->where(['enabled' => 1]);
-            }])
-            ->where(['video_id' => $id])
+            ->withViewRelations()
+            ->whereIdOrSlug($id, $slug)
             ->untilNow()
             ->onlyActive()
             ->asArray()
@@ -182,6 +141,6 @@ class ViewController extends Controller implements ViewContextInterface
      */
     protected function getRequest()
     {
-        return Yii::$container->get(Request::class);
+        return $this->request;
     }
 }

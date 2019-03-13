@@ -17,6 +17,8 @@ use RS\Component\Core\Settings\SettingsInterface;
  */
 class VideosController extends Controller implements ViewContextInterface
 {
+    protected $request;
+    
     /**
      * @inheritdoc
      */
@@ -52,6 +54,16 @@ class VideosController extends Controller implements ViewContextInterface
                 ],
             ],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        $this->request = Yii::$container->get(Request::class);
+
+        parent::init();
     }
 
     /**
@@ -380,6 +392,6 @@ class VideosController extends Controller implements ViewContextInterface
      */
     protected function getRequest()
     {
-        return Yii::$container->get(Request::class);
+        return $this->request;
     }
 }

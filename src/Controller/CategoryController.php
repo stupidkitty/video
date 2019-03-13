@@ -6,7 +6,6 @@ use yii\data\Sort;
 use yii\web\Request;
 use yii\web\Controller;
 use yii\filters\PageCache;
-use yii\filters\VerbFilter;
 use SK\VideoModule\Model\Video;
 use yii\data\ActiveDataProvider;
 use SK\VideoModule\Model\Category;
@@ -23,6 +22,8 @@ use SK\VideoModule\EventSubscriber\VideoSubscriber;
  */
 class CategoryController extends Controller implements ViewContextInterface
 {
+    protected $request;
+
     /**
      * @inheritdoc
      */
@@ -61,6 +62,16 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
             ],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        $this->request = Yii::$container->get(Request::class);
+
+        parent::init();
     }
 
     /**
@@ -516,7 +527,7 @@ class CategoryController extends Controller implements ViewContextInterface
     protected function buildInitialQuery($category, $t)
     {
         $query = Video::find()
-            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.views', 'v.template', 'v.published_at'])
+            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.views', 'v.template', 'v.published_at'])
             ->alias('v')
             ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
             ->with(['categories' => function ($query) {
@@ -613,6 +624,6 @@ class CategoryController extends Controller implements ViewContextInterface
      */
     protected function getRequest()
     {
-        return Yii::$container->get(Request::class);
+        return $this->request;
     }
 }
