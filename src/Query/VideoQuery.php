@@ -10,7 +10,7 @@ class VideoQuery extends ActiveQuery
 {
     public function asThumbs()
     {
-        return $this->select(['video_id', 'image_id', 'slug', 'title', 'orientation', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'template', 'published_at'])
+        return $this->select(['video_id', 'image_id', 'slug', 'title', 'orientation', 'video_preview', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'template', 'published_at'])
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
                     ->where(['enabled' => 1]);
@@ -20,16 +20,31 @@ class VideoQuery extends ActiveQuery
             }]);
     }
 
+    /**
+     * Добавляет к запросу условие "только активные"
+     *
+     * @return \yii\db\ActiveQuery
+     */
     public function onlyActive()
     {
         return $this->andWhere(['status' => Video::STATUS_ACTIVE]);
     }
 
+    /**
+     * Добавляет к запросу условие "до текущего времени"
+     *
+     * @return \yii\db\ActiveQuery
+     */
     public function untilNow()
     {
         return $this->andWhere(['<=', 'published_at', new Expression('NOW()')]);
     }
 
+    /**
+     * Добавляет к запросу условие "между текущей датой и заданной"
+     *
+     * @return \yii\db\ActiveQuery
+     */
     public function rangedUntilNow($rangeStart)
     {
         $timeagoExpression = $this->getTimeagoExpression($rangeStart);
@@ -38,7 +53,46 @@ class VideoQuery extends ActiveQuery
     }
 
     /**
+     * Подключает связанные модели для страницы просмотра видео.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function withViewRelations()
+    {
+        return $this->with(['poster' => function ($query) {
+                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
+            }])
+            ->with(['images' => function ($query) {
+                $query->select(['image_id', 'video_id', 'filepath', 'source_url'])
+                    ->indexBy('image_id');
+            }])
+            ->with(['categories' => function ($query) {
+                $query->select(['category_id', 'title', 'slug', 'h1'])
+                    ->where(['enabled' => 1]);
+            }])
+            ->with(['screenshots' => function ($query) {
+                $query->select(['screenshot_id', 'video_id', 'path', 'source_url']);
+            }]);
+    }
+
+    /**
+     * Подключает связанные модели для страницы просмотра видео.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function whereIdOrSlug($id = 0, $slug = '')
+    {
+        if (0 !== $id) {
+            return $this->where(['video_id' => $id]);
+        }
+        
+        return $this->where(['slug' => $slug]);
+    }
+
+    /**
      * Кеширует подсчет элементов датасета. Кастыль :(
+     * 
+     * @return integer
      */
     public function cachedCount()
     {
