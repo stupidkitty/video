@@ -3,7 +3,6 @@ namespace SK\VideoModule\Controller\Api;
 
 use Yii;
 use yii\web\User;
-use yii\base\Event;
 use yii\web\Request;
 use yii\filters\Cors;
 use yii\rest\Controller;
@@ -15,7 +14,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Form\Api\VideoForm;
 use SK\VideoModule\Model\RotationStats;
-use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use SK\VideoModule\Service\Video as VideoService;
 
 /**
  * VideoController
@@ -45,21 +44,6 @@ class VideoController extends Controller
                 'class' => HttpBearerAuth::class,
             ],
         ];
-    }
-
-    /**
-     * @param \yii\base\Action $action
-     *
-     * @return bool
-     */
-    public function beforeAction($action)
-    {
-
-        //Event::on(Video::class, Video::EVENT_BEFORE_INSERT, [VideoSubscriber::class, 'onCreate']);
-        //Event::on(Video::class, Video::EVENT_BEFORE_UPDATE, [VideoSubscriber::class, 'onUpdate']);
-        Event::on(Video::class, Video::EVENT_BEFORE_DELETE, [VideoSubscriber::class, 'onDelete']);
-
-        return parent::beforeAction($action);
     }
 
     /**
@@ -232,8 +216,9 @@ class VideoController extends Controller
     public function actionDelete($id)
     {
         $video = $this->findById($id);
+        $videoService = new VideoService;
 
-        if ($video->delete()) {
+        if ($videoService->delete($video)) {
             return '';
         }
 

@@ -2,7 +2,6 @@
 namespace SK\VideoModule\Controller\Admin;
 
 use Yii;
-use yii\base\Event;
 use yii\helpers\Url;
 use yii\web\Request;
 use yii\web\Controller;
@@ -10,7 +9,6 @@ use yii\base\DynamicModel;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
-
 use SK\VideoModule\Model\Video;
 use RS\Component\User\Model\User;
 use SK\VideoModule\Model\Category;
@@ -18,7 +16,7 @@ use yii\web\NotFoundHttpException;
 use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\Form\Admin\VideoForm;
 use SK\VideoModule\Form\Admin\VideoFilterForm;
-use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use SK\VideoModule\Service\Video as VideoService;
 use SK\VideoModule\Form\Admin\VideosBatchActionsForm;
 
 /**
@@ -61,10 +59,6 @@ class MainController extends Controller
         if (in_array($action->id, ['index'], true)) {
             Url::remember('', 'actions-redirect');
         }
-
-        //Event::on(Video::class, Video::EVENT_BEFORE_INSERT, [VideoSubscriber::class, 'onCreate']);
-        //Event::on(Video::class, Video::EVENT_BEFORE_UPDATE, [VideoSubscriber::class, 'onUpdate']);
-        Event::on(Video::class, Video::EVENT_BEFORE_DELETE, [VideoSubscriber::class, 'onDelete']);
 
         return parent::beforeAction($action);
     }
@@ -139,26 +133,18 @@ class MainController extends Controller
 
         if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $currentDatetime = gmdate('Y-m-d H:i:s');
+            $videoService = new VideoService;
 
             $video->setAttributes($form->getAttributes());
             $video->generateSlug($form->slug);
             $video->updated_at = $currentDatetime;
             $video->created_at = $currentDatetime;
 
-            /*if ($video->save()) {
-                // Добавление категорий
-                $categories = Category::find()
-                    ->where(['category_id' => $form->categories_ids])
-                    ->all();
+            $videoService->updateCategoriesByIds($video, $form->categories_ids);
 
-                foreach ($categories as $category) {
-                    $video->addCategory($category);
-                    RotationStats::addVideo($category, $video, $video->poster, true);
-                }
-            }*/
             Yii::$app->session->addFlash('error', 'Сервис временно не работает');
 
-            //return $this->redirect(Url::previous('actions-redirect'));
+            return $this->redirect(Url::previous('actions-redirect'));
         }
 
         $categoriesOptionsList = Category::find()
@@ -193,15 +179,14 @@ class MainController extends Controller
     {
         $video = $this->findById($id);
 
-        $oldCategoriesIds = ArrayHelper::getColumn($video->categories, 'category_id');
-
         $form = new VideoForm([
-            'categories_ids' => $oldCategoriesIds,
+            'categories_ids' => ArrayHelper::getColumn($video->categories, 'category_id'),
         ]);
         $form->setAttributes($video->getAttributes());
 
         if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $currentDatetime = gmdate('Y-m-d H:i:s');
+            $videoService = new VideoService;
 
             $video->setAttributes($form->getAttributes());
             $video->generateSlug($form->slug);
@@ -209,32 +194,7 @@ class MainController extends Controller
 
             $video->save();
 
-            $newCategoriesIds = $form->categories_ids;
-
-            $removeCategoriesIds = array_diff($oldCategoriesIds, $newCategoriesIds);
-            $addCategoriesIds = array_diff($newCategoriesIds, $oldCategoriesIds);
-
-            if (!empty($removeCategoriesIds)) {
-                $removeCategories = Category::find()
-                    ->where(['category_id' => $removeCategoriesIds])
-                    ->all();
-
-                foreach ($removeCategories as $removeCategory) {
-                    $video->removeCategory($removeCategory);
-                    RotationStats::deleteAll(['video_id' => $video->getId(), 'category_id' => $removeCategory->getId()]);
-                }
-            }
-
-            if (!empty($addCategoriesIds)) {
-                $addCategories = Category::find()
-                    ->where(['category_id' => $addCategoriesIds])
-                    ->all();
-
-                foreach ($addCategories as $addCategory) {
-                    $video->addCategory($addCategory);
-                    RotationStats::addVideo($addCategory, $video, $video->poster, true);
-                }
-            }
+            $videoService->updateCategoriesByIds($video, $form->categories_ids);
 
             return $this->redirect(Url::previous('actions-redirect'));
         }
@@ -272,10 +232,10 @@ class MainController extends Controller
     {
         $video = $this->findById($id);
 
-        $title = $video->getTitle();
+        $videoService = new VideoService;
 
-        if ($video->delete()) {
-            Yii::$app->session->addFlash('success', "Видео \"{$title}\" удалено");
+        if ($videoService->delete($video)) {
+            Yii::$app->session->addFlash('success', Yii::t('videos', 'Видео "{title}" удалено', ['title' => $video->title]));
         }
 
         return $this->redirect(Url::previous('actions-redirect'));
@@ -302,7 +262,9 @@ class MainController extends Controller
             ]);
         }
 
-        $videosQuery = Video::find()
+        $videoService = new VideoService;
+        $deletedNum = $videoService->deleteById($ajaxForm->videos_ids);
+        /*$videosQuery = Video::find()
             ->where(['video_id' => $ajaxForm->videos_ids]);
 
         $deletedNum = 0;
@@ -312,7 +274,7 @@ class MainController extends Controller
                     $deletedNum ++;
                 }
             }
-        }
+        }*/
 
         return $this->asJson([
             'message' => Yii::t('videos', '<b>{num}</b> videos deleted', ['num' => $deletedNum])
