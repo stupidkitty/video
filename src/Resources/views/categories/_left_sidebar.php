@@ -75,15 +75,41 @@ use yii\helpers\Html;
     </div>
 
     <div class="box-footer clearfix">
-        <?= Html::submitButton('<span class="glyphicon glyphicon-save"></span> Сохранить порядок сортировки',
-            [
-                'id' => 'save-order',
-                'class' => 'btn btn-primary',
-                'data-url' => Url::to(['save-order'])
-            ]
-        ) ?>
+        <div class="btn-group pull-right dropup">
+            <button type="button" class="btn btn-default">Действия</button>
+            
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
 
-        <?= Html::a('<i class="glyphicon glyphicon-export" style="color:#ff196a"></i> Экспорт категорий', ['export'], ['class' => 'btn btn-default', 'title' => 'Экспорт категорий']) ?>
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    <?= Html::a(
+                        '<i class="fa fa-sort-numeric-asc text-blue"></i> Сохранить порядок сортировки',
+                        ['save-order'],
+                        [
+                            'id' => 'save-order',
+                        ]
+                    ) ?>
+                </li>
+                <li>
+                    <?= Html::a(
+                        '<i class="glyphicon glyphicon-export" style="color:#ff196a"></i> Экспорт категорий', 
+                        ['export']
+                    ) ?>
+                </li>
+                <li>
+                    <?= Html::a(
+                        '<i class="fa fa-refresh text-yellow"></i> Пересчитать видео', 
+                        ['recalculate-videos'],
+                        [
+                            'id' => 'recalculate-videos',
+                        ]
+                    ) ?>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -96,12 +122,14 @@ $script = <<< 'JAVASCRIPT'
     });
 
     var saveOrderButton = document.querySelector('#save-order');
+    var recalculateVideosLink = document.querySelector('#recalculate-videos');
     var categoryList = document.querySelector('#sortable');
 
     saveOrderButton.addEventListener('click', function (event) {
+        event.stopPropagation();
         event.preventDefault();
 
-        let sendUrl = saveOrderButton.getAttribute('data-url');
+        let sendUrl = saveOrderButton.getAttribute('href');
         let categoriesItems = categoryList.querySelectorAll('[data-key]');
         let formData = new FormData();
 
@@ -124,15 +152,55 @@ $script = <<< 'JAVASCRIPT'
             method: 'POST',
             body: formData,
             credentials: 'same-origin'
-        }).then(function(response) {
-            return response.json();
-        }).then(function(data) {
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            return response;
+        })
+        .then(response => response.json())
+        .then((data) => {
             if (data.error !== undefined) {
                 throw new Error(data.error.message);
             }
 
             toastr.success(data.message);
-        }).catch(function(error) {
+        })
+        .catch(function(error) {
+            toastr.error(error.message);
+        });
+    });
+
+    recalculateVideosLink.addEventListener('click', function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        let sendUrl = this.href;
+        let formData = new FormData();
+
+        fetch(sendUrl, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            return response;
+        })
+        .then(response => response.json())
+        .then((data) => {
+            if (data.error !== undefined) {
+                throw new Error(data.error.message);
+            }
+
+            toastr.success(data.message);
+        })
+        .catch(function(error) {
             toastr.error(error.message);
         });
     });

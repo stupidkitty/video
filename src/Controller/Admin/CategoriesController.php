@@ -14,6 +14,7 @@ use SK\VideoModule\Model\Category;
 use yii\web\NotFoundHttpException;
 use SK\VideoModule\Form\Admin\CategoryForm;
 use SK\VideoModule\EventSubscriber\CategorySubscriber;
+use SK\VideoModule\Service\Category as CategoryService;
 
 /**
  * CategoriesController implements the CRUD actions for Category model.
@@ -40,6 +41,7 @@ class CategoriesController extends Controller
                 'actions' => [
                     'delete' => ['post'],
                     'save-order' => ['post'],
+                    'recalculate-videos' => ['post'],
                 ],
             ],
         ];
@@ -50,7 +52,7 @@ class CategoriesController extends Controller
      */
     public function beforeAction($action)
     {
-        if (in_array($action->id,['save-order'])) {
+        if (in_array($action->id, ['save-order', 'recalculate-videos'])) {
             $this->enableCsrfValidation = false;
         }
 
@@ -60,25 +62,6 @@ class CategoriesController extends Controller
 
         return parent::beforeAction($action);
     }
-
-    /**
-     * Lists all Category models.
-     *
-     * @return mixed
-     */
-    /*public function actionIndex()
-    {
-        $categories = Category::find()
-            ->orderBy(['position' => SORT_ASC])
-            ->all();
-
-        $form = new CategoryForm();
-
-        return $this->render('index', [
-            'categories' => $categories,
-            'form' => $form,
-        ]);
-    }*/
 
     /**
      * Displays a single Category model.
@@ -226,6 +209,7 @@ class CategoriesController extends Controller
 
     /**
      * Сохраняет порядок сортировки категорий, установленный пользователем.
+     * 
      * @return mixed
      */
     public function actionSaveOrder()
@@ -275,6 +259,11 @@ class CategoriesController extends Controller
         }
     }
 
+    /**
+     * Формирует csv для экспорта категорий.
+     *
+     * @return send file
+     */
     public function actionExport()
     {
         $exporter = new CsvGrid([
@@ -305,6 +294,29 @@ class CategoriesController extends Controller
         $exporter->export()->send('categories.csv');
     }
 
+    /**
+     * Пересчитывает активные видео в категориях.
+     *
+     * @return json
+     */
+    public function actionRecalculateVideos()
+    {
+        try {
+            $categoryService = new CategoryService;
+            $categoryService->countVideos();
+
+            return $this->asJson([
+                'message' => 'All active videos counted in categories',
+            ]);
+        } catch (\Exception $e) {
+            return $this->asJson([
+                'error' => [
+                    'code' => 422,
+                    'message' => $e->getMessage(),
+                ],
+            ]);
+        }
+    }
 
     /**
      * Поиск категории по ее идентификатору
