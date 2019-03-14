@@ -7,8 +7,9 @@ use yii\web\Request;
 use yii\web\Controller;
 use yii\base\DynamicModel;
 use yii\filters\VerbFilter;
+use yii2tech\csvgrid\CsvGrid;
 use yii\filters\AccessControl;
-
+use yii\data\ActiveDataProvider;
 use SK\VideoModule\Model\Category;
 use yii\web\NotFoundHttpException;
 use SK\VideoModule\Form\Admin\CategoryForm;
@@ -273,6 +274,25 @@ class CategoriesController extends Controller
             ]);
         }
     }
+
+    public function actionExport()
+    {
+        $exporter = new CsvGrid([
+            'csvFileConfig' => [
+		        'cellDelimiter' => '|',
+		        'enclosure' => '"',
+		    ],
+            'dataProvider' => new ActiveDataProvider([
+                'query' => Category::find(),
+                'pagination' => [
+                    'pageSize' => 50, // export batch size
+                ],
+            ]),
+        ]);
+
+        $exporter->export()->send('categories.csv');
+    }
+
 
     /**
      * Поиск категории по ее идентификатору

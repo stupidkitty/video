@@ -28,8 +28,18 @@ use yii\helpers\Html;
             <ul id="sortable" class="categories-list">
             <?php foreach ($categories as $category): ?>
 
-                <li class="categories-list__item <?= ($category->category_id === $active_id)? 'active' : ''?> <?= (!$category->isEnabled()) ? 'bg-pink--horizontal-gradient' : '' ?>" data-key="<?= $category->category_id ?>" data-position="<?= $category->position ?>" data-title="<?= $category->title ?>" data-clicks="<?= $category->last_period_clicks ?>">
-                    <span class="categories-list__span categories-list__span--id"><?= $category->category_id ?>: </span><?= Html::a($category->title, ['update', 'id' => $category->category_id], ['title' => 'Редактирование', 'class' => 'categories-list__a categories-list__a--title']) ?><?= (!$category->isEnabled()) ? ' (выключена)' : '' ?>
+                <li 
+                  class="categories-list__item <?= ($category->category_id === $active_id)? 'active' : ''?> <?= (!$category->isEnabled()) ? 'bg-pink--horizontal-gradient' : '' ?>"
+                  data-key="<?= $category->category_id ?>"
+                  data-position="<?= $category->position ?>"
+                  data-title="<?= $category->title ?>"
+                  data-clicks="<?= $category->last_period_clicks ?>"
+                >
+                    <span class="categories-list__span categories-list__span--id"><?= $category->category_id ?>: </span>
+                    
+                    <?= Html::a($category->title, ['update', 'id' => $category->category_id], ['title' => 'Редактирование', 'class' => 'categories-list__a categories-list__a--title']) ?>
+                    <?= (!$category->isEnabled()) ? "({$category->videos_num}, выключена)" : "({$category->videos_num})" ?>
+                    
                     <ul class="categories-list__actions action-buttons pull-right">
                         <li class="action-buttons__item">
                             <?= Html::a(
