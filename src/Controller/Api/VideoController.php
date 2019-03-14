@@ -9,11 +9,9 @@ use yii\rest\Controller;
 use yii\filters\VerbFilter;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\Category;
 use yii\web\NotFoundHttpException;
 use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Form\Api\VideoForm;
-use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\Service\Video as VideoService;
 
 /**
@@ -87,6 +85,7 @@ class VideoController extends Controller
             try {
                 $video = new Video;
                 $currentDatetime = gmdate('Y-m-d H:i:s');
+                $videoService = new VideoService;
 
                 $video->setAttributes($form->getAttributes());
                 $video->generateSlug($form->slug);
@@ -96,16 +95,11 @@ class VideoController extends Controller
                 $video->published_at = $form->published_at;
 
                 if (!$video->save()) {
-                    $errors = [];
-                    foreach($video->getErrorSummary(true) as $message) {
-                        $errors[] = $message;
-                    }
-
                     return [
                         'error' => [
                             'code' => 422,
                             'message' => "Video \"{$video->title}\" create fail",
-                            'errors' => $errors,
+                            'errors' => $video->getErrorSummary(true),
                         ],
                     ];
                 }
@@ -132,17 +126,7 @@ class VideoController extends Controller
                 }
 
                 // Добавление категорий
-                $addCategories = Category::find()
-                    ->where(['category_id' => $form->categories_ids])
-                    ->all();
-
-                foreach ($addCategories as $addCategory) {
-                    $video->addCategory($addCategory);
-
-                    if ($video->hasPoster()) {
-                        RotationStats::addVideo($addCategory, $video, $video->poster, true);
-                    }
-                }
+                $videoService->updateCategoriesByIds($video, $form->categories_ids);
 
                 $transaction->commit();
 
@@ -160,16 +144,11 @@ class VideoController extends Controller
                 ];
             }
         } else {
-            $errors = [];
-            foreach($form->getErrorSummary(true) as $message) {
-                $errors[] = $message;
-            }
-
             return [
                 'error' => [
                     'code' => 422,
                     'message' => "Cannot add video \"{$form->title}\"",
-                    'errors' => $errors,
+                    'errors' => $form->getErrorSummary(true),
                 ],
             ];
         }
@@ -193,16 +172,11 @@ class VideoController extends Controller
             ];
 
         } else {
-            $errors = [];
-            foreach($video->getErrorSummary(true) as $message) {
-                $errors[] = $message;
-            }
-
             return [
                 'error' => [
-                    'errors' => $errors,
                     'code' => 422,
                     'message' => Yii::t('videos', 'Video "{title}" update fail', ['title' => $video->title]),
+                    'errors' => $video->getErrorSummary(true),
                 ],
             ];
         }
@@ -224,16 +198,11 @@ class VideoController extends Controller
 
         Yii::$app->getResponse()->setStatusCode(422);
 
-        $errors = [];
-        foreach($video->getErrorSummary(true) as $message) {
-            $errors[] = $message;
-        }
-
         return [
             'error' => [
                 'code' => 422,
                 'message' => 'Can\'t delete video',
-                'errors' => $errors,
+                'errors' => $video->getErrorSummary(true),
             ],
         ];
     }
