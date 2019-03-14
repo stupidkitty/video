@@ -288,6 +288,18 @@ class CategoriesController extends Controller
                     'pageSize' => 50, // export batch size
                 ],
             ]),
+            'columns' => [
+                'category_id',
+                'meta_title',
+                'meta_description',
+                'title',
+                'h1',
+                'description',
+                'seotext',
+                'param1',
+                'param2',
+                'param3',
+            ],
         ]);
 
         $exporter->export()->send('categories.csv');
