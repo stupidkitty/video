@@ -2,7 +2,6 @@
 namespace SK\VideoModule\Controller\Admin;
 
 use yii\web\Controller;
-use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Statistic\VideoStatisticBuilder;
@@ -25,15 +24,14 @@ class StatsController extends Controller
                     ],
                 ],
             ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['post'],
-                ],
-            ],
         ];
     }
 
+    /**
+     * Отображает статистику ротации. В том числе по категориям.
+     *
+     * @return mixed
+     */
     public function actionIndex()
     {
         $reportBuilder = new RotationStatisticBuilder;
@@ -47,12 +45,20 @@ class StatsController extends Controller
         ]);
     }
 
+    /**
+     * Рисует график распределения цтр (цтр/кол-во видео)
+     * 
+     * Sql:
+     * ```
+     * SELECT ROUND(`max_ctr`, 4) as `ctr`, COUNT(*) as `num` FROM `videos` 
+     * WHERE `max_ctr` > 0
+     * GROUP BY `ctr`
+     * ```
+     *
+     * @return mixed
+     */
     public function actionCtrSpreading()
     {
-        
-        //SELECT ROUND(`max_ctr`, 4) as `ctr`, COUNT(*) as `num` FROM `videos` 
-        //WHERE `max_ctr` > 0
-        //GROUP BY `ctr`
         $query = Video::find();
         $rows = $query
             ->select(['ctr' => new \yii\db\Expression('ROUND(`max_ctr`, 4)'), 'num' => new \yii\db\Expression('COUNT(*)')])
