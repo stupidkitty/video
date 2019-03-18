@@ -66,13 +66,6 @@ class StatsController extends Controller
             ->groupBy('ctr')
             ->asArray()
             ->all();
-        
-        /*$labels = [];
-        $values = [];
-        foreach ($rows as $row) {
-            $labels[] = (double) $row['ctr'];
-            $values[] = (int) $row ['num'];
-        }*/
 
         return $this->render('ctr-spreading', [
             'labels' => array_column($rows, 'ctr'),
