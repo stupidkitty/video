@@ -32,7 +32,7 @@ class SearchController extends Controller implements ViewContextInterface
                     'index' => ['q', 'page'],
                 ],
             ],
-            'pageCache' => [
+            /*'pageCache' => [
                 'class' => PageCache::class,
                 'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
@@ -44,10 +44,11 @@ class SearchController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->getRequest()->get('page', 1),
-                    $this->getRequest()->post('q', '') || $this->getRequest()->get('q', ''),
+                    $this->getRequest()->post('q', ''),
+                    $this->getRequest()->get('q', ''),
                     $this->isMobile(),
                 ],
-            ],
+            ],*/
         ];
     }
 
@@ -84,6 +85,7 @@ class SearchController extends Controller implements ViewContextInterface
 
         // задрочка для чпу, форма доложна быть методом POST --begin
         if ($request->isPost && '' !== $request->post('q', '')) {
+            echo $request->post('q', '');exit;
             $request->setQueryParams(['q' => $request->post('q', ''), 'page' => $page]);
             $request->resolve();
 
