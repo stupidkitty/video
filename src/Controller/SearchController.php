@@ -85,7 +85,6 @@ class SearchController extends Controller implements ViewContextInterface
 
         // задрочка для чпу, форма доложна быть методом POST --begin
         if ($request->isPost && '' !== $request->post('q', '')) {
-            echo $request->post('q', '');exit;
             $request->setQueryParams(['q' => $request->post('q', ''), 'page' => $page]);
             $request->resolve();
 
