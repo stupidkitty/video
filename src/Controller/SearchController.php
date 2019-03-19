@@ -44,7 +44,7 @@ class SearchController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->getRequest()->get('page', 1),
-                    $this->getRequest()->getBodyParam('q', ''),
+                    $this->getRequest()->post('q', '') || $this->getRequest()->get('q', ''),
                     $this->isMobile(),
                 ],
             ],
