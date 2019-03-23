@@ -58,7 +58,7 @@ class RotateVideoProvider extends BaseDataProvider
 
         $this->query = Video::find()
             ->alias('v')
-            ->select('v.video_id, v.image_id, v.slug, v.title, v.orientation, v.duration, v.likes, v.dislikes, v.comments_num, v.views, v.template, v.published_at, vs.tested_image, vs.ctr')
+            ->select('v.video_id, v.image_id, v.slug, v.title, v.orientation, v.video_preview, v.duration, v.likes, v.dislikes, v.comments_num, v.views, v.template, v.published_at, vs.tested_image, vs.ctr')
             ->innerJoin(['vs' => RotationStats::tableName()], 'v.video_id = vs.video_id AND v.image_id = vs.image_id')
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
