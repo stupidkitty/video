@@ -29,7 +29,7 @@ class RelatedProvider
         $requiredRelatedNum = $this->settings->get('related_number', self::RELATED_NUMBER, 'videos');
             //SELECT `v`.* FROM `videos_related_map` AS `r` LEFT JOIN `videos` AS `v` ON `v`.`video_id` = `r`.`related_id` WHERE `r`.`video_id`=10
         $videos = Video::find()
-            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.views', 'v.template', 'v.published_at'])
+            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.views', 'v.template', 'v.published_at'])
             ->from(['v' => Video::tableName()])
             ->leftJoin(['r' => VideosRelatedMap::tableName()], 'v.video_id = r.related_id')
             ->with(['categories' => function ($query) {
