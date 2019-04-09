@@ -111,7 +111,7 @@ class m190206_092629_create_videos extends Migration
             'clicks' => 'mediumint(8) UNSIGNED NOT NULL DEFAULT 1',
         ], $tableOptions);
 
-        $this->addPrimaryKey('category_id', $tableName, ['category_id', 'date', 'hour']);
+        $this->addPrimaryKey('category_id', 'videos_categories_stats', ['category_id', 'date', 'hour']);
 
         /**
          * Create `videos_images` table
