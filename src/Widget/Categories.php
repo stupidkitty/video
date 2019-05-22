@@ -8,12 +8,10 @@ use SK\VideoModule\Model\Category;
 
 class Categories extends Widget
 {
-    private $cacheKey = 'video:widget:categories:';
-
     /**
      * @var int Идентификатор текущей активной категории;
      */
-    public $active_id = null;
+    public $active_id = 0;
 
     /**
      * @var string path to template
@@ -39,7 +37,16 @@ class Categories extends Widget
     public $limit;
     
     /**
-     * @var int Время жизни кеша темплейта (html)
+     * Включает кеш виджета.
+     *
+     * @var boolean
+     */
+    public $enableCache = true;
+
+    /**
+     * Время жизни кеша темплейта (html)
+     *
+     * @var integer
      */
     public $cacheDuration = 300;
     
@@ -48,11 +55,17 @@ class Categories extends Widget
      */
     public $items = [];
 
+    private $cache;
+
+    private $defaultCacheKey = 'video:widget:categories:';
+
     /**
      * Initializes the widget
      */
     public function init() {
         parent::init();
+
+        $this->cache = Yii::$app->cache;
 
         if (!in_array($this->order, ['id', 'title', 'position', 'clicks'])) {
             $this->order = 'title';
@@ -69,10 +82,11 @@ class Categories extends Widget
      *
      * @return string|void
      */
-    public function run() {
+    public function run()
+    {
         $cacheKey = $this->buildCacheKey();
 
-        $html = Yii::$app->cache->get($cacheKey);
+        $html = $this->isCacheEnabled() ?  $this->cache->get($cacheKey) : false;
 
         if (false === $html) {
             $categories = $this->getItems();
@@ -86,7 +100,9 @@ class Categories extends Widget
                 'active_id' => $this->active_id,
             ]);
 
-            Yii::$app->cache->set($cacheKey, $html, $this->cacheDuration);
+            if ($this->isCacheEnabled()) {
+                $this->cache->set($cacheKey, $html, $this->cacheDuration);
+            }
         }
 
         return $html;
@@ -117,8 +133,23 @@ class Categories extends Widget
         return $query->all();
     }
 
+    /**
+     * Включен\выключен кеш виджета.
+     *
+     * @return boolean
+     */
+    private function isCacheEnabled()
+    {
+        return (bool) $this->enableCache;
+    }
+
+    /**
+     * Создает ключ для кеша.
+     *
+     * @return string
+     */
     private function buildCacheKey()
     {
-        return "{$this->cacheKey}:{$this->order}:{$this->template}:{$this->active_id}";
+        return "{$this->defaultCacheKey}:{$this->order}:{$this->template}:{$this->active_id}";
     }
 }
