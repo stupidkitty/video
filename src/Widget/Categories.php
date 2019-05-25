@@ -35,6 +35,13 @@ class Categories extends Widget
      * @var integer
      */
     public $limit;
+
+    /**
+     * Группирует категории по первой букве
+     *
+     * @var boolean
+     */
+    public $groupByFirstLetter = false;
     
     /**
      * Включает кеш виджета.
@@ -130,6 +137,24 @@ class Categories extends Widget
             $query->limit((int) $this->limit);
         }
 
+        if ($this->isGroupByFirstLetter()) {
+            $lastLetter = '';
+            $categories = [];
+
+            foreach ($query->all() as $category) {
+                $currentLetter = mb_strtoupper(mb_substr($category['title'], 0, 1));
+                
+                if (is_numeric($currentLetter)) {
+                    $currentLetter = '#';
+                }
+
+                $categories[$currentLetter][] = $category;
+                $lastLetter = $currentLetter;
+            }
+
+            return $categories;
+        }
+
         return $query->all();
     }
 
@@ -141,6 +166,16 @@ class Categories extends Widget
     private function isCacheEnabled()
     {
         return (bool) $this->enableCache;
+    }
+
+    /**
+     * Группировать или нет категории по первой букве.
+     *
+     * @return boolean
+     */
+    private function isGroupByFirstLetter()
+    {
+        return (bool) $this->groupByFirstLetter;
     }
 
     /**
