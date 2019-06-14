@@ -29,10 +29,10 @@ class SearchController extends Controller implements ViewContextInterface
             'queryParams' => [
                 'class' => QueryParamsFilter::class,
                 'actions' => [
-                    'index' => ['q', 'page'],
+                    'index' => ['q', 'page', 'orientation'],
                 ],
             ],
-            /*'pageCache' => [
+            'pageCache' => [
                 'class' => PageCache::class,
                 'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
@@ -43,12 +43,10 @@ class SearchController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    $this->getRequest()->get('page', 1),
-                    $this->getRequest()->post('q', ''),
-                    $this->getRequest()->get('q', ''),
+                    \implode(':', \array_values($this->request->get())),
                     $this->isMobile(),
                 ],
-            ],*/
+            ],
         ];
     }
 
@@ -84,7 +82,7 @@ class SearchController extends Controller implements ViewContextInterface
         $request = $this->getRequest();
 
         // задрочка для чпу, форма доложна быть методом POST --begin
-        if ($request->isPost && '' !== $request->post('q', '')) {
+        /*if ($request->isPost && '' !== $request->post('q', '')) {
             $request->setQueryParams(['q' => $request->post('q', ''), 'page' => $page]);
             $request->resolve();
 
@@ -93,7 +91,7 @@ class SearchController extends Controller implements ViewContextInterface
 
         if ('' !== $q) {
             $request->setQueryParams(['q' => $q, 'page' => $page]);
-        }
+        }*/
         // задрочка для чпу --end
 
         $query = Video::find()
@@ -108,16 +106,17 @@ class SearchController extends Controller implements ViewContextInterface
             ],
         ]);
 
-        $form = new SearchForm();
+        $filterForm = new SearchForm();
 
-        if ($form->load($request->get()) && $form->validate()) {
+        if ($filterForm->load($request->get()) && $filterForm->isValid()) {
             $query
                 ->select('*, MATCH (`title`, `description`, `short_description`) AGAINST (:query) AS `relevance`')
                 ->where('MATCH (`title`, `description`, `short_description`) AGAINST (:query)', [
-                    ':query' => $form->getQuery(),
+                    ':query' => $filterForm->getQuery(),
                 ])
                 ->untilNow()
                 ->onlyActive()
+                ->andFilterWhere(['orientation' => $filterForm->orientation])
                 ->orderBy(['relevance' => SORT_DESC])
                 ->asArray();
 
@@ -136,12 +135,12 @@ class SearchController extends Controller implements ViewContextInterface
 
         return $this->render('search', [
             'page' => $page,
-            'form' => $form,
+            'form' => $filterForm,
             'settings' => $settings,
             'pagination' => $pagination,
             'videos' => $videos,
             'totalCount' => $totalCount,
-            'query' => $form->getQuery(),
+            'query' => $filterForm->getQuery(),
         ]);
     }
 
