@@ -142,7 +142,7 @@ class Categories extends Widget
             $categories = [];
 
             foreach ($query->all() as $category) {
-                $currentLetter = mb_strtoupper(mb_substr($category['title'], 0, 1));
+                $currentLetter = mb_strtolower(mb_substr($category['title'], 0, 1));
                 
                 if (is_numeric($currentLetter)) {
                     $currentLetter = '#';
