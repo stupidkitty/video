@@ -42,8 +42,7 @@ class ViewController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    $this->getRequest()->get('id', 1),
-                    $this->getRequest()->get('slug', 1),
+                    \implode(':', \array_values($this->request->get())),
                     $this->isMobile(),
                 ],
             ],
