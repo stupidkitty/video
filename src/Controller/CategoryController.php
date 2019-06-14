@@ -11,6 +11,7 @@ use yii\data\ActiveDataProvider;
 use SK\VideoModule\Model\Category;
 use yii\base\ViewContextInterface;
 use yii\web\NotFoundHttpException;
+use SK\VideoModule\Form\FilterForm;
 use SK\VideoModule\Model\VideosCategoriesMap;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use SK\VideoModule\Provider\RotateVideoProvider;
@@ -33,12 +34,12 @@ class CategoryController extends Controller implements ViewContextInterface
             'queryParams' => [
                 'class' => QueryParamsFilter::class,
                 'actions' => [
-                    'index' => ['id', 'slug', 'page', 'o', 't'],
-                    'date' => ['id', 'slug', 'page', 't'],
-                    'views' => ['id', 'slug', 'page', 't'],
-                    'likes' => ['id', 'slug', 'page', 't'],
-                    'ctr' => ['id', 'slug', 'page', 't'],
-                    'all-categories' => ['sort'],
+                    'index' => ['id', 'slug', 'page', 'o', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'date' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'views' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'likes' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'ctr' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'all-categories' => ['sort', 'orientation'],
                 ],
             ],
             'pageCache' => [
@@ -53,11 +54,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    $this->getRequest()->get('id', 0),
-                    $this->getRequest()->get('slug', ''),
-                    $this->getRequest()->get('page', 1),
-                    $this->getRequest()->get('o', ''),
-                    $this->getRequest()->get('t', 'all-time'),
+                    \implode(':', \array_values($this->request->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -101,13 +98,8 @@ class CategoryController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        if (0 !== (int) $id) {
-            $category = $this->findById($id);
-        } elseif (!empty($slug)) {
-            $category = $this->findBySlug($slug);
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $category = $this->findByIdentify($identify);
 
         if ('ctr' === $o) {
             $dataProvider = new RotateVideoProvider([
@@ -175,15 +167,16 @@ class CategoryController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        if (0 !== (int) $id) {
-            $category = $this->findById($id);
-        } elseif (!empty($slug)) {
-            $category = $this->findBySlug($slug);
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $category = $this->findByIdentify($identify);
 
-        $query = $this->buildInitialQuery($category, $t);
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
+
+        $query = $this->buildInitialQuery($category,  $filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -238,15 +231,16 @@ class CategoryController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        if (0 !== (int) $id) {
-            $category = $this->findById($id);
-        } elseif (!empty($slug)) {
-            $category = $this->findBySlug($slug);
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $category = $this->findByIdentify($identify);
 
-        $query = $this->buildInitialQuery($category, $t);
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
+
+        $query = $this->buildInitialQuery($category,  $filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -301,15 +295,16 @@ class CategoryController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        if (0 !== (int) $id) {
-            $category = $this->findById($id);
-        } elseif (!empty($slug)) {
-            $category = $this->findBySlug($slug);
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $category = $this->findByIdentify($identify);
 
-        $query = $this->buildInitialQuery($category, $t);
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
+
+        $query = $this->buildInitialQuery($category,  $filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -365,13 +360,14 @@ class CategoryController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        if (0 !== (int) $id) {
-            $category = $this->findById($id);
-        } elseif (!empty($slug)) {
-            $category = $this->findBySlug($slug);
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
+        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $category = $this->findByIdentify($identify);
+
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
 
         $dataProvider = new RotateVideoProvider([
             'pagination' => [
@@ -426,6 +422,7 @@ class CategoryController extends Controller implements ViewContextInterface
             'category' => $category,
             'videos' => $videos,
             'pagination' => $pagination,
+            'filterForm' => $filterForm,
         ]);
     }
 
@@ -479,19 +476,27 @@ class CategoryController extends Controller implements ViewContextInterface
     }
 
     /**
-     * Find category by slug
+     * Find category by primary key or by slug
      *
-     * @param string $slug
+     * @param int|string $identify
      *
      * @return Category
      *
      * @throws NotFoundHttpException
      */
-    public function findBySlug($slug)
+    public function findByIdentify($identify)
     {
-        $category = Category::find()
-            ->where(['slug' => $slug, 'enabled' => 1])
-            ->asArray()
+        $query = Category::find()
+            ->asArray();
+
+        if (is_integer($identify)) {
+            $query->where(['category_id' => $identify]);
+        } else {
+            $query->where(['slug' => $identify]);
+        }
+        
+        $category = $query
+            ->andWhere(['enabled' => 1])
             ->one();
 
         if (null === $category) {
@@ -501,30 +506,7 @@ class CategoryController extends Controller implements ViewContextInterface
         return $category;
     }
 
-    /**
-     * Find category by id
-     *
-     * @param integer $id
-     *
-     * @return Category
-     *
-     * @throws NotFoundHttpException
-     */
-    public function findById($id)
-    {
-        $category = Category::find()
-            ->where(['category_id' => $id, 'enabled' => 1])
-            ->asArray()
-            ->one();
-
-        if (null === $category) {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
-
-        return $category;
-    }
-
-    protected function buildInitialQuery($category, $t)
+    protected function buildInitialQuery($category, $filterForm)
     {
         $query = Video::find()
             ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.views', 'v.template', 'v.published_at'])
@@ -536,17 +518,21 @@ class CategoryController extends Controller implements ViewContextInterface
             }])
             ->with(['poster' => function ($query) {
                 $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }]);
+            }])
+            ->andwhere(['vcm.category_id' => $category['category_id']]);
 
-        if ('all-time' === $t) {
+        if ('all-time' === $filterForm->t) {
             $query->untilNow();
-        } elseif ($this->isValidRange($t)) {
-            $query->rangedUntilNow($t);
+        } else {
+            $query->rangedUntilNow($filterForm->t);
         }
 
         $query
             ->onlyActive()
-            ->andwhere(['vcm.category_id' => $category['category_id']])
+            ->andFilterWhere(['orientation' => $filterForm->orientation])
+            ->andFilterWhere(['>=', 'duration', $filterForm->durationMin])
+            ->andFilterWhere(['<=', 'duration', $filterForm->durationMax])
+            ->andFilterWhere(['is_hd' => $filterForm->isHd])
             ->asArray();
 
         return $query;
@@ -584,25 +570,6 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
             ],
         ]);
-    }
-
-    /**
-     * Проверяет корректность параметра $t в экшене контроллера.
-     * Значения: daily, weekly, monthly, early, all_time
-     *
-     * @param string $time Ограничение по времени.
-     *
-     * @return string.
-     *
-     * @throws NotFoundHttpException
-     */
-    protected function isValidRange($time)
-    {
-        if (in_array($time, ['daily', 'weekly', 'monthly', 'yearly', 'all-time'])) {
-            return true;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 
     /**
