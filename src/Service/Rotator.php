@@ -99,17 +99,17 @@ class Rotator
                 ]
             );
             /*RotationStats::getDb()->createCommand()
-            ->update(RotationStats::tableName(), [
-                'current_shows' => 0,
-                'current_clicks' => 0,
-                'current_index' => $currentIndex,
-                "shows{$currentIndex}" => (int) $thumbStat['current_shows'],
-                "clicks{$currentIndex}" => (int) $thumbStat['current_clicks'],
-            ], '`video_id`=:video_id AND `category_id`=:category_id AND `image_id`=:image_id')
-            ->bindValue(':video_id', (int) $thumbStat['video_id'])
-            ->bindValue(':category_id', (int) $thumbStat['category_id'])
-            ->bindValue(':image_id', (int) $thumbStat['image_id'])
-            ->execute();*/
+                ->update(RotationStats::tableName(), [
+                    'current_shows' => 0,
+                    'current_clicks' => 0,
+                    'current_index' => $currentIndex,
+                    "shows{$currentIndex}" => (int) $thumbStat['current_shows'],
+                    "clicks{$currentIndex}" => (int) $thumbStat['current_clicks'],
+                ], '`video_id`=:video_id AND `category_id`=:category_id AND `image_id`=:image_id')
+                ->bindValue(':video_id', (int) $thumbStat['video_id'])
+                ->bindValue(':category_id', (int) $thumbStat['category_id'])
+                ->bindValue(':image_id', (int) $thumbStat['image_id'])
+                ->execute();*/
         }
     }
 }
