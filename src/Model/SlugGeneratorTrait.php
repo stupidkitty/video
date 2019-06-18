@@ -18,7 +18,7 @@ trait SlugGeneratorTrait
             $title = $this->getTitle();
         }
 
-        $slug = URLify::filter($title);
+        $slug = URLify::filter($title, 240);
 
         if (!$slug) {
             $slug = 'default-slug';
