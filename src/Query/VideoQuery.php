@@ -111,9 +111,7 @@ class VideoQuery extends ActiveQuery
      *
      * @param string $time Ограничение по времени.
      *
-     * @return string.
-     *
-     * @throws NotFoundHttpException
+     * @return string
      */
     protected function getTimeagoExpression($time)
     {
