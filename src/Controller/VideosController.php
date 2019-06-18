@@ -8,7 +8,7 @@ use yii\filters\PageCache;
 use SK\VideoModule\Model\Video;
 use yii\data\ActiveDataProvider;
 use yii\base\ViewContextInterface;
-use yii\web\NotFoundHttpException;
+use SK\VideoModule\Form\FilterForm;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
 
@@ -28,11 +28,11 @@ class VideosController extends Controller implements ViewContextInterface
             'queryParams' => [
                 'class' => QueryParamsFilter::class,
                 'actions' => [
-                    'index' => ['page', 'o', 't'],
-                    'date' => ['page', 't'],
-                    'views' => ['page', 't'],
-                    'likes' => ['page', 't'],
-                    'ctr' => ['page', 't'],
+                    'index' => ['page', 'o', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'date' => ['page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'views' => ['page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'likes' => ['page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'ctr' => ['page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
                 ],
             ],
             'pageCache' => [
@@ -47,9 +47,7 @@ class VideosController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    $this->getRequest()->get('page', 1),
-                    $this->getRequest()->get('o', 'date'),
-                    $this->getRequest()->get('t', 'all-time'),
+                    \implode(':', \array_values($this->request->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -93,18 +91,13 @@ class VideosController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $query = Video::find()
-            ->asThumbs();
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
 
-        if ('all-time' === $t) {
-            $query->untilNow();
-        } elseif ($this->isValidRange($t)) {
-            $query->rangedUntilNow($t);
-        }
-
-        $query
-            ->onlyActive()
-            ->asArray();
+        $query = $this->buildInitialQuery($filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -167,18 +160,13 @@ class VideosController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $query = Video::find()
-            ->asThumbs();
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
 
-        if ('all-time' === $t) {
-            $query->untilNow();
-        } elseif ($this->isValidRange($t)) {
-            $query->rangedUntilNow($t);
-        }
-
-        $query
-            ->onlyActive()
-            ->asArray();
+        $query = $this->buildInitialQuery($filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -216,18 +204,13 @@ class VideosController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $query = Video::find()
-            ->asThumbs();
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
 
-        if ('all-time' === $t) {
-            $query->untilNow();
-        } elseif ($this->isValidRange($t)) {
-            $query->rangedUntilNow($t);
-        }
-
-        $query
-            ->onlyActive()
-            ->asArray();
+        $query = $this->buildInitialQuery($filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -265,18 +248,13 @@ class VideosController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $query = Video::find()
-            ->asThumbs();
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
 
-        if ('all-time' === $t) {
-            $query->untilNow();
-        } elseif ($this->isValidRange($t)) {
-            $query->rangedUntilNow($t);
-        }
-
-        $query
-            ->onlyActive()
-            ->asArray();
+        $query = $this->buildInitialQuery($filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -314,18 +292,13 @@ class VideosController extends Controller implements ViewContextInterface
         $page = (int) $page;
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $query = Video::find()
-            ->asThumbs();
+        $filterForm = new FilterForm([
+            't' => $t,
+        ]);
+        $filterForm->load($this->request->get());
+        $filterForm->isValid();
 
-        if ('all-time' === $t) {
-            $query->untilNow();
-        } elseif ($this->isValidRange($t)) {
-            $query->rangedUntilNow($t);
-        }
-
-        $query
-            ->onlyActive()
-            ->asArray();
+        $query = $this->buildInitialQuery($filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -354,23 +327,26 @@ class VideosController extends Controller implements ViewContextInterface
         ]);
     }
 
-    /**
-     * Проверяет корректность параметра $t в экшене контроллера.
-     * daily, weekly, monthly, early, all_time
-     *
-     * @param string $time Ограничение по времени.
-     *
-     * @return string.
-     *
-     * @throws NotFoundHttpException
-     */
-    protected function isValidRange($time)
+    protected function buildInitialQuery($filterForm)
     {
-        if (in_array($time, ['daily', 'weekly', 'monthly', 'yearly', 'all-time'])) {
-            return true;
+        $query = Video::find()
+            ->asThumbs()
+            ->asArray();
+
+        if ('all-time' === $filterForm->t) {
+            $query->untilNow();
+        } else {
+            $query->rangedUntilNow($filterForm->t);
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        $query
+            ->onlyActive()
+            ->andFilterWhere(['orientation' => $filterForm->orientation])
+            ->andFilterWhere(['>=', 'duration', $filterForm->durationMin])
+            ->andFilterWhere(['<=', 'duration', $filterForm->durationMax])
+            ->andFilterWhere(['is_hd' => $filterForm->isHd]);
+
+        return $query;
     }
 
     /**
