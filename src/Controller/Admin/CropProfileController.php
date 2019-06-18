@@ -84,10 +84,8 @@ class CropProfileController extends Controller
         $form = new CropProfileForm;
 
         if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
-            $currentDatetime = gmdate('Y-m-d H:i:s');
-
             $crop->setAttributes($form->getAttributes());
-            $crop->created_at = $currentDatetime;
+            $crop->created_at = gmdate('Y-m-d H:i:s');
 
             if ($crop->save()) {
                 Yii::$app->session->addFlash('success', 'Новый профиль нарезки изображений добавлен');
@@ -117,8 +115,6 @@ class CropProfileController extends Controller
         $form->setAttributes($crop->getAttributes());
 
         if ($form->load(Yii::$app->request->post()) && $form->isValid()) {
-            $currentDatetime = gmdate('Y-m-d H:i:s');
-
             $crop->setAttributes($form->getAttributes());
 
             if ($crop->save()) {
@@ -157,7 +153,7 @@ class CropProfileController extends Controller
      * Finds the CropProfile model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Gallery the loaded model
+     * @return CropProfile the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findById($id)
