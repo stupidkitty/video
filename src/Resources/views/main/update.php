@@ -122,6 +122,8 @@ $this->params['breadcrumbs'][] = $video->title;
                     'style' => 'width:initial;',
                 ]) ?>
 
+                <?= $activeForm->field($form, 'is_hd')->checkbox() ?>
+
                 <?= $activeForm->field($form, 'on_index')->checkbox() ?>
 
                 <?= Html::activeHiddenInput($form, 'image_id') ?>

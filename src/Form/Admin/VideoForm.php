@@ -1,7 +1,6 @@
 <?php
 namespace SK\VideoModule\Form\Admin;
 
-use Yii;
 use yii\base\Model;
 
 /**
@@ -25,6 +24,7 @@ class VideoForm extends Model
     public $duration;
     public $status;
     public $on_index;
+    public $is_hd;
     public $published_at;
     /** @var array $categories_ids Список айди категорий видео ролика. */
     public $categories_ids = [];
@@ -47,7 +47,7 @@ class VideoForm extends Model
             [['slug', 'title', 'short_description', 'video_url', 'source_url', 'embed', 'template'], 'string', 'max' => 255],
             [['description'], 'string', 'max' => 3000],
             [['image_id', 'user_id', 'orientation', 'duration', 'status'], 'integer'],
-            [['on_index'], 'boolean'],
+            [['on_index', 'is_hd'], 'boolean'],
             [['published_at'], 'safe'],
 
             ['categories_ids', 'each', 'rule' => ['integer']],

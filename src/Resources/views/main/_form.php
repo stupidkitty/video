@@ -32,13 +32,15 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'embed')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'on_index')->textInput() ?>
-
     <?= $form->field($model, 'likes')->textInput() ?>
 
     <?= $form->field($model, 'dislikes')->textInput() ?>
 
     <?= $form->field($model, 'comments_num')->textInput() ?>
+
+    <?= $form->field($model, 'is_hd')->checkbox() ?>
+
+    <?= $form->field($model, 'on_index')->checkbox() ?>
 
     <?= $form->field($model, 'views')->textInput() ?>
 

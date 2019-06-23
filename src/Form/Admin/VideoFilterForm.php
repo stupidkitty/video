@@ -22,6 +22,7 @@ class VideoFilterForm extends Model
     public $user_id;
     public $status;
     public $title;
+    public $is_hd;
 
     public $show_thumb = false;
 
@@ -39,7 +40,7 @@ class VideoFilterForm extends Model
     {
         return [
             [['user_id', 'status', 'per_page', 'category_id'], 'integer'],
-            [['show_thumb', 'bulk_edit'], 'boolean'],
+            [['show_thumb', 'bulk_edit', 'is_hd'], 'boolean'],
 
             ['videos_ids', 'filter', 'skipOnEmpty' => true, 'filter' => function ($value) {
                 return StringHelper::explode($value, $delimiter = ',', true, true);

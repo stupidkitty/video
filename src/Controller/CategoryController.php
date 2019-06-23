@@ -509,7 +509,7 @@ class CategoryController extends Controller implements ViewContextInterface
     protected function buildInitialQuery($category, $filterForm)
     {
         $query = Video::find()
-            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.views', 'v.template', 'v.published_at'])
+            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.is_hd', 'v.views', 'v.template', 'v.published_at'])
             ->alias('v')
             ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
             ->with(['categories' => function ($query) {
@@ -529,10 +529,10 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $query
             ->onlyActive()
-            ->andFilterWhere(['orientation' => $filterForm->orientation])
-            ->andFilterWhere(['>=', 'duration', $filterForm->durationMin])
-            ->andFilterWhere(['<=', 'duration', $filterForm->durationMax])
-            ->andFilterWhere(['is_hd' => $filterForm->isHd])
+            ->andFilterWhere(['v.orientation' => $filterForm->orientation])
+            ->andFilterWhere(['>=', 'v.duration', $filterForm->durationMin])
+            ->andFilterWhere(['<=', 'v.duration', $filterForm->durationMax])
+            ->andFilterWhere(['v.is_hd' => $filterForm->isHd])
             ->asArray();
 
         return $query;

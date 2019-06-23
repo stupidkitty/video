@@ -10,7 +10,7 @@ class VideoQuery extends ActiveQuery
 {
     public function asThumbs()
     {
-        return $this->select(['video_id', 'image_id', 'slug', 'title', 'orientation', 'video_preview', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'template', 'published_at'])
+        return $this->select(['video_id', 'image_id', 'slug', 'title', 'orientation', 'video_preview', 'duration', 'likes', 'dislikes', 'comments_num', 'is_hd', 'views', 'template', 'published_at'])
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
                     ->where(['enabled' => 1]);
@@ -28,6 +28,16 @@ class VideoQuery extends ActiveQuery
     public function onlyActive()
     {
         return $this->andWhere(['status' => Video::STATUS_ACTIVE]);
+    }
+
+    /**
+     * Добавляет к запросу условие "только активные"
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function onlyHd()
+    {
+        return $this->andWhere(['is_hd' => 1]);
     }
 
     /**

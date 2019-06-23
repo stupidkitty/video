@@ -24,6 +24,7 @@ use SK\VideoModule\Query\VideoQuery;
  * @property integer $likes
  * @property integer $dislikes
  * @property integer $comments_num
+ * @property boolean $is_hd
  * @property integer $views
  * @property string $template
  * @property integer $status
@@ -56,6 +57,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
         return [
             [['slug', 'title', 'description', 'short_description', 'video_preview', 'video_url', 'source_url', 'embed', 'template'], 'string'],
             [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'on_index', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
+            [['is_hd'], 'boolean'],
             [['published_at', 'created_at', 'updated_at'], 'safe'],
         ];
     }

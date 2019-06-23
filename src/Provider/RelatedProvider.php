@@ -27,10 +27,11 @@ class RelatedProvider
     public function getFromTable($video_id)
     {
         $requiredRelatedNum = $this->settings->get('related_number', self::RELATED_NUMBER, 'videos');
+
             //SELECT `v`.* FROM `videos_related_map` AS `r` LEFT JOIN `videos` AS `v` ON `v`.`video_id` = `r`.`related_id` WHERE `r`.`video_id`=10
         $videos = Video::find()
-            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.views', 'v.template', 'v.published_at'])
-            ->from(['v' => Video::tableName()])
+            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.is_hd', 'v.views', 'v.template', 'v.published_at'])
+            ->alias('v')
             ->leftJoin(['r' => VideosRelatedMap::tableName()], 'v.video_id = r.related_id')
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1']);
@@ -124,12 +125,11 @@ class RelatedProvider
             foreach ($relatedVideos as $relatedVideo) {
                 $related[] = [$video['video_id'], $relatedVideo['video_id']];
             }
-            //dump($related); exit;
-                // Удалим старое.
-            Yii::$app->db->createCommand()
-                ->delete(VideosRelatedMap::tableName(), ['video_id' => $video['video_id']])
-                ->execute();
-                // вставим новое
+
+            // Удалим старое.
+            VideosRelatedMap::deleteAll(['video_id' => $video['video_id']]);
+
+            // вставим новое
             Yii::$app->db->createCommand()
                 ->batchInsert(VideosRelatedMap::tableName(), ['video_id', 'related_id'], $related)
                 ->execute();

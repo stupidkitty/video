@@ -23,6 +23,7 @@ class VideoForm extends Model
     public $duration;
     public $status;
     public $on_index;
+    public $is_hd;
     public $published_at;
     /** @var array $categories_ids Список айди категорий видео ролика. */
     public $categories_ids = [];
@@ -50,7 +51,7 @@ class VideoForm extends Model
             [['description'], 'string', 'max' => 3000],
             [['video_id', 'orientation', 'duration', 'status'], 'integer'],
             ['video_id', 'unique', 'targetClass' => Video::class],
-            [['on_index'], 'boolean'],
+            [['on_index', 'is_hd'], 'boolean'],
             [['published_at'], 'safe'],
 
             ['categories_ids', 'each', 'rule' => ['integer']],
