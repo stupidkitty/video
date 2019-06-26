@@ -2,13 +2,12 @@
 namespace SK\VideoModule\Provider;
 
 use Yii;
-
-use yii\data\BaseDataProvider;
 use yii\db\Expression;
 use yii\db\QueryInterface;
-use yii\db\ActiveQueryInterface;
-
+use yii\data\BaseDataProvider;
 use SK\VideoModule\Model\Video;
+use yii\db\ActiveQueryInterface;
+use SK\VideoModule\Form\FilterForm;
 use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\Model\VideosCategoriesMap;
 
@@ -40,7 +39,7 @@ class RotateVideoProvider extends BaseDataProvider
     public $testVideosStartPosition = 4;
     public $category_id;
 
-    public $datetimeLimit = 'all-time';
+    public $filterForm;
 
     private $cache;
 
@@ -56,9 +55,13 @@ class RotateVideoProvider extends BaseDataProvider
     {
         parent::init();
 
+        if (null === $this->filterForm) {
+            $this->filterForm = new FilterForm;
+        }
+
         $this->query = Video::find()
             ->alias('v')
-            ->select('v.video_id, v.image_id, v.slug, v.title, v.orientation, v.video_preview, v.duration, v.likes, v.dislikes, v.comments_num, v.views, v.template, v.published_at, vs.tested_image, vs.ctr')
+            ->select('v.video_id, v.image_id, v.slug, v.title, v.orientation, v.video_preview, v.duration, v.likes, v.dislikes, v.comments_num, v.is_hd, v.views, v.template, v.published_at, vs.tested_image, vs.ctr')
             ->innerJoin(['vs' => RotationStats::tableName()], 'v.video_id = vs.video_id AND v.image_id = vs.image_id')
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
@@ -68,16 +71,18 @@ class RotateVideoProvider extends BaseDataProvider
                 $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
             }]);
 
-        if ('all-time' === $this->datetimeLimit) {
-            $this->query->andWhere(['<=', 'v.published_at', new Expression('NOW()')]);
-        } elseif ($this->isValidRange($this->datetimeLimit)) {
-            $timeagoExpression = $this->getTimeagoExpression($this->datetimeLimit);
-
-            $this->query->andWhere(['between', 'v.published_at', new Expression($timeagoExpression), new Expression('NOW()')]);
+        if ('all-time' === $this->filterForm->t) {
+            $this->query->untilNow();
+        } else {
+            $this->query->rangedUntilNow($this->filterForm->t);
         }
 
         $this->query
-            ->andWhere(['v.status' => Video::STATUS_ACTIVE])
+            ->onlyActive()
+            ->andFilterWhere(['v.orientation' => $this->filterForm->orientation])
+            ->andFilterWhere(['>=', 'v.duration', $this->filterForm->durationMin])
+            ->andFilterWhere(['<=', 'v.duration', $this->filterForm->durationMax])
+            ->andFilterWhere(['v.is_hd' => $this->filterForm->isHd])
             ->orderBy(['ctr' => SORT_DESC])
             ->indexBy('video_id')
             ->asArray();
@@ -287,21 +292,25 @@ class RotateVideoProvider extends BaseDataProvider
      */
     protected function prepareTotalCount()
     {
-        $cacheKey = "rotate:video:provider:totalcount:{$this->category_id}";
-
-        $count = $this->cache->get($cacheKey);
-
-        if (false === $count) {
-            $count = Video::find()
-                ->from(['v' => Video::tableName()])
-                ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
-                ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
-                ->andWhere(['v.status' => Video::STATUS_ACTIVE])
-                ->andWhere(['vcm.category_id' => $this->category_id])
-                ->count();
-
-            $this->cache->set($cacheKey, $count, 300);
+        $query = Video::find()
+            ->alias('v')
+            ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
+            ->andWhere(['vcm.category_id' => $this->category_id]);
+        
+        if ('all-time' === $this->filterForm->t) {
+            $query->untilNow();
+        } else {
+            $query->rangedUntilNow($this->filterForm->t);
         }
+
+        $count = $query    
+            ->andWhere(['v.status' => Video::STATUS_ACTIVE])
+            ->andFilterWhere(['v.orientation' => $this->filterForm->orientation])
+            ->andFilterWhere(['>=', 'v.duration', $this->filterForm->durationMin])
+            ->andFilterWhere(['<=', 'v.duration', $this->filterForm->durationMax])
+            ->andFilterWhere(['v.is_hd' => $this->filterForm->isHd])
+            ->cache(300)
+            ->count();
 
         return (int) $count;
     }
@@ -313,59 +322,28 @@ class RotateVideoProvider extends BaseDataProvider
      */
     protected function getTestedCount()
     {
-        $count = Video::find()
-            ->from(['v' => Video::tableName()])
+        $query = Video::find()
+            ->alias('v')
             ->innerJoin(['vs' => RotationStats::tableName()], 'v.video_id = vs.video_id AND v.image_id = vs.image_id')
-            ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
-            ->andWhere(['v.status' => Video::STATUS_ACTIVE])
             ->andWhere(['vs.category_id' => $this->category_id])
             ->andWhere(['vs.best_image' => 1])
-            ->andWhere(['vs.tested_image' => 1])
+            ->andWhere(['vs.tested_image' => 1]);
+
+        if ('all-time' === $this->filterForm->t) {
+            $query->untilNow();
+        } else {
+            $query->rangedUntilNow($this->filterForm->t);
+        }
+
+        $count = $query
+            ->andWhere(['v.status' => Video::STATUS_ACTIVE])
+            ->andFilterWhere(['v.orientation' => $this->filterForm->orientation])
+            ->andFilterWhere(['>=', 'v.duration', $this->filterForm->durationMin])
+            ->andFilterWhere(['<=', 'v.duration', $this->filterForm->durationMax])
+            ->andFilterWhere(['v.is_hd' => $this->filterForm->isHd])
+            ->cache(300)
             ->count();
 
         return (int) $count;
-    }
-
-    /**
-     * Возвращает выражение для первого значения в выборке по интервалу времени.
-     * Значения: daily, weekly, monthly, early, all_time
-     *
-     * @param string $time Ограничение по времени.
-     *
-     * @return string.
-     *
-     * @throws NotFoundHttpException
-     */
-    protected function getTimeagoExpression($time)
-    {
-        $times = [
-            'daily' => '(NOW() - INTERVAL 1 DAY)',
-            'weekly' => '(NOW() - INTERVAL 1 WEEK)',
-            'monthly' => '(NOW() - INTERVAL 1 MONTH)',
-            'yearly' => '(NOW() - INTERVAL 1 YEAR)',
-        ];
-
-        if (isset($times[$time])) {
-            return $times[$time];
-        }
-
-        return $times['yearly'];
-    }
-
-    /**
-     * Проверяет корректность параметра $t в экшене контроллера.
-     * Значения: daily, weekly, monthly, early, all_time
-     *
-     * @param string $time Ограничение по времени.
-     *
-     * @return boolean
-     */
-    protected function isValidRange($time)
-    {
-        if (in_array($time, ['daily', 'weekly', 'monthly', 'yearly', 'all-time'])) {
-            return true;
-        }
-
-        return false;
     }
 }
