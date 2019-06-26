@@ -218,6 +218,7 @@ class CategoryController extends Controller implements ViewContextInterface
             'category' => $category,
             'videos' => $videos,
             'pagination' => $pagination,
+            'filterForm' => $filterForm,
         ]);
     }
 
@@ -282,6 +283,7 @@ class CategoryController extends Controller implements ViewContextInterface
             'category' => $category,
             'videos' => $videos,
             'pagination' => $pagination,
+            'filterForm' => $filterForm,
         ]);
     }
 
@@ -346,6 +348,7 @@ class CategoryController extends Controller implements ViewContextInterface
             'category' => $category,
             'videos' => $videos,
             'pagination' => $pagination,
+            'filterForm' => $filterForm,
         ]);
     }
 
@@ -370,6 +373,7 @@ class CategoryController extends Controller implements ViewContextInterface
         $filterForm->isValid();
 
         $dataProvider = new RotateVideoProvider([
+            'filterForm' => $filterForm,
             'pagination' => [
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
