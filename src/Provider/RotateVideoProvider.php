@@ -2,7 +2,6 @@
 namespace SK\VideoModule\Provider;
 
 use Yii;
-use yii\db\Expression;
 use yii\db\QueryInterface;
 use yii\data\BaseDataProvider;
 use SK\VideoModule\Model\Video;
@@ -84,7 +83,6 @@ class RotateVideoProvider extends BaseDataProvider
             ->andFilterWhere(['<=', 'v.duration', $this->filterForm->durationMax])
             ->andFilterWhere(['v.is_hd' => $this->filterForm->isHd])
             ->orderBy(['ctr' => SORT_DESC])
-            ->indexBy('video_id')
             ->asArray();
 
         $this->cache = Yii::$app->cache;
