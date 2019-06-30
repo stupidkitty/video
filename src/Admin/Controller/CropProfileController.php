@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Controller\Admin;
+namespace SK\VideoModule\Admin\Controller;
 
 use Yii;
 use yii\web\Controller;
@@ -8,7 +8,7 @@ use yii\filters\AccessControl;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use SK\VideoModule\Model\CropProfile;
-use SK\VideoModule\Form\Admin\CropProfileForm;
+use SK\VideoModule\Admin\Form\CropProfileForm;
 
 /**
  * CropProfile implements the CRUD actions for CropProfile model.

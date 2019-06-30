@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Form\Admin;
+namespace SK\VideoModule\Admin\Form;
 
 use yii\base\Model;
 use yii\helpers\StringHelper;

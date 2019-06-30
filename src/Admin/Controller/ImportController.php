@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Controller\Admin;
+namespace SK\VideoModule\Admin\Controller;
 
 use Yii;
 use yii\web\Request;
@@ -12,8 +12,8 @@ use yii\data\ActiveDataProvider;
 use RS\Component\User\Model\User;
 use yii\web\NotFoundHttpException;
 use SK\VideoModule\Model\ImportFeed;
-use SK\VideoModule\Form\Admin\VideosImport;
-use SK\VideoModule\Form\Admin\CategoriesImportForm;
+use SK\VideoModule\Admin\Form\VideosImport;
+use SK\VideoModule\Admin\Form\CategoriesImportForm;
 
 /**
  * ImportController

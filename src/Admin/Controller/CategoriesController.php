@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Controller\Admin;
+namespace SK\VideoModule\Admin\Controller;
 
 use Yii;
 use yii\base\Event;
@@ -12,7 +12,7 @@ use yii\filters\AccessControl;
 use yii\data\ActiveDataProvider;
 use SK\VideoModule\Model\Category;
 use yii\web\NotFoundHttpException;
-use SK\VideoModule\Form\Admin\CategoryForm;
+use SK\VideoModule\Admin\Form\CategoryForm;
 use SK\VideoModule\EventSubscriber\CategorySubscriber;
 use SK\VideoModule\Service\Category as CategoryService;
 

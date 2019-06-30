@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Controller\Api;
+namespace SK\VideoModule\Api\Controller;
 
 use Yii;
 use yii\filters\Cors;

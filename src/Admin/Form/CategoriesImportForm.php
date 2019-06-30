@@ -1,13 +1,12 @@
 <?php
-namespace SK\VideoModule\Form\Admin;
+namespace SK\VideoModule\Admin\Form;
 
 use Yii;
-use SplFileObject;
 use LimitIterator;
+use SplFileObject;
 use yii\base\Model;
-use yii\helpers\StringHelper;
 use yii\helpers\FileHelper;
-
+use yii\helpers\StringHelper;
 use SK\VideoModule\Model\Category;
 
 /**

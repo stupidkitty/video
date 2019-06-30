@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Controller\Admin;
+namespace SK\VideoModule\Admin\Controller;
 
 use yii\web\Response;
 use yii\web\Controller;

@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Form\Api;
+namespace SK\VideoModule\Api\Form;
 
 use yii\base\Model;
 use SK\VideoModule\Model\Video;

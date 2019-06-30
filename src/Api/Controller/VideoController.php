@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Controller\Api;
+namespace SK\VideoModule\Api\Controller;
 
 use Yii;
 use yii\web\User;
@@ -11,7 +11,7 @@ use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use yii\web\NotFoundHttpException;
 use yii\filters\auth\HttpBearerAuth;
-use SK\VideoModule\Form\Api\VideoForm;
+use SK\VideoModule\Api\Form\VideoForm;
 use SK\VideoModule\Service\Video as VideoService;
 
 /**

@@ -7,7 +7,7 @@ Yii2 video module
     'videos' => [
         'class' => SK\VideoModule\Module::class,
         //'viewPath' => '@app/views/videos',
-        //'controllerNamespace' => 'SK\VideoModule\Admin',
+        //'controllerNamespace' => 'SK\VideoModule\Admin\Controller',
     ],
 ],
 ```

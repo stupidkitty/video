@@ -1,5 +1,5 @@
 <?php
-namespace SK\VideoModule\Controller\Admin;
+namespace SK\VideoModule\Admin\Controller;
 
 use Yii;
 use yii\helpers\Url;
@@ -14,10 +14,10 @@ use RS\Component\User\Model\User;
 use SK\VideoModule\Model\Category;
 use yii\web\NotFoundHttpException;
 use SK\VideoModule\Model\RotationStats;
-use SK\VideoModule\Form\Admin\VideoForm;
-use SK\VideoModule\Form\Admin\VideoFilterForm;
+use SK\VideoModule\Admin\Form\VideoForm;
+use SK\VideoModule\Admin\Form\VideoFilterForm;
 use SK\VideoModule\Service\Video as VideoService;
-use SK\VideoModule\Form\Admin\VideosBatchActionsForm;
+use SK\VideoModule\Admin\Form\VideosBatchActionsForm;
 
 /**
  * MainController implements the CRUD actions for Video model.
