@@ -43,6 +43,12 @@ $this->params['breadcrumbs'][] = $video->title;
                     <iframe width="342" height="180" src="<?= "{$this->params['video.embed.base_url']}{$video->embed}" ?>" frameborder="0" allowfullscreen="" scrolling="no"></iframe>
                 </div>
                 <div style="margin-top:15px;">
+                    <video controls poster="<?= $video->poster->filepath ?>">
+                        <source src="<?= "{$this->params['video.preview.base_url']}{$video->video_preview}" ?>" type="video/mp4">
+                        Your browser doesn't support HTML5 video tag.
+                    </video>
+                </div>
+                <div style="margin-top:15px;">
                     <?= Html::img($video->poster->filepath) ?>
                 </div>
                 <div style="margin-top:15px;">
@@ -105,6 +111,8 @@ $this->params['breadcrumbs'][] = $video->title;
                 <?= $activeForm->field($form, 'duration')->textInput(['placeholder' => 324])->hint('В секундах') ?>
 
                 <?= $activeForm->field($form, 'video_url')->textInput(['maxlength' => true])->hint('Прямой урл до видео файла') ?>
+
+                <?= $activeForm->field($form, 'source_url')->textInput(['maxlength' => true])->hint('Урл источника видео. Страница с видео, например.') ?>
 
                 <?= $activeForm->field($form, 'embed')->textarea(['rows' => 4]) ?>
 
