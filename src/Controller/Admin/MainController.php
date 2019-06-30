@@ -107,7 +107,7 @@ class MainController extends Controller
             $thumbsRotationStats[$item->image->getId()]['categories'][] = $item;
         }
 
-        $statusLabel = $this->getStatusesOptionsList();
+        $statusLabel = $this->getStatusNames();
 
         return $this->render('view', [
             'video' => $video,
@@ -157,7 +157,7 @@ class MainController extends Controller
             ->indexBy('user_id')
             ->column();
 
-        $statusesOptionsList = $this->getStatusesOptionsList();
+        $statusesOptionsList = $this->getStatusNames();
 
         return $this->render('create', [
             'video' => $video,
@@ -209,7 +209,7 @@ class MainController extends Controller
             ->indexBy('user_id')
             ->column();
 
-        $statusesOptionsList = $this->getStatusesOptionsList();
+        $statusesOptionsList = $this->getStatusNames();
 
         return $this->render('update', [
             'video' => $video,
@@ -336,7 +336,7 @@ class MainController extends Controller
      *
      * @return array
      */
-    protected function getStatusesOptionsList()
+    protected function getStatusNames()
     {
         return [
     		Video::STATUS_DISABLED => Yii::t('videos', 'status_disabled'),
