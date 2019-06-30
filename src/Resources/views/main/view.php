@@ -38,6 +38,12 @@ $this->params['breadcrumbs'][] = $video->title;
                     <iframe width="342" height="180" src="<?= "{$this->params['video.embed.base_url']}{$video->embed}" ?>" frameborder="0" allowfullscreen="" scrolling="no"></iframe>
                 </div>
                 <div style="margin-top:15px;">
+                    <video controls poster="<?= $video->poster->filepath ?>">
+                        <source src="<?= "{$this->params['video.preview.base_url']}{$video->video_preview}" ?>" type="video/mp4">
+                        Your browser doesn't support HTML5 video tag.
+                    </video>
+                </div>
+                <div style="margin-top:15px;">
                     <?= Html::img($video->poster->filepath) ?>
                 </div>
             </div>
@@ -139,9 +145,11 @@ $this->params['breadcrumbs'][] = $video->title;
                                     <tr>
                                         <th width="150">Category</th>
                                         <th>Ctr</th>
-                                        <th>Total shows</th>
                                         <th>Total clicks</th>
+                                        <th>Total shows</th>
                                         <th>Tested</th>
+                                        <th>Current clicks</th>
+                                        <th>Current shows</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -149,9 +157,11 @@ $this->params['breadcrumbs'][] = $video->title;
                                     <tr>
                                         <td><?= $imageCategory->category->title ?></td>
                                         <td><?= $imageCategory->ctr ? "<b>{$imageCategory->ctr}</b>" : 0 ?></td>
-                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->total_shows) ?></td>
                                         <td><?= Yii::$app->formatter->asInteger($imageCategory->total_clicks) ?></td>
+                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->total_shows) ?></td>
                                         <td><?= $imageCategory->tested_image ? 'Yes' : 'No' ?></td>
+                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->current_clicks) ?></td>
+                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->current_shows) ?></td>
                                     </tr>
                                 <?php endforeach ?>
                                 </tbody>
