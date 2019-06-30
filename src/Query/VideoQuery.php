@@ -10,7 +10,8 @@ class VideoQuery extends ActiveQuery
 {
     public function asThumbs()
     {
-        return $this->select(['video_id', 'image_id', 'slug', 'title', 'orientation', 'video_preview', 'source_url', 'duration', 'likes', 'dislikes', 'comments_num', 'is_hd', 'views', 'template', 'published_at'])
+        return $this->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.source_url', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.is_hd', 'v.views', 'v.template', 'v.published_at'])
+            ->alias('v')
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
                     ->where(['enabled' => 1]);
@@ -27,7 +28,7 @@ class VideoQuery extends ActiveQuery
      */
     public function onlyActive()
     {
-        return $this->andWhere(['status' => Video::STATUS_ACTIVE]);
+        return $this->andWhere(['v.status' => Video::STATUS_ACTIVE]);
     }
 
     /**
@@ -37,7 +38,7 @@ class VideoQuery extends ActiveQuery
      */
     public function onlyHd()
     {
-        return $this->andWhere(['is_hd' => 1]);
+        return $this->andWhere(['v.is_hd' => 1]);
     }
 
     /**
@@ -47,7 +48,7 @@ class VideoQuery extends ActiveQuery
      */
     public function untilNow()
     {
-        return $this->andWhere(['<=', 'published_at', new Expression('NOW()')]);
+        return $this->andWhere(['<=', 'v.published_at', new Expression('NOW()')]);
     }
 
     /**
@@ -59,7 +60,7 @@ class VideoQuery extends ActiveQuery
     {
         $timeagoExpression = $this->getTimeagoExpression($rangeStart);
 
-        return $this->andWhere(['between', 'published_at', new Expression($timeagoExpression), new Expression('NOW()')]);
+        return $this->andWhere(['between', 'v.published_at', new Expression($timeagoExpression), new Expression('NOW()')]);
     }
 
     /**
@@ -93,10 +94,10 @@ class VideoQuery extends ActiveQuery
     public function whereIdOrSlug($id = 0, $slug = '')
     {
         if (0 !== $id) {
-            return $this->where(['video_id' => $id]);
+            return $this->where(['v.video_id' => $id]);
         }
         
-        return $this->where(['slug' => $slug]);
+        return $this->where(['v.slug' => $slug]);
     }
 
     /**

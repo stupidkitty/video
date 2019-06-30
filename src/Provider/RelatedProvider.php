@@ -30,18 +30,11 @@ class RelatedProvider
 
             //SELECT `v`.* FROM `videos_related_map` AS `r` LEFT JOIN `videos` AS `v` ON `v`.`video_id` = `r`.`related_id` WHERE `r`.`video_id`=10
         $videos = Video::find()
-            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.is_hd', 'v.views', 'v.template', 'v.published_at'])
-            ->alias('v')
+            ->asThumbs()
             ->leftJoin(['r' => VideosRelatedMap::tableName()], 'v.video_id = r.related_id')
-            ->with(['categories' => function ($query) {
-                $query->select(['category_id', 'title', 'slug', 'h1']);
-            }])
-            ->with(['poster' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }])
             ->where(['r.video_id' => $video_id])
-            ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
-            ->andWhere(['v.status' => Video::STATUS_ACTIVE])
+            ->untilNow()
+            ->onlyActive()
             ->limit($requiredRelatedNum)
             ->asArray()
             ->all();

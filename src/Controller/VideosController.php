@@ -341,10 +341,10 @@ class VideosController extends Controller implements ViewContextInterface
 
         $query
             ->onlyActive()
-            ->andFilterWhere(['orientation' => $filterForm->orientation])
-            ->andFilterWhere(['>=', 'duration', $filterForm->durationMin])
-            ->andFilterWhere(['<=', 'duration', $filterForm->durationMax])
-            ->andFilterWhere(['is_hd' => $filterForm->isHd]);
+            ->andFilterWhere(['v.orientation' => $filterForm->orientation])
+            ->andFilterWhere(['>=', 'v.duration', $filterForm->durationMin])
+            ->andFilterWhere(['<=', 'v.duration', $filterForm->durationMax])
+            ->andFilterWhere(['v.is_hd' => $filterForm->isHd]);
 
         return $query;
     }

@@ -59,16 +59,9 @@ class RotateVideoProvider extends BaseDataProvider
         }
 
         $this->query = Video::find()
-            ->alias('v')
-            ->select('v.video_id, v.image_id, v.slug, v.title, v.orientation, v.video_preview, v.source_url, v.duration, v.likes, v.dislikes, v.comments_num, v.is_hd, v.views, v.template, v.published_at, vs.tested_image, vs.ctr')
-            ->innerJoin(['vs' => RotationStats::tableName()], 'v.video_id = vs.video_id AND v.image_id = vs.image_id')
-            ->with(['categories' => function ($query) {
-                $query->select(['category_id', 'title', 'slug', 'h1'])
-                    ->where(['enabled' => 1]);
-            }])
-            ->with(['poster' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }]);
+            ->asThumbs()
+            ->addSelect(['vs.tested_image', 'vs.ctr'])
+            ->innerJoin(['vs' => RotationStats::tableName()], 'v.video_id = vs.video_id AND v.image_id = vs.image_id');
 
         if ('all-time' === $this->filterForm->t) {
             $this->query->untilNow();
@@ -225,7 +218,7 @@ class RotateVideoProvider extends BaseDataProvider
             ->all();
 
         // Перемешаем тестовые тумбы.
-        $resultArray = $testedModels + $testModels;
+        $resultArray = array_merge($testedModels, $testModels);
 
         if (($page + 1) <= $boundaryPage && count($resultArray) > $this->testVideosStartPosition) {
             $firstVideos = array_splice($resultArray, 0, $this->testVideosStartPosition);
@@ -302,13 +295,12 @@ class RotateVideoProvider extends BaseDataProvider
         }
 
         $count = $query    
-            ->andWhere(['v.status' => Video::STATUS_ACTIVE])
+            ->onlyActive()
             ->andFilterWhere(['v.orientation' => $this->filterForm->orientation])
             ->andFilterWhere(['>=', 'v.duration', $this->filterForm->durationMin])
             ->andFilterWhere(['<=', 'v.duration', $this->filterForm->durationMax])
             ->andFilterWhere(['v.is_hd' => $this->filterForm->isHd])
-            ->cache(300)
-            ->count();
+            ->cachedCount();
 
         return (int) $count;
     }
@@ -334,13 +326,12 @@ class RotateVideoProvider extends BaseDataProvider
         }
 
         $count = $query
-            ->andWhere(['v.status' => Video::STATUS_ACTIVE])
+            ->onlyActive()
             ->andFilterWhere(['v.orientation' => $this->filterForm->orientation])
             ->andFilterWhere(['>=', 'v.duration', $this->filterForm->durationMin])
             ->andFilterWhere(['<=', 'v.duration', $this->filterForm->durationMax])
             ->andFilterWhere(['v.is_hd' => $this->filterForm->isHd])
-            ->cache(300)
-            ->count();
+            ->cachedCount();
 
         return (int) $count;
     }

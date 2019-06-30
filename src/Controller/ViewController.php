@@ -107,6 +107,7 @@ class ViewController extends Controller implements ViewContextInterface
     protected function findByIdOrSlug($id, $slug)
     {
         $video = Video::find()
+            ->alias('v')
             ->withViewRelations()
             ->whereIdOrSlug($id, $slug)
             ->untilNow()

@@ -513,16 +513,8 @@ class CategoryController extends Controller implements ViewContextInterface
     protected function buildInitialQuery($category, $filterForm)
     {
         $query = Video::find()
-            ->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.source_url', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.is_hd', 'v.views', 'v.template', 'v.published_at'])
-            ->alias('v')
+            ->asThumbs()
             ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
-            ->with(['categories' => function ($query) {
-                $query->select(['category_id', 'title', 'slug', 'h1'])
-                    ->where(['enabled' => 1]);
-            }])
-            ->with(['poster' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }])
             ->andwhere(['vcm.category_id' => $category['category_id']]);
 
         if ('all-time' === $filterForm->t) {

@@ -101,9 +101,9 @@ class Videos extends Widget
         $query->onlyActive();
 
         if ('ctr' === $this->order) {
-            $query->orderBy(['max_ctr' => SORT_DESC]);
+            $query->orderBy(['v.max_ctr' => SORT_DESC]);
         } elseif ('date' === $this->order) {
-            $query->orderBy(['published_at' => SORT_DESC]);
+            $query->orderBy(['v.published_at' => SORT_DESC]);
         } else {
             $query->orderBy([$this->order => SORT_DESC]);
         }
@@ -114,7 +114,7 @@ class Videos extends Widget
             ->all();
 
         if (count($result) < $this->limit) {
-            $query->where(['and', ['<=', 'published_at', new Expression('NOW()')], ['status' => Video::STATUS_ACTIVE]]);
+            $query->where(['and', ['<=', 'v.published_at', new Expression('NOW()')], ['status' => Video::STATUS_ACTIVE]]);
 
             $result = $query->all();
         }
