@@ -3,6 +3,7 @@ namespace SK\VideoModule\Form;
 
 use Yii;
 use yii\base\Model;
+use yii\helpers\StringHelper;
 
 /**
  * SearchForm represents the model behind the search form about.
