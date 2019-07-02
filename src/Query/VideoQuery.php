@@ -91,13 +91,13 @@ class VideoQuery extends ActiveQuery
      *
      * @return \yii\db\ActiveQuery
      */
-    public function whereIdOrSlug($id = 0, $slug = '')
+    public function whereIdOrSlug($identify)
     {
-        if (0 !== $id) {
-            return $this->where(['v.video_id' => $id]);
+        if (is_integer($identify)) {
+            return $this->where(['v.video_id' => $identify]);
         }
         
-        return $this->where(['v.slug' => $slug]);
+        return $this->where(['v.slug' => $identify]);
     }
 
     /**
