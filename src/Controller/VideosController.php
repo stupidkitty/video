@@ -106,6 +106,7 @@ class VideosController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'sortParam' => 'o',
@@ -142,6 +143,10 @@ class VideosController extends Controller implements ViewContextInterface
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
 
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
+
         return $this->render('all_videos', [
             'page' => $page,
             'sort' => $o,
@@ -175,6 +180,7 @@ class VideosController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'defaultOrder' => [
@@ -185,6 +191,10 @@ class VideosController extends Controller implements ViewContextInterface
 
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
 
         return $this->render('all_videos', [
             'page' => $page,
@@ -219,6 +229,7 @@ class VideosController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'defaultOrder' => [
@@ -263,6 +274,7 @@ class VideosController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'defaultOrder' => [
@@ -273,6 +285,10 @@ class VideosController extends Controller implements ViewContextInterface
 
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
 
         return $this->render('all_videos', [
             'page' => $page,
@@ -307,6 +323,7 @@ class VideosController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'defaultOrder' => [
@@ -317,6 +334,10 @@ class VideosController extends Controller implements ViewContextInterface
 
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
 
         return $this->render('all_videos', [
             'page' => $page,

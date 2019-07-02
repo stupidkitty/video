@@ -103,6 +103,7 @@ class SearchController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
         ]);
 

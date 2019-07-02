@@ -107,6 +107,7 @@ class CategoryController extends Controller implements ViewContextInterface
                     'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                     'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                     'forcePageParam' => false,
+                    'validatePage' => false,
                 ],
                 'sort' => $this->buildSort(),
                 'category_id' => $category['category_id'],
@@ -124,6 +125,7 @@ class CategoryController extends Controller implements ViewContextInterface
                     'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                     'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                     'forcePageParam' => false,
+                    'validatePage' => false,
                 ],
                 'sort' => $this->buildSort(),
             ]);
@@ -131,6 +133,10 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
             $this->on(
@@ -185,6 +191,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'defaultOrder' => [
@@ -195,6 +202,10 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
             $this->on(
@@ -250,6 +261,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'defaultOrder' => [
@@ -274,6 +286,10 @@ class CategoryController extends Controller implements ViewContextInterface
                     'page' => $page,
                 ]
             );
+        }
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
         }
 
         return $this->render('category_videos', [
@@ -315,6 +331,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'defaultOrder' => [
@@ -325,6 +342,10 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
             $this->on(
@@ -378,6 +399,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'pageSize' => $settings->get('items_per_page', 24, 'videos'),
                 'forcePageParam' => false,
+                'validatePage' => false,
             ],
             'sort' => [
                 'sortParam' => 'o',
@@ -403,6 +425,10 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            Yii::$app->response->statusCode = 404;
+        }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
             $this->on(
