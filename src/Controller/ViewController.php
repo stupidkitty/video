@@ -82,7 +82,8 @@ class ViewController extends Controller implements ViewContextInterface
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $video = $this->findByIdOrSlug((int) $id, (string) $slug);
+        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $video = $this->findByIdentify($identify);
 
         $template = !empty($video['template']) ? $video['template'] : 'view';
 
@@ -104,12 +105,12 @@ class ViewController extends Controller implements ViewContextInterface
      * @return null|Video
      * @throws NotFoundHttpException
      */
-    protected function findByIdOrSlug($id, $slug)
+    protected function findByIdentify($identify)
     {
         $video = Video::find()
             ->alias('v')
             ->withViewRelations()
-            ->whereIdOrSlug($id, $slug)
+            ->whereIdOrSlug($identify)
             ->untilNow()
             ->onlyActive()
             ->asArray()
