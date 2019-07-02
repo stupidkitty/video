@@ -21,6 +21,7 @@ class VideosRelatedMap extends ActiveRecord
     {
         return 'videos_related_map';
     }
+
     /**
      * @inheritdoc
      */
@@ -31,6 +32,7 @@ class VideosRelatedMap extends ActiveRecord
             [['video_id', 'related_id'], 'integer'],
         ];
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -38,6 +40,7 @@ class VideosRelatedMap extends ActiveRecord
     {
         return $this->hasOne(Video::class, ['video_id' => 'video_id']);
     }
+    
     /**
      * @return \yii\db\ActiveQuery
      */
