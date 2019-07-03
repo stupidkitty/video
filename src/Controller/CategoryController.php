@@ -487,7 +487,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
             ],
             'defaultOrder' => [
-                'mv' => SORT_DESC,
+                'abc' => SORT_ASC,
             ],
         ]);
 
