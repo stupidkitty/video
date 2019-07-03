@@ -113,9 +113,7 @@ class CategoriesController extends Controller
 
     /**
      * Create new Category model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     *
-     * @param integer $id
+     * If update is successful, the browser will be redirected to the 'create' page.
      *
      * @return mixed
      */
