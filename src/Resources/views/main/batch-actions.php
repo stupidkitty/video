@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
 	<div class="col-md-12">
 		<?= Html::beginForm(['main/batch-actions'], 'post', ['id' => 'batch-actions-form', 'class' => 'form-horizontal']) ?>
 			<div class="form-group">
-				<label class="col-md-3 control-label"><?= Yii::t('videos', 'User') ?> <?= Html::checkbox('change_user', false) ?></label>
+				<label class="col-md-3 control-label"><?= Yii::t('videos', 'User') ?> <?= Html::checkbox('isChangeUser', false) ?></label>
 				<div class="col-md-9">
 					<?= Html::dropDownList(
 							'user_id',
@@ -33,7 +33,7 @@ use yii\widgets\ActiveForm;
 			</div>
 
 			<div class="form-group">
-				<label class="col-md-3 control-label"><?= Yii::t('videos', 'Status') ?> <?= Html::checkbox('change_status', false) ?></label>
+				<label class="col-md-3 control-label"><?= Yii::t('videos', 'Status') ?> <?= Html::checkbox('isChangeStatus', false) ?></label>
 				<div class="col-md-9">
 					<?= Html::dropDownList(
 							'status',
@@ -50,8 +50,31 @@ use yii\widgets\ActiveForm;
 				</div>
 			</div>
 
+            <div class="form-group">
+				<label class="col-md-3 control-label"><?= Yii::t('videos', 'orientation') ?> <?= Html::checkbox('isChangeOrientation', false) ?></label>
+				<div class="col-md-9">
+					<?= Html::dropDownList(
+							'orientation',
+							null,
+                            [
+                                1 => 'Straight',
+                                2 => 'Lesbian',
+                                3 => 'Shemale',
+                                4 => 'Gay',
+                            ],
+							[
+								'prompt' => '-- Select orientation --',
+								'id' => 'select-orientation',
+								'class' => 'form-control',
+								'style' => 'width:initial;',
+							]
+						)
+					?>
+				</div>
+			</div>
+
 			<div class="form-group">
-				<label class="col-md-3 control-label"><?= Yii::t('videos', 'Add categories') ?> <?= Html::checkbox('add_categories', false) ?></label>
+				<label class="col-md-3 control-label"><?= Yii::t('videos', 'Add categories') ?> <?= Html::checkbox('isAddCategories', false) ?></label>
 				<div class="col-md-9">
 					<?= Html::dropDownList(
 							'add_categories_ids',
@@ -67,7 +90,7 @@ use yii\widgets\ActiveForm;
 			</div>
 
 			<div class="form-group">
-				<label class="col-md-3 control-label"><?= Yii::t('videos', 'Remove categories') ?> <?= Html::checkbox('delete_categories', false) ?></label>
+				<label class="col-md-3 control-label"><?= Yii::t('videos', 'Remove categories') ?> <?= Html::checkbox('isDeleteCategories', false) ?></label>
 				<div class="col-md-9">
 					<?= Html::dropDownList(
 							'delete_categories_ids',

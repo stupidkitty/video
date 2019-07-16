@@ -12,13 +12,15 @@ class VideosBatchActionsForm extends Model
     /**
     * Checkboxes
     */
-    public $change_user;
-    public $change_status;
-    public $add_categories;
-    public $delete_categories;
+    public $isChangeUser;
+    public $isChangeStatus;
+    public $isAddCategories;
+    public $isDeleteCategories;
+    public $isChangeOrientation;
 
     public $videos_ids;
     public $user_id;
+    public $orientation;
     public $status;
     public $add_categories_ids;
     public $delete_categories_ids;
@@ -33,21 +35,24 @@ class VideosBatchActionsForm extends Model
         return [
             [
                 [
-                    'change_user',
-                    'change_status',
-                    'add_categories',
-                    'delete_categories',
+                    'isChangeUser',
+                    'isChangeStatus',
+                    'isAddCategories',
+                    'isDeleteCategories',
+                    'isChangeOrientation',
                 ], 'boolean'
             ],
 
-            [['user_id', 'status'], 'integer'],
+            [['user_id', 'status', 'orientation'], 'integer'],
             ['user_id', 'exist', 'targetClass' => User::class, 'skipOnEmpty' => true],
 
             ['add_categories_ids', 'each', 'rule' => ['integer'], 'skipOnEmpty' => true ],
             ['add_categories_ids', 'filter', 'filter' => 'array_filter', 'skipOnEmpty' => true],
+            ['add_categories_ids', 'default', 'value' => []],
 
             ['delete_categories_ids', 'each', 'rule' => ['integer'], 'skipOnEmpty' => true ],
             ['delete_categories_ids', 'filter', 'filter' => 'array_filter', 'skipOnEmpty' => true],
+            ['delete_categories_ids', 'default', 'value' => []],
 
             ['videos_ids', 'each', 'rule' => ['integer']],
             ['videos_ids', 'filter', 'filter' => 'array_filter'],
@@ -76,17 +81,24 @@ class VideosBatchActionsForm extends Model
         foreach ($videosQuery->batch(20) as $videos) {
             foreach ($videos as $video) {
                 // Изменение пользователя
-                if ('1' === $this->change_user) {
-                    $video->user_id = $this->user_id;
+                if ((bool) $this->isChangeUser && is_numeric($this->user_id)) {
+                    $video->user_id = (int) $this->user_id;
                 }
+
+                // Изменение ориентации
+                if ((bool) $this->isChangeOrientation && is_numeric($this->orientation)) {
+                    $video->orientation = (int) $this->orientation;
+                }
+
                 // Изменение статуса
-                if ('1' === $this->change_status && !empty($this->status)) {
-                    $video->status = $this->status;
+                if ((bool) $this->isChangeStatus && is_numeric($this->status)) {
+                    $video->status = (int) $this->status;
                 }
 
                 $video->save();
+
                 // Добавление категории
-                if ('1' === $this->add_categories) {
+                if ((bool) $this->isAddCategories) {
                     $categories = Category::find()
                         ->where(['category_id' => $this->add_categories_ids])
                         ->all();
@@ -95,8 +107,9 @@ class VideosBatchActionsForm extends Model
                         $video->addCategory($category);
                     }
                 }
+
                 // Удаление категории
-                if ('1' === $this->delete_categories) {
+                if ((bool) $this->isDeleteCategories) {
                     $categories = Category::find()
                         ->where(['category_id' => $this->delete_categories_ids])
                         ->all();
