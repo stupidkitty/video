@@ -56,6 +56,10 @@ class RotateVideoProvider extends BaseDataProvider
 
         if (null === $this->filterForm) {
             $this->filterForm = new FilterForm;
+            $this->filterForm->load([
+                'orientation' => '',
+            ]);
+            $this->filterForm->isValid();
         }
 
         $this->query = Video::find()
@@ -287,14 +291,14 @@ class RotateVideoProvider extends BaseDataProvider
             ->alias('v')
             ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
             ->andWhere(['vcm.category_id' => $this->category_id]);
-        
+
         if ('all-time' === $this->filterForm->t) {
             $query->untilNow();
         } else {
             $query->rangedUntilNow($this->filterForm->t);
         }
 
-        $count = $query    
+        $count = $query
             ->onlyActive()
             ->andFilterWhere(['v.orientation' => $this->filterForm->orientation])
             ->andFilterWhere(['>=', 'v.duration', $this->filterForm->durationMin])
