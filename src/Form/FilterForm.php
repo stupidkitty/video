@@ -33,7 +33,7 @@ class FilterForm extends Model
                 $values = StringHelper::explode($value, $delimiter = '-', true, true);
                 
                 \array_walk($values, function (&$value) {
-                    $value = \str_ireplace(['straight', 'gay', 'shemale'], [0, 1, 2], $value);
+                    $value = \str_ireplace(['straight', 'lesbian', 'shemale', 'gay'], [1, 2, 3, 4], $value);
                 });
                 
                 return $values;
