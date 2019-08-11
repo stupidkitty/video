@@ -56,9 +56,7 @@ class RotateVideoProvider extends BaseDataProvider
 
         if (null === $this->filterForm) {
             $this->filterForm = new FilterForm;
-            $this->filterForm->load([
-                'orientation' => '',
-            ]);
+            $this->filterForm->load();
             $this->filterForm->isValid();
         }
 

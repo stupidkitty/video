@@ -11,7 +11,7 @@ use yii\helpers\StringHelper;
 class SearchForm extends Model
 {
     public $q;
-    public $orientation = 'straight';
+    public $orientation;
 
     /**
      * @inheritdoc

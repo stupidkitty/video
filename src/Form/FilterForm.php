@@ -9,7 +9,7 @@ use yii\helpers\StringHelper;
  */
 class FilterForm extends Model
 {
-    public $orientation = 'straight';
+    public $orientation;
     public $t = 'all-time';
     public $durationMin;
     public $durationMax;
