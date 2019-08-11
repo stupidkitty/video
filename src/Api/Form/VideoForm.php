@@ -73,7 +73,7 @@ class VideoForm extends Model
 
             [['slug', 'video_preview', 'video_url', 'source_url', 'embed', 'template'], 'trim'],
             ['status', 'default', 'value' => 0],
-            ['orientation', 'default', 'value' => 0],
+            ['orientation', 'default', 'value' => 1],
             ['on_index', 'default', 'value' => 1],
             ['published_at', 'default', 'value' => null],
         ];
