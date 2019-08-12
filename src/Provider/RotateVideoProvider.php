@@ -56,8 +56,8 @@ class RotateVideoProvider extends BaseDataProvider
 
         if (null === $this->filterForm) {
             $this->filterForm = new FilterForm;
-            $this->filterForm->load();
-            $this->filterForm->isValid();
+            //$this->filterForm->load();
+            //$this->filterForm->isValid();
         }
 
         $this->query = Video::find()
