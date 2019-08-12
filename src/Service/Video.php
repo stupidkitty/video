@@ -3,11 +3,11 @@ namespace SK\VideoModule\Service;
 
 use Yii;
 use yii\helpers\ArrayHelper;
-use SK\VideoModule\Model\Category;
 use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\Model\VideosRelatedMap;
 use SK\VideoModule\Model\Video as VideoModel;
 use SK\VideoModule\Model\VideosCategoriesMap;
+use SK\VideoModule\Model\Category as CategoryModel;
 
 class Video
 {
@@ -25,7 +25,7 @@ class Video
      * SET `v`.`max_ctr` = IFNULL(`vs`.`max_ctr`, 0)
      * WHERE `v`.`max_ctr`!=`vs`.`max_ctr`
      * ```
-     * 
+     *
      * @return void
      */
     public function updateMaxCtr()
@@ -58,7 +58,7 @@ class Video
         $addCategoriesIds = array_diff($newCategoriesIds, $oldCategoriesIds);
 
         if (!empty($removeCategoriesIds)) {
-            $removeCategories = Category::find()
+            $removeCategories = CategoryModel::find()
                 ->where(['category_id' => $removeCategoriesIds])
                 ->all();
 
@@ -69,7 +69,7 @@ class Video
         }
 
         if (!empty($addCategoriesIds)) {
-            $addCategories = Category::find()
+            $addCategories = CategoryModel::find()
                 ->where(['category_id' => $addCategoriesIds])
                 ->all();
 
@@ -123,8 +123,8 @@ class Video
         $deletedNum = 0;
         $query = VideoModel::find()
             ->where(['video_id' => $id]);
-        
-        
+
+
         foreach ($query->batch(20) as $videos) {
             foreach ($videos as $video) {
                 if ($this->delete($video)) {
