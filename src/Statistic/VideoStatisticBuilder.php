@@ -106,7 +106,8 @@ class VideoStatisticBuilder
     protected function countAutopostingVideos()
     {
         $num = Video::find()
-            ->where(['>=', 'published_at', new Expression('NOW()')])
+            ->alias('v')
+            ->where(['>=', 'v.published_at', new Expression('NOW()')])
             ->onlyActive()
             ->count();
 

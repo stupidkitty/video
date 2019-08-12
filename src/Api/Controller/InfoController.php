@@ -48,9 +48,13 @@ class InfoController extends Controller
         $data = [];
 
         $data['total_videos_num'] = Video::find()->count();
-        $data['active_videos_num'] = Video::find()->onlyActive()->count();
+        $data['active_videos_num'] = Video::find()
+            ->alias('v')
+            ->onlyActive()
+            ->count();
 
         $data['autoposting_queue_num'] = Video::find()
+            ->alias('v')
             ->andWhere(['>=', 'published_at', new Expression('NOW()')])
             ->onlyActive()
             ->count();
@@ -58,7 +62,10 @@ class InfoController extends Controller
         $data['active_categories_num'] = Category::find()->where(['enabled' => 1])->count();
         $data['total_categories_num'] = Category::find()->count();
 
-        $data['max_published_at'] = Video::find()->onlyActive()->max('published_at');
+        $data['max_published_at'] = Video::find()
+            ->alias('v')
+            ->onlyActive()
+            ->max('published_at');
         $data['autoposting_interval'] = $settings->get('autoposting_fixed_interval', 8640, 'videos');
         $data['autoposting_dispersion_interval'] = $settings->get('autoposting_spread_interval', 600, 'videos');
 
