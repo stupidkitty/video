@@ -8,7 +8,7 @@ class AssignCoverImages implements HandlerInterface
 {
     public function run()
     {
-        $rotator = new Category();
-        $rotator->assignCoverImages();
+        $category = new Category();
+        $category->assignCoverImages();
     }
 }
