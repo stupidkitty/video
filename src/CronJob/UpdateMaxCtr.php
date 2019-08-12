@@ -1,14 +1,14 @@
 <?php
 namespace SK\VideoModule\CronJob;
 
-use SK\VideoModule\Service\Video;
+use SK\VideoModule\Service\Video as VideoService;
 use SK\CronModule\Handler\HandlerInterface;
 
 class UpdateMaxCtr implements HandlerInterface
 {
     public function run()
     {
-        $rotator = new Video();
-        $rotator->updateMaxCtr();
+        $video = new VideoService();
+        $video->updateMaxCtr();
     }
 }

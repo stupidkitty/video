@@ -1,14 +1,14 @@
 <?php
 namespace SK\VideoModule\CronJob;
 
-use SK\VideoModule\Service\Category;
+use SK\VideoModule\Service\Category as CategoryService;
 use SK\CronModule\Handler\HandlerInterface;
 
 class AssignCoverImages implements HandlerInterface
 {
     public function run()
     {
-        $category = new Category();
+        $category = new CategoryService();
         $category->assignCoverImages();
     }
 }
