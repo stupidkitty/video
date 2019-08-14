@@ -75,6 +75,7 @@ class VideoForm extends Model
             ['status', 'default', 'value' => 0],
             ['orientation', 'default', 'value' => 1],
             ['on_index', 'default', 'value' => 1],
+            ['is_hd', 'default', 'value' => 0],
             ['published_at', 'default', 'value' => null],
         ];
     }
