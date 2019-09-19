@@ -124,9 +124,10 @@ class Category
                 $firstId = array_shift($unusedIds);
                 $image = Image::findOne(['image_id' => $firstId]);
 
-                if (null !== $image) {
+                if (null !== $image && $image->filepath !== $category->image) {
                     //$category->setCoverImage($image);
                     $category->image = $image->filepath;
+                    $category->updated_at = gmdate('Y-m-d H:i:s');
                     $category->save();
                 }
 
