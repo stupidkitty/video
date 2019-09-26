@@ -9,6 +9,7 @@ use yii\filters\VerbFilter;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\RotationStats;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\EventSubscriber\VideoSubscriber;
 
 /**
  * AjaxController представляет различные аякс действия.
@@ -29,6 +30,7 @@ class AjaxController extends Controller
                     'thumbs-log' => ['post'],
                     'like' => ['post'],
                     'dislike' => ['post'],
+                    'get-video' => ['get'],
                 ],
             ],
         ];
@@ -40,6 +42,36 @@ class AjaxController extends Controller
 
         return parent::beforeAction($action);
     }
+
+    public function actionGetVideo($id)
+    {
+        $settings = Yii::$container->get(SettingsInterface::class);
+
+        $video = Video::find()
+            ->alias('v')
+            ->withViewRelations()
+            ->whereIdOrSlug((int) $id)
+            ->untilNow()
+            ->onlyActive()
+            ->asArray()
+            ->one();
+
+        if (null === $video) {
+            return $this->asJson([
+                'error' => [
+                    'code' => 404,
+                    'message' => 'The requested video does not exist.',
+                ],
+            ]);
+        }
+
+        if ($settings->get('internal_register_activity', true, 'videos')) {
+            $this->on(self::EVENT_AFTER_ACTION, [VideoSubscriber::class, 'onView'], $video);
+        }
+
+        return $this->asJson($video);
+    }
+
 
     /**
      * Update click by category_id
