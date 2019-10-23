@@ -45,6 +45,10 @@ class AjaxController extends Controller
 
     public function actionGetVideo($id)
     {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, GET');
+        header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+
         $settings = Yii::$container->get(SettingsInterface::class);
 
         $video = Video::find()
