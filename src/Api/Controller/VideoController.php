@@ -4,9 +4,7 @@ namespace SK\VideoModule\Api\Controller;
 use Yii;
 use yii\web\User;
 use yii\web\Request;
-use yii\filters\Cors;
 use yii\rest\Controller;
-use yii\filters\VerbFilter;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use yii\web\NotFoundHttpException;
@@ -25,21 +23,9 @@ class VideoController extends Controller
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'index' => ['get', 'head'],
-                    'view' => ['get', 'head'],
-                    'create' => ['post'],
-                    'update' => ['put', 'patch'],
-                    'delete' => ['delete'],
-                ],
-            ],
-            'corsFilter' => [
-                'class' => Cors::class,
-            ],
             'authenticator' => [
                 'class' => HttpBearerAuth::class,
+                'except' => ['view', 'index'],
             ],
         ];
     }
@@ -61,9 +47,71 @@ class VideoController extends Controller
      */
     public function actionView($id)
     {
-        $video = $this->findById($id);
+        $responseData = [];
 
-        return $video;
+        try {
+            $video = $this->findById($id);
+        } catch (\NotFoundHttpException $e) {
+            $responseData['result']['video']['id'] = (int) $id;
+            $responseData['result']['video']['errors'][] = $e->getMessage();
+
+            return $responseData;
+        }
+
+        $videoData = [
+            'id' => $video->video_id,
+            'slug' => $video->slug,
+            'title' => $video->title,
+            'description' => $video->description,
+            'orientation' => $video->orientation,
+            'duration' => $video->duration,
+            'videoPreview' => $video->video_preview,
+            'embed' => $video->embed,
+            'onIndex' => $video->on_index,
+            'likes' => $video->likes,
+            'dislikes' => $video->dislikes,
+            'commentsNum' => $video->comments_num,
+            'isHd' => $video->is_hd,
+            'views' => $video->views,
+            'publishedAt' => $video->published_at,
+            'poster' => null,
+            'categories' => [],
+            'screenshots' => [],
+        ];
+
+        if ($video->hasPoster()) {
+            $videoData['poster'] = [
+                'id' => $video->poster->image_id,
+                'path' => $video->poster->filepath,
+                'source_url' => $video->poster->source_url,
+            ];
+        }
+
+        if ($video->hasCategories()) {
+            $videoData['categories'] = \array_map(function ($category) {
+                return [
+                    'id' => $category->category_id,
+                    'slug' => $category->slug,
+                    'title' => $category->title,
+                    'h1' => $category->h1,
+                ];
+            }, $video->categories);
+        }
+
+        if ($video->hasScreenshots()) {
+            $videoData['screenshots'] = \array_map(function ($screenshot) {
+                return [
+                    'id' => $screenshot->screenshot_id,
+                    'path' => $screenshot->path,
+                    'source_url' => $screenshot->source_url,
+                ];
+            }, $video->categories);
+        }
+
+
+        $responseData['result']['video'] = $videoData;
+
+        return $responseData;
     }
 
     /**
@@ -210,6 +258,7 @@ class VideoController extends Controller
     /**
      * Finds the Video model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Video the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -217,11 +266,13 @@ class VideoController extends Controller
     protected function findById($id)
     {
         $video = Video::find()
-            ->where(['video_id' => $id])
+            ->alias('v')
+            ->withViewRelations()
+            ->whereIdOrSlug((int) $id)
             ->one();
 
         if (null === $video) {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException('The requested video does not exist.');
         }
 
         return $video;
