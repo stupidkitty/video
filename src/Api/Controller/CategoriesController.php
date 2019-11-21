@@ -2,12 +2,15 @@
 namespace SK\VideoModule\Api\Controller;
 
 use Yii;
+use yii\base\Event;
 use yii\web\Request;
 use yii\rest\Controller;
+use yii\filters\PageCache;
 use SK\VideoModule\Model\Category;
 use yii\web\NotFoundHttpException;
 use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Api\Form\VideoForm;
+use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Service\Video as VideoService;
 
 /**
@@ -25,7 +28,33 @@ class CategoriesController extends Controller
                 'class' => HttpBearerAuth::class,
                 'except' => ['view', 'index'],
             ],
+            'pageCache' => [
+                'class' => PageCache::class,
+                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'only' => ['index', 'view'],
+                'duration' => 3200,
+                'dependency' => [
+                    'class' => 'yii\caching\TagDependency',
+                    'tags' => 'videos:categories',
+                ],
+                'variations' => [
+                    Yii::$app->language,
+                    \implode(':', \array_values(Yii::$container->get(Request::class)->get())),
+                ],
+            ],
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function beforeAction($action)
+    {
+        $request = Yii::$container->get(Request::class);
+
+        Event::trigger(static::class, "action.{$action->id}", new Event(['data' => $request->get()]));
+
+        return parent::beforeAction($action);
     }
 
     /**
@@ -38,7 +67,7 @@ class CategoriesController extends Controller
         $responseData = [];
 
         $categories = Category::find()
-            ->select(['category_id', 'slug', 'image', 'title', 'description', 'h1', 'param1', 'param2', 'param3', 'videos_num'])
+            ->select(['category_id', 'slug', 'image', 'title', 'description', 'h1', 'param1', 'param2', 'param3', 'videos_num', 'last_period_clicks', 'on_index'])
             ->where(['enabled' => 1])
             ->all();
 
@@ -54,6 +83,8 @@ class CategoriesController extends Controller
                 'param2' => $category->param2,
                 'param3' => $category->param3,
                 'videosNum' => $category->videos_num,
+                'lastPeriodClicks' => $category->last_period_clicks,
+                'onIndex' => $category->on_index,
             ];
         }, $categories);
 
