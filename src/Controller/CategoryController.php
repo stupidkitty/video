@@ -492,7 +492,7 @@ class CategoryController extends Controller implements ViewContextInterface
         ]);
 
         $categories = Category::find()
-            ->select(['category_id', 'slug', 'image', 'title', 'description', 'param1', 'param2', 'param3', 'videos_num'])
+            ->select(['category_id', 'slug', 'image', 'title', 'h1', 'description', 'param1', 'param2', 'param3', 'videos_num'])
             ->where(['enabled' => 1])
             ->orderBy($sort->getOrders())
             ->asArray()
@@ -524,7 +524,7 @@ class CategoryController extends Controller implements ViewContextInterface
         } else {
             $query->where(['slug' => $identify]);
         }
-        
+
         $category = $query
             ->andWhere(['enabled' => 1])
             ->one();
@@ -602,7 +602,7 @@ class CategoryController extends Controller implements ViewContextInterface
     protected function isMobile()
     {
         $deviceDetect = Yii::$container->get('device.detect');
-        
+
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 
