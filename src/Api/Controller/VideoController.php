@@ -37,7 +37,7 @@ class VideoController extends Controller
      */
     public function actionIndex()
     {
-        return Video::find()->limit(5)->all();
+        return [];
     }
 
     /**
