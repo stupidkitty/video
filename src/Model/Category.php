@@ -50,13 +50,13 @@ class Category extends ActiveRecord implements CategoryInterface, ToggleableInte
         return [
             [
                 [
-                    'title',
-                    'h1',
                     'image',
-                    'meta_description',
                     'slug',
+                    'title',
                     'meta_title',
+                    'meta_description',
                     'description',
+                    'h1',
                     'seotext',
                     'param1',
                     'param2',
