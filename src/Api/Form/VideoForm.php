@@ -29,8 +29,6 @@ class VideoForm extends Model
     public $categories_ids = [];
     /** @var array $images Список урлов тумб для видео ролика. */
     public $images = [];
-    /** @var array $screenshots Список урлов скриншотов для видео ролика. */
-    public $screenshots = [];
 
     /**
      * @inheritdoc
@@ -61,10 +59,6 @@ class VideoForm extends Model
             ['images', 'each', 'rule' => ['string']],
             ['images', 'filter', 'filter' => 'array_filter', 'skipOnEmpty' => true],
             ['images', 'default', 'value' => []],
-
-            ['screenshots', 'each', 'rule' => ['string']],
-            ['screenshots', 'filter', 'filter' => 'array_filter', 'skipOnEmpty' => true],
-            ['screenshots', 'default', 'value' => []],
 
             [['title', 'description', 'short_description'], 'filter', 'filter' => function ($value) {
                 $value = preg_replace('/\s+/', ' ', $value);
