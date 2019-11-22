@@ -80,11 +80,12 @@ class CategoriesController extends Controller
     {
         $responseData['result']['createScreenshots'] = [];
         $responseData['result']['createScreenshots']['id'] = (int) $id;
+        $createdScreenshots = [];
 
         try {
             $video = $this->findVideoById($id);
         } catch (NotFoundHttpException $e) {
-            $responseData['result']['createScreenshots']['errors'] = [$e->getMessage()];
+            $responseData['result']['createScreenshots']['errors'][] = $e->getMessage();
 
             return $responseData;
         }
@@ -93,97 +94,26 @@ class CategoriesController extends Controller
 
         if ($form->load($request->post()) && $form->isValid()) {
             foreach ($form->screenshots as $screenshot) {
-                $newScreenshotRecord = new Screenshot([
+                $preparedData = [
                     'video_id' => $video->video_id,
-                    'path' => $screenshot['path'],
-                    'source_url' => $screenshot['source_url'],
+                    'path' => isset($screenshot['path']) ? trim($screenshot['path']) : '',
+                    'source_url' => isset($screenshot['source_url']) ? trim($screenshot['source_url']) : '',
                     'created_at' => gmdate('Y-m-d H:i:s'),
-                ]);
+                ];
 
-                $newScreenshotRecord->save();
+                $newScreenshotRecord = new Screenshot($preparedData);
+
+                if ($newScreenshotRecord->save()) {
+                    $preparedData['id'] = $newScreenshotRecord->screenshot_id;
+                } else {
+                    $preparedData['errors'] = $$newScreenshotRecord->getErrorSummary(true);
+                }
+
+                $createdScreenshots[] = $preparedData;
             }
         }
 
-
-        /*$request = Yii::$container->get(Request::class);
-        $form = new VideoForm;
-
-        if ($form->load($request->post()) && $form->isValid()) {
-            $db = Yii::$app->db;
-            $user = Yii::$container->get(User::class);
-
-            $transaction = $db->beginTransaction();
-
-            try {
-                $video = new Video;
-                $currentDatetime = gmdate('Y-m-d H:i:s');
-                $videoService = new VideoService;
-
-                $video->setAttributes($form->getAttributes());
-                $video->generateSlug($form->slug);
-                $video->user_id = $user->getId();
-                $video->updated_at = $currentDatetime;
-                $video->created_at = $currentDatetime;
-                $video->published_at = $form->published_at;
-
-                if (!$video->save()) {
-                    return [
-                        'error' => [
-                            'code' => 422,
-                            'message' => "Video \"{$video->title}\" create fail",
-                            'errors' => $video->getErrorSummary(true),
-                        ],
-                    ];
-                }
-
-                // Добавление фото
-                foreach ($form->images as $key => $imageUrl) {
-                    $image = new Image([
-                        'video_id' => $video->getId(),
-                        'filepath' => $imageUrl,
-                        'source_url' => $imageUrl,
-                        'status' => 10,
-                        'created_at' => $currentDatetime,
-                    ]);
-
-                    if ($image->save()) {
-                        $video->addImage($image);
-
-                        if (0 === $key) {
-                            $video->setPoster($image);
-                        }
-                    } else {
-                        throw new \Exception('Cannot add an image');
-                    }
-                }
-
-                // Добавление категорий
-                $videoService->updateCategoriesByIds($video, $form->categories_ids);
-
-                $transaction->commit();
-
-                return [
-                    'message' => "Video \"{$video->title}\" created",
-                ];
-            } catch (\Exception $e) {
-                $transaction->rollBack();
-
-                return [
-                    'error' => [
-                        'code' => 422,
-                        'message' => $e->getMessage(),
-                    ],
-                ];
-            }
-        } else {
-            return [
-                'error' => [
-                    'code' => 422,
-                    'message' => "Cannot add video \"{$form->title}\"",
-                    'errors' => $form->getErrorSummary(true),
-                ],
-            ];
-        }*/
+        return  $responseData['result']['createScreenshots'] = $createdScreenshots;
     }
 
     /**
