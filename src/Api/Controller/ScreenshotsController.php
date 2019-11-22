@@ -14,9 +14,9 @@ use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Api\Form\DeleteScreenshotsForm;
 
 /**
- * VideoController
+ * ScreenshotsController
  */
-class CategoriesController extends Controller
+class ScreenshotsController extends Controller
 {
     /**
      * @inheritdoc
@@ -54,7 +54,7 @@ class CategoriesController extends Controller
     {
         $responseData = [];
 
-        $screenshots = Screenshots::find()
+        $screenshots = Screenshot::find()
             ->select(['screenshot_id', 'path', 'source_url'])
             ->where(['video_id' => (int) $id])
             ->all();
