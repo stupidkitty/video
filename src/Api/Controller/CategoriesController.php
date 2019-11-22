@@ -2,7 +2,6 @@
 namespace SK\VideoModule\Api\Controller;
 
 use Yii;
-use yii\base\Event;
 use yii\web\Request;
 use yii\rest\Controller;
 use yii\filters\PageCache;
@@ -43,18 +42,6 @@ class CategoriesController extends Controller
                 ],
             ],
         ];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function beforeAction($action)
-    {
-        $request = Yii::$container->get(Request::class);
-
-        Event::trigger(static::class, "action.{$action->id}", new Event(['data' => $request->get()]));
-
-        return parent::beforeAction($action);
     }
 
     /**
