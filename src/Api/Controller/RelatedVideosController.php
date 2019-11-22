@@ -8,7 +8,9 @@ use yii\filters\PageCache;
 use SK\VideoModule\Model\Video;
 use yii\web\NotFoundHttpException;
 use yii\filters\auth\HttpBearerAuth;
+use SK\VideoModule\Model\VideosRelatedMap;
 use SK\VideoModule\Provider\RelatedProvider;
+use SK\VideoModule\Api\Form\DeleteRelatedForm;
 use RS\Component\Core\Settings\SettingsInterface;
 
 /**
@@ -105,6 +107,33 @@ class RelatedVideosController extends Controller
         $responseData['result']['relatedVideos'] = $relatedVideos;
 
         return $responseData;
+    }
+
+    /**
+     * Удаляет похожие посты.
+     *
+     * @return mixed
+     */
+    public function actionDelete($id)
+    {
+        $responseData['result']['deletedRelated'] = [];
+        $deletedIds = [];
+
+        try {
+            $video = $this->findVideoById($id);
+        } catch (NotFoundHttpException $e) {
+            $responseData['result']['deletedRelated']['errors'][] = $e->getMessage();
+
+            return $responseData;
+        }
+
+        $form = new DeleteRelatedForm;
+
+        if ($form->load($request->getBodyParams()) && $form->isValid()) {
+            VideosRelatedMap::deleteAll(['related_id' => $form->related_ids]);
+        }
+
+        return  $responseData['result']['deletedRelated'] = $form->related_ids;
     }
 
     /**
