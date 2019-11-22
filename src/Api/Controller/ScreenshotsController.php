@@ -6,11 +6,12 @@ use yii\web\Request;
 use yii\rest\Controller;
 use yii\filters\PageCache;
 use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\Screenshot;
 use yii\web\NotFoundHttpException;
+use SK\VideoModule\Model\Screenshot;
 use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Api\Form\ScreenshotsForm;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Api\Form\DeleteScreenshotsForm;
 
 /**
  * VideoController
@@ -25,7 +26,7 @@ class CategoriesController extends Controller
         return [
             'authenticator' => [
                 'class' => HttpBearerAuth::class,
-                'except' => ['view', 'index'],
+                'except' => ['index'],
             ],
             'pageCache' => [
                 'class' => PageCache::class,
@@ -78,14 +79,13 @@ class CategoriesController extends Controller
      */
     public function actionCreate($id)
     {
-        $responseData['result']['createScreenshots'] = [];
-        $responseData['result']['createScreenshots']['id'] = (int) $id;
+        $responseData['result']['createdScreenshots'] = [];
         $createdScreenshots = [];
 
         try {
             $video = $this->findVideoById($id);
         } catch (NotFoundHttpException $e) {
-            $responseData['result']['createScreenshots']['errors'][] = $e->getMessage();
+            $responseData['result']['createdScreenshots']['errors'][] = $e->getMessage();
 
             return $responseData;
         }
@@ -113,35 +113,7 @@ class CategoriesController extends Controller
             }
         }
 
-        return  $responseData['result']['createScreenshots'] = $createdScreenshots;
-    }
-
-    /**
-     * Gets info about auto postig. Max date post and count future posts.
-     *
-     * @return mixed
-     */
-    public function actionUpdate($id)
-    {
-        /*$video = $this->findById($id);
-        $request = Yii::$container->get(Request::class);
-
-        $video->load(['Video' => $request->getBodyParams()]);
-
-        if ($video->save()) {
-            return [
-                'message' => Yii::t('videos', 'Video "{title}" has been updated', ['title' => $video->title]),
-            ];
-
-        } else {
-            return [
-                'error' => [
-                    'code' => 422,
-                    'message' => Yii::t('videos', 'Video "{title}" update fail', ['title' => $video->title]),
-                    'errors' => $video->getErrorSummary(true),
-                ],
-            ];
-        }*/
+        return  $responseData['result']['createdScreenshots'] = $createdScreenshots;
     }
 
     /**
@@ -151,22 +123,32 @@ class CategoriesController extends Controller
      */
     public function actionDelete($id)
     {
-        /*$video = $this->findById($id);
-        $videoService = new VideoService;
+        $responseData['result']['deletedScreenshots'] = [];
+        $deletedIds = [];
 
-        if ($videoService->delete($video)) {
-            return '';
+        try {
+            $video = $this->findVideoById($id);
+        } catch (NotFoundHttpException $e) {
+            $responseData['result']['deletedScreenshots']['errors'][] = $e->getMessage();
+
+            return $responseData;
         }
 
-        Yii::$app->getResponse()->setStatusCode(422);
+        $form = new DeleteScreenshotsForm;
 
-        return [
-            'error' => [
-                'code' => 422,
-                'message' => 'Can\'t delete video',
-                'errors' => $video->getErrorSummary(true),
-            ],
-        ];*/
+        if ($form->load($request->post()) && $form->isValid()) {
+            $screenshots = Screenshot::find()
+                ->where(['video_id' => $video->video_id, 'screenshot_id' => $form->screenshots_id])
+                ->all();
+
+            foreach ($screenshots as $screenshot) {
+                if ($screenshot->delete()) {
+                    $deletedIds[] = $screenshot->screenshot_id;
+                }
+            }
+        }
+
+        return  $responseData['result']['deletedScreenshots'] = $deletedIds;
     }
 
     /**
