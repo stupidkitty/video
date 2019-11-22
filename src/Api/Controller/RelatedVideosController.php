@@ -63,9 +63,7 @@ class RelatedVideosController extends Controller
 
         $videos = $relatedProvider->getModels($video->video_id);
 
-        $related = [];
-
-        foreach ($videos as $video) {
+        $relatedVideos = \array_map(function ($video) {
             $videoData = [
                 'video_id' => (int) $video['video_id'],
                 'image_id' => (int) $video['image_id'],
@@ -101,10 +99,12 @@ class RelatedVideosController extends Controller
                 }, $video['categories']);
             }
 
-            $related[] = $videoData;
-        }
+            return $videoData;
+        }, $videos);
 
-        return $related;
+        $responseData['result']['relatedVideos'] = $relatedVideos;
+
+        return $responseData;
     }
 
     /**
