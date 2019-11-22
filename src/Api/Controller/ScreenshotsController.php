@@ -136,9 +136,9 @@ class ScreenshotsController extends Controller
 
         $form = new DeleteScreenshotsForm;
 
-        if ($form->load($request->post()) && $form->isValid()) {
+        if ($form->load($request->getBodyParams()) && $form->isValid()) {
             $screenshots = Screenshot::find()
-                ->where(['video_id' => $video->video_id, 'screenshot_id' => $form->screenshots_id])
+                ->where(['video_id' => $video->video_id, 'screenshot_id' => $form->screenshots_ids])
                 ->all();
 
             foreach ($screenshots as $screenshot) {
