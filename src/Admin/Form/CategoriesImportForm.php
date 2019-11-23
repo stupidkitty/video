@@ -255,7 +255,7 @@ class CategoriesImportForm extends Model
 
         if (!$category->save(true)) {
             $validateErrors = [];
-            $validateErrors[$category->title] = $category->getErrorSummary();
+            $validateErrors[$category->title] = $category->getErrorSummary(true);
             $this->addError('csv_rows', $validateErrors);
 
             return false;
