@@ -25,6 +25,8 @@ class VideoForm extends Model
     public $status;
     public $on_index;
     public $is_hd;
+    public $noindex;
+    public $nofollow;
     public $published_at;
     /** @var array $categories_ids Список айди категорий видео ролика. */
     public $categories_ids = [];
@@ -47,7 +49,7 @@ class VideoForm extends Model
             [['slug', 'title', 'short_description', 'video_url', 'source_url', 'embed', 'template'], 'string', 'max' => 255],
             [['description'], 'string', 'max' => 3000],
             [['image_id', 'user_id', 'orientation', 'duration', 'status'], 'integer'],
-            [['on_index', 'is_hd'], 'boolean'],
+            [['on_index', 'is_hd', 'noindex', 'nofollow'], 'boolean'],
             [['published_at'], 'safe'],
 
             ['categories_ids', 'each', 'rule' => ['integer']],
@@ -62,7 +64,7 @@ class VideoForm extends Model
             [['slug', 'video_url', 'source_url', 'embed', 'template'], 'trim'],
             ['status', 'default', 'value' => 0],
             ['orientation', 'default', 'value' => 1],
-            ['is_hd', 'default', 'value' => 0],
+            [['is_hd', 'noindex', 'nofollow'], 'default', 'value' => 0],
             ['on_index', 'default', 'value' => 1],
         ];
     }
