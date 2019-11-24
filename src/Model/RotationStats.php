@@ -57,7 +57,9 @@ class RotationStats extends ActiveRecord
                 'integer'
             ],
             [['best_image', 'tested_image'], 'boolean'],
-            [['ctr'], 'number'],
+            ['ctr', 'number'],
+            ['tested_at', 'datetime', 'format' => 'php: Y-m-d H:i:s'],
+            ['tested_at', 'default', 'value' => null],
         ];
     }
     /**
