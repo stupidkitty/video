@@ -17,6 +17,16 @@ class Rotator
      */
     const RECALCULATE_CTR_PERIOD = 2000;
 
+     /**
+     * @var int default thumbs per page;
+     */
+    const ITEMS_PER_PAGE = 24;
+
+    /**
+     * @var int default thumbs per page;
+     */
+    const TEST_PERCENT = 15;
+
     /**
      * Устанавливает флаг "тестировано" у записи
      *
@@ -62,7 +72,7 @@ class Rotator
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $recalculate_ctr_period = $settings->get('recalculate_ctr_period', self::RECALCULATE_CTR_PERIOD, 'videos');
+        $recalculate_ctr_period = $settings->get('recalculate_ctr_period', static::RECALCULATE_CTR_PERIOD, 'videos');
         $showsCheckpointValue = (int) ceil($recalculate_ctr_period / 5);
 
         $thumbStats = RotationStats::find()
@@ -94,23 +104,78 @@ class Rotator
                     "clicks{$currentIndex}" => (int) $thumbStat['current_clicks'],
                 ],
                 [
-                    'video_id' =>  $thumbStat['video_id'],
-                    'category_id' =>  $thumbStat['category_id'],
-                    'image_id' =>  $thumbStat['image_id'],
+                    'video_id' => $thumbStat['video_id'],
+                    'category_id' => $thumbStat['category_id'],
+                    'image_id' => $thumbStat['image_id'],
                 ]
             );
-            /*RotationStats::getDb()->createCommand()
-                ->update(RotationStats::tableName(), [
-                    'current_shows' => 0,
-                    'current_clicks' => 0,
-                    'current_index' => $currentIndex,
-                    "shows{$currentIndex}" => (int) $thumbStat['current_shows'],
-                    "clicks{$currentIndex}" => (int) $thumbStat['current_clicks'],
-                ], '`video_id`=:video_id AND `category_id`=:category_id AND `image_id`=:image_id')
-                ->bindValue(':video_id', (int) $thumbStat['video_id'])
-                ->bindValue(':category_id', (int) $thumbStat['category_id'])
-                ->bindValue(':image_id', (int) $thumbStat['image_id'])
-                ->execute();*/
+        }
+    }
+
+    /**
+     * Сбрасывает ротацию старых видео, если в категории больше не осталось что ротировать.
+     * Пропускает топовые видео с 1-й страницы.
+     *
+     * @return void
+     */
+    public function resetOldTestedVideos()
+    {
+        $db = Yii::$app->db;
+        $settings = Yii::$container->get(SettingsInterface::class);
+
+        $thumbsPerPage = (int) $settings->get('items_per_page', static::ITEMS_PER_PAGE, 'videos');
+        $testThumbsPercent = (int) $settings->get('test_items_percent', static::TEST_PERCENT, 'videos');
+        $testPerPage = ceil($thumbsPerPage * $testThumbsPercent / 100);
+        $untouchablesThumbsNum = $thumbsPerPage - $testPerPage;
+
+        $sql = "SELECT `category_id`, COUNT(*) - SUM(`tested_image`) as `tested_diff`
+                FROM `videos_stats`
+                GROUP BY `category_id`
+                HAVING `tested_diff` = 0"; // = 0
+
+        $categories = $db->createCommand($sql)
+            ->queryAll();
+
+        foreach ($categories as $category) {
+            // найдем топовые тумбы в этой категории.
+            $untouchablesThumbs = RotationStats::find()
+                ->select(['video_id'])
+                ->where(['category_id' => $category['category_id']])
+                ->andWhere(['>', 'ctr', 0])
+                ->orderBy(['ctr' => SORT_DESC])
+                ->limit($untouchablesThumbsNum)
+                ->column();
+
+            // найдем худшие тумбы в категории. при этом исключим топовые (их ротировать нельзя).
+            $resetThumbs = RotationStats::find()
+                ->select(['video_id'])
+                ->where(['category_id' => $category['category_id']])
+                ->andWhere(['>', 'ctr', 0])
+                ->andFilterWhere(['NOT IN', 'video_id', $untouchablesThumbs])
+                ->orderBy(['tested_at' => SORT_DESC])
+                ->limit($untouchablesThumbsNum)
+                ->column();
+
+            RotationStats::updateAll([
+                'tested_image' => 0,
+                'tested_at' => null,
+                'current_index' => 0,
+                'current_shows' => 0,
+                'current_clicks' => 0,
+                'shows0' => 0,
+                'clicks0' => 0,
+                'shows1' => 0,
+                'clicks1' => 0,
+                'shows2' => 0,
+                'clicks2' => 0,
+                'shows3' => 0,
+                'clicks3' => 0,
+                'shows4' => 0,
+                'clicks4' => 0,
+            ], [
+                'video_id' => $resetThumbs,
+                'category_id' => $category['category_id'],
+            ]);
         }
     }
 }
