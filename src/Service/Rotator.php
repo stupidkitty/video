@@ -30,13 +30,14 @@ class Rotator
 
             // Завершим тестовый период у тумб, если набралась необходимая статистика.
         $query = RotationStats::find()
-            ->select(['category_id', 'video_id', 'image_id', 'tested_image'])
+            ->select(['category_id', 'video_id', 'image_id', 'tested_image', 'tested_at'])
             ->where(['tested_image' => 0])
             ->andWhere(['>=', 'total_shows', $test_item_period]);
 
         foreach ($query->batch(50) as $rows) {
             foreach ($rows as $row) {
                 $row->tested_image = 1;
+                $row->tested_at = gmdate('Y-m-d H:i:s');
                 $row->save();
             }
         }
@@ -83,7 +84,7 @@ class Rotator
                 $currentIndex ++;
             }
 
-           
+
             RotationStats::updateAll(
                 [
                     'current_shows' => 0,
