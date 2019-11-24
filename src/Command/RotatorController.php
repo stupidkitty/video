@@ -19,7 +19,7 @@ class RotatorController extends Controller
 
     /**
      * Помечает тумбы как тестированные в статистике.
-     * 
+     *
      * @return void
      */
     public function actionMarkTested()
@@ -30,12 +30,23 @@ class RotatorController extends Controller
 
     /**
      * Смещает указатель истори просмотров на следующий.
-     * 
+     *
      * @return void
      */
     public function actionShiftViews()
     {
         $rotatorService = new RotatorService();
         $rotatorService->shiftHistoryCheckpoint();
+    }
+
+    /**
+     * Смещает указатель истори просмотров на следующий.
+     *
+     * @return void
+     */
+    public function actionResetTested()
+    {
+        $rotatorService = new RotatorService();
+        $rotatorService->resetOldTestedVideos();
     }
 }
