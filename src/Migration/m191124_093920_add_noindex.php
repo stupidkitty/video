@@ -17,7 +17,6 @@ class m191124_093920_add_noindex extends Migration
                         AFTER `noindex`');
 
         $this->execute('ALTER TABLE `videos_stats` ADD `tested_at` TIMESTAMP NULL DEFAULT NULL AFTER `tested_image`');
-
     }
 
     /**
