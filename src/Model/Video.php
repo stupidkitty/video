@@ -56,9 +56,13 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     {
         return [
             [['slug', 'title', 'description', 'short_description', 'video_preview', 'video_url', 'source_url', 'embed', 'template'], 'string'],
-            [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'on_index', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
-            [['is_hd'], 'boolean'],
-            [['published_at', 'created_at', 'updated_at'], 'safe'],
+            [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
+            [['is_hd', 'on_index', 'noindex', 'nofollow'], 'boolean'],
+            [['published_at', 'created_at', 'updated_at'], 'datetime', 'format' => 'php: Y-m-d H:i:s'],
+            [['is_hd', 'noindex', 'nofollow'], 'default', 'value' => 0],
+            ['on_index', 'default', 'value' => 1],
+            [['created_at', 'updated_at'], 'default', 'value' => gmdate('Y-m-d H:i:s')],
+            [['published_at'], 'default', 'value' => null],
         ];
     }
 
