@@ -26,7 +26,7 @@ class Rotator
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 
-        $test_item_period = (int) $settings->get('test_item_period', self::TEST_ITEM_PERIOD, 'videos');
+        $test_item_period = (int) $settings->get('test_item_period', static::TEST_ITEM_PERIOD, 'videos');
 
             // Завершим тестовый период у тумб, если набралась необходимая статистика.
         $query = RotationStats::find()
