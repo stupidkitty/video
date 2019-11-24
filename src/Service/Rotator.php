@@ -2,6 +2,8 @@
 namespace SK\VideoModule\Service;
 
 use Yii;
+use yii\db\Expression;
+use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\RotationStats;
 use RS\Component\Core\Settings\SettingsInterface;
 
@@ -125,35 +127,48 @@ class Rotator
 
         $thumbsPerPage = (int) $settings->get('items_per_page', static::ITEMS_PER_PAGE, 'videos');
         $testThumbsPercent = (int) $settings->get('test_items_percent', static::TEST_PERCENT, 'videos');
-        $testPerPage = ceil($thumbsPerPage * $testThumbsPercent / 100);
+        $testPerPage = (int) ceil($thumbsPerPage * $testThumbsPercent / 100);
         $untouchablesThumbsNum = $thumbsPerPage - $testPerPage;
 
         $sql = "SELECT `category_id`, COUNT(*) - SUM(`tested_image`) as `tested_diff`
-                FROM `videos_stats`
+                FROM `videos_stats` as `vs`
+                LEFT JOIN `videos` as `v` ON (`vs`.`video_id`=`v`.`video_id`)
+                WHERE `v`.`published_at`<= NOW() AND `v`.`status` = 10
                 GROUP BY `category_id`
-                HAVING `tested_diff` = 0"; // = 0
+                HAVING `tested_diff` < :testSpotsNum"; // = 0
 
         $categories = $db->createCommand($sql)
+            ->bindValue(':testSpotsNum', $testPerPage)
             ->queryAll();
 
         foreach ($categories as $category) {
+            $resetLimit = $testPerPage - (int) $category['tested_diff'];
+
             // найдем топовые тумбы в этой категории.
             $untouchablesThumbs = RotationStats::find()
-                ->select(['video_id'])
-                ->where(['category_id' => $category['category_id']])
-                ->andWhere(['>', 'ctr', 0])
-                ->orderBy(['ctr' => SORT_DESC])
+                ->alias('rs')
+                ->select(['rs.video_id'])
+                ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
+                ->where(['rs.category_id' => $category['category_id']])
+                ->andWhere(['>', 'rs.ctr', 0])
+                ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
+                ->andWhere(['v.status' => 10])
+                ->orderBy(['rs.ctr' => SORT_DESC])
                 ->limit($untouchablesThumbsNum)
                 ->column();
 
             // найдем худшие тумбы в категории. при этом исключим топовые (их ротировать нельзя).
             $resetThumbs = RotationStats::find()
-                ->select(['video_id'])
-                ->where(['category_id' => $category['category_id']])
-                ->andWhere(['>', 'ctr', 0])
-                ->andFilterWhere(['NOT IN', 'video_id', $untouchablesThumbs])
-                ->orderBy(['tested_at' => SORT_DESC])
-                ->limit($untouchablesThumbsNum)
+                ->alias('rs')
+                ->select(['rs.video_id'])
+                ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
+                ->where(['rs.category_id' => $category['category_id']])
+                ->andWhere(['>', 'rs.ctr', 0])
+                ->andFilterWhere(['NOT IN', 'rs.video_id', $untouchablesThumbs])
+                ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
+                ->andWhere(['v.status' => 10])
+                ->orderBy(['rs.tested_at' => SORT_DESC])
+                ->limit($resetLimit)
                 ->column();
 
             RotationStats::updateAll([
