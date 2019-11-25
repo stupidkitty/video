@@ -26,9 +26,9 @@ class VideoController extends Controller
     public function behaviors()
     {
         return [
-            'corsFilter' => [
+            /*'corsFilter' => [
                 'class' => Cors::class,
-            ],
+            ],*/
             'authenticator' => [
                 'class' => HttpBearerAuth::class,
                 'except' => ['view', 'index', 'options'],

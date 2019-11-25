@@ -25,9 +25,9 @@ class RelatedVideosController extends Controller
     public function behaviors()
     {
         return [
-            'corsFilter' => [
+            /*'corsFilter' => [
                 'class' => Cors::class,
-            ],
+            ],*/
             'authenticator' => [
                 'class' => HttpBearerAuth::class,
                 'except' => ['index', 'options'],
