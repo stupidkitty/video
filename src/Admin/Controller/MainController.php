@@ -126,10 +126,7 @@ class MainController extends Controller
     {
         $video = new Video;
 
-        $form = new VideoForm([
-            'categories_ids' => ArrayHelper::getColumn($video->categories, 'category_id'),
-        ]);
-        $form->setAttributes($video->getAttributes());
+        $form = new VideoForm;
 
         if ($form->load($this->getRequest()->post()) && $form->isValid()) {
             $currentDatetime = gmdate('Y-m-d H:i:s');

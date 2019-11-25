@@ -73,16 +73,9 @@ class VideoQuery extends ActiveQuery
         return $this->with(['poster' => function ($query) {
                 $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
             }])
-            ->with(['images' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url'])
-                    ->indexBy('image_id');
-            }])
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
                     ->where(['enabled' => 1]);
-            }])
-            ->with(['screenshots' => function ($query) {
-                $query->select(['screenshot_id', 'video_id', 'path', 'source_url']);
             }]);
     }
 
@@ -96,13 +89,13 @@ class VideoQuery extends ActiveQuery
         if (is_integer($identify)) {
             return $this->where(['v.video_id' => $identify]);
         }
-        
+
         return $this->where(['v.slug' => $identify]);
     }
 
     /**
      * Кеширует подсчет элементов датасета. Кастыль :(
-     * 
+     *
      * @return integer
      */
     public function cachedCount()
