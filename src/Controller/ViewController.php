@@ -3,6 +3,7 @@ namespace SK\VideoModule\Controller;
 
 use Yii;
 use yii\web\Request;
+use yii\web\Response;
 use yii\web\Controller;
 use yii\filters\PageCache;
 use SK\VideoModule\Model\Video;
@@ -87,6 +88,8 @@ class ViewController extends Controller implements ViewContextInterface
 
         $template = !empty($video['template']) ? $video['template'] : 'view';
 
+        $this->registerXRobotsTag($video);
+
         if ($settings->get('internal_register_activity', true, 'videos')) {
             $this->on(self::EVENT_AFTER_ACTION, [VideoSubscriber::class, 'onView'], $video);
         }
@@ -131,7 +134,7 @@ class ViewController extends Controller implements ViewContextInterface
     protected function isMobile()
     {
         $deviceDetect = Yii::$container->get('device.detect');
-        
+
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 
@@ -143,5 +146,31 @@ class ViewController extends Controller implements ViewContextInterface
     protected function getRequest()
     {
         return $this->request;
+    }
+
+    /**
+     * Регистрирует заголовок для запрета индексации
+     * или запрета перехода по ссылкам страницы просмотра видео
+     *
+     * @param array $video
+     * @return void
+     */
+    protected function registerXRobotsTag(array $video)
+    {
+        $response = Yii::$container->get(Response::class);
+
+        $crawlerRestrictionTypes = [];
+        if (true === (bool) $video['noindex']) {
+            $crawlerRestrictionTypes[] = 'noindex';
+        }
+
+        if (true === (bool) $video['nofollow']) {
+            $crawlerRestrictionTypes[] = 'nofollow';
+        }
+
+        if (!empty($crawlerRestrictionTypes)) {
+            $headers = $response->getHeaders();
+            $headers->add('X-Robots-Tag', \implode(',', $crawlerRestrictionTypes));
+        }
     }
 }
