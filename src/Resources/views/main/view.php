@@ -113,6 +113,8 @@ $this->params['breadcrumbs'][] = $video->title;
                         ],
                         'is_hd',
                         'on_index',
+                        'noindex',
+                        'nofollow',
                         'created_at:datetime',
                         'updated_at:datetime',
                     ],

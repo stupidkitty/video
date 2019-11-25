@@ -105,14 +105,14 @@ $this->params['breadcrumbs'][] = $this->title;
 			            // 'likes',
 			            // 'dislikes',
 			            // 'comments_num',
-			            // 'views',
-			            // 'status',
+			             'noindex',
+			             'nofollow',
 			            [
 			            	'attribute' => 'published_at',
 			            	'label' => Yii::t('app', 'published_at'),
 			            	'format' => 'html',
-			            	'value' => function ($data) {
-			            		return Yii::$app->formatter->asDateTime($data->published_at);
+			            	'value' => function ($video) {
+			            		return Yii::$app->formatter->asDateTime($video->published_at);
 			            	},
 			        		'options' => [
 			        			'style' => 'width:145px',

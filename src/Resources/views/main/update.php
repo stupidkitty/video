@@ -134,6 +134,10 @@ $this->params['breadcrumbs'][] = $video->title;
 
                 <?= $activeForm->field($form, 'on_index')->checkbox() ?>
 
+                <?= $activeForm->field($form, 'noindex')->checkbox(['label' => 'Запретить ПС индексировать страницу']) ?>
+
+                <?= $activeForm->field($form, 'nofollow')->checkbox(['label' => 'Запретить ПС переход по ссылкам']) ?>
+
                 <?= Html::activeHiddenInput($form, 'image_id') ?>
             </div>
         </div>
