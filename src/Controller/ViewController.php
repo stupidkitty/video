@@ -35,7 +35,7 @@ class ViewController extends Controller implements ViewContextInterface
             'pageCache' => [
                 'class' => PageCache::class,
                 'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
-                //'only' => ['index'],
+                'only' => ['index'],
                 'duration' => 3600,
                 'dependency' => [
                     'class' => 'yii\caching\DbDependency',
