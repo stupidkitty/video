@@ -4,6 +4,7 @@ namespace SK\VideoModule\Api\Controller;
 use Yii;
 use yii\web\User;
 use yii\web\Request;
+use yii\filters\Cors;
 use yii\rest\Controller;
 use yii\filters\PageCache;
 use SK\VideoModule\Model\Image;
@@ -25,9 +26,12 @@ class VideoController extends Controller
     public function behaviors()
     {
         return [
+            'corsFilter' => [
+                'class' => Cors::class,
+            ],
             'authenticator' => [
                 'class' => HttpBearerAuth::class,
-                'except' => ['view', 'index'],
+                'except' => ['view', 'index', 'options'],
             ],
             'pageCache' => [
                 'class' => PageCache::class,
@@ -84,11 +88,12 @@ class VideoController extends Controller
             'dislikes' => $video->dislikes,
             'commentsNum' => $video->comments_num,
             'isHd' => $video->is_hd,
+            'noindex' => $video->noindex,
+            'nofollow' => $video->nofollow,
             'views' => $video->views,
             'publishedAt' => $video->published_at,
             'poster' => null,
             'categories' => [],
-            'screenshots' => [],
         ];
 
         if ($video->hasPoster()) {
@@ -109,17 +114,6 @@ class VideoController extends Controller
                 ];
             }, $video->categories);
         }
-
-        if ($video->hasScreenshots()) {
-            $videoData['screenshots'] = \array_map(function ($screenshot) {
-                return [
-                    'id' => $screenshot->screenshot_id,
-                    'path' => $screenshot->path,
-                    'sourceUrl' => $screenshot->source_url,
-                ];
-            }, $video->categories);
-        }
-
 
         $responseData['result']['video'] = $videoData;
 
@@ -265,24 +259,6 @@ class VideoController extends Controller
                 'errors' => $video->getErrorSummary(true),
             ],
         ];
-    }
-
-    public function actionRelated($id)
-    {
-        $responseData['result']['related'] = [];
-
-        try {
-            $video = $this->findById($id);
-        } catch (NotFoundHttpException $e) {
-            return $responseData;
-        }
-
-        $video = $this->findById($id);
-
-        $relatedProvider = new RelatedProvider;
-
-        $videos = $relatedProvider->getModels($video->video_id);
-        dump($videos);
     }
 
     /**

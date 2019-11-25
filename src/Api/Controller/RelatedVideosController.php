@@ -3,6 +3,7 @@ namespace SK\VideoModule\Api\Controller;
 
 use Yii;
 use yii\web\Request;
+use yii\filters\Cors;
 use yii\rest\Controller;
 use yii\filters\PageCache;
 use SK\VideoModule\Model\Video;
@@ -24,9 +25,12 @@ class RelatedVideosController extends Controller
     public function behaviors()
     {
         return [
+            'corsFilter' => [
+                'class' => Cors::class,
+            ],
             'authenticator' => [
                 'class' => HttpBearerAuth::class,
-                'except' => ['index'],
+                'except' => ['index', 'options'],
             ],
             'pageCache' => [
                 'class' => PageCache::class,
@@ -67,19 +71,19 @@ class RelatedVideosController extends Controller
 
         $relatedVideos = \array_map(function ($video) {
             $videoData = [
-                'video_id' => (int) $video['video_id'],
-                'image_id' => (int) $video['image_id'],
+                'id' => (int) $video['video_id'],
+                'imageId' => (int) $video['image_id'],
                 'slug' => $video['slug'],
                 'title' => $video['title'],
                 'orientation' => (int) $video['orientation'],
-                'video_preview' => $video['video_preview'],
+                'videoPreview' => $video['video_preview'],
                 'duration' => (int) $video['duration'],
                 'likes' => (int) $video['likes'],
                 'dislikes' => (int) $video['dislikes'],
-                'comments_num' => (int) $video['comments_num'],
-                'is_hd' => (int) $video['is_hd'],
+                'commentsNum' => (int) $video['comments_num'],
+                'isHd' => (int) $video['is_hd'],
                 'views' => (int) $video['views'],
-                'published_at' => $video['published_at'],
+                'publishedAt' => $video['published_at'],
             ];
 
             if (!empty($video['poster'])) {
