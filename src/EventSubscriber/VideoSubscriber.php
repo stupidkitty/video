@@ -120,7 +120,7 @@ final class VideoSubscriber
      * @param \yii\base\Event $event
      * @return void
      */
-    public function registerShow($event)
+    public static function registerShow($event)
     {
         Video::updateAllCounters(['views' => 1], ['or', ['video_id' => $event->id], ['slug' => $event->slug]]);
     }
