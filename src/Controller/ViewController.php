@@ -9,6 +9,7 @@ use yii\filters\PageCache;
 use SK\VideoModule\Model\Video;
 use yii\base\ViewContextInterface;
 use yii\web\NotFoundHttpException;
+use SK\VideoModule\Event\VideoShow;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
@@ -56,6 +57,19 @@ class ViewController extends Controller implements ViewContextInterface
     public function init()
     {
         $this->request = Yii::$container->get(Request::class);
+
+        $response = Yii::$container->get(Response::class);
+
+        $response->on($response::EVENT_AFTER_SEND, function () {
+            $request = Yii::$container->get(Request::class);
+
+            Yii::$app->trigger('video-show', new VideoShow([
+                'id' => (int) $request->get('id', 0),
+                'slug' => $request->get('slug', ''),
+            ]));
+        });
+
+        Yii::$app->on('video-show', [VideoSubscriber::class, 'registerShow']);
 
         parent::init();
     }

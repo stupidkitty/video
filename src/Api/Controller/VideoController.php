@@ -5,15 +5,18 @@ use Yii;
 use yii\web\User;
 use yii\web\Request;
 use yii\filters\Cors;
+use yii\web\Response;
 use yii\rest\Controller;
 use yii\filters\PageCache;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use yii\web\NotFoundHttpException;
+use SK\VideoModule\Event\VideoShow;
 use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Api\Form\VideoForm;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Service\Video as VideoService;
+use SK\VideoModule\EventSubscriber\VideoSubscriber;
 
 /**
  * VideoController
@@ -44,6 +47,26 @@ class VideoController extends Controller
                 ],
             ],
         ];
+    }
+
+    public function beforeAction($action)
+    {
+        if ('view' === $action->id) {
+            $response = Yii::$container->get(Response::class);
+
+            $response->on($response::EVENT_AFTER_SEND, function () {
+                $request = Yii::$container->get(Request::class);
+
+                Yii::$app->trigger('video-show', new VideoShow([
+                    'id' => (int) $request->get('id', 0),
+                    'slug' => $request->get('slug', ''),
+                ]));
+            });
+
+            Yii::$app->on('video-show', [VideoSubscriber::class, 'registerShow']);
+        }
+
+        return parent::beforeAction($action);
     }
 
     /**

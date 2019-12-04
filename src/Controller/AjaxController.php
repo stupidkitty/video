@@ -159,11 +159,6 @@ class AjaxController extends Controller
             return '';
         }
 
-        // Апдейт счетчика просмотров видео
-        $db->createCommand('UPDATE `videos` SET `views`=`views`+1 WHERE `video_id`=:video_id')
-            ->bindParam(':video_id', $video_id)
-            ->execute();
-
         // Апдейт статы ротации тумбы
         //RotationStats::updateAllCounters(['current_clicks' => 1], ['video_id' => $video_id, 'category_id' => $category['category_id'], 'image_id' => $image_id]);
         $db->createCommand('UPDATE `videos_stats` SET `current_clicks`=`current_clicks`+1 WHERE `video_id`=:video_id AND `category_id`=:category_id AND `image_id`=:image_id')

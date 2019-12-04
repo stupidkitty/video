@@ -27,9 +27,6 @@ final class VideoSubscriber
         $video_id = isset($event->data['video_id']) ? $event->data['video_id'] : 0;
         $image_id = isset($event->data['image_id']) ? $event->data['image_id'] : 0;
 
-        // Обновление просмотра
-        Video::updateAllCounters(['views' => 1], ['video_id' => $video_id]);
-
         // если рефера нет, не учитываем этот трафик.
         if (null === $request->getReferrer()) {
             return;
@@ -115,5 +112,16 @@ final class VideoSubscriber
                ])
                ->execute();
         }
+    }
+
+    /**
+     * Регистрирует просмотр видео.
+     *
+     * @param \yii\base\Event $event
+     * @return void
+     */
+    public function registerShow($event)
+    {
+        Video::updateAllCounters(['views' => 1], ['or', ['video_id' => $event->id], ['slug' => $event->slug]]);
     }
 }
