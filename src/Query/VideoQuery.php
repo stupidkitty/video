@@ -10,7 +10,25 @@ class VideoQuery extends ActiveQuery
 {
     public function asThumbs()
     {
-        return $this->select(['v.video_id', 'v.image_id', 'v.slug', 'v.title', 'v.orientation', 'v.video_preview', 'v.source_url', 'v.duration', 'v.likes', 'v.dislikes', 'v.comments_num', 'v.is_hd', 'v.views', 'v.template', 'v.published_at'])
+        return $this->select([
+                'v.video_id',
+                'v.image_id',
+                'v.slug',
+                'v.title',
+                'v.orientation',
+                'v.video_preview',
+                'v.source_url',
+                'v.duration',
+                'v.likes',
+                'v.dislikes',
+                'v.comments_num',
+                'v.is_hd',
+                'v.noindex',
+                'v.nofollow',
+                'v.views',
+                'v.template',
+                'v.published_at'
+            ])
             ->alias('v')
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
