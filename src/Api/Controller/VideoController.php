@@ -34,7 +34,7 @@ class VideoController extends Controller
             ],*/
             'authenticator' => [
                 'class' => HttpBearerAuth::class,
-                'except' => ['view', 'index', 'options'],
+                'except' => ['view', 'index', 'options', 'like', 'dislike'],
             ],
             'pageCache' => [
                 'class' => PageCache::class,
@@ -161,7 +161,7 @@ class VideoController extends Controller
 
             try {
                 $video = new Video;
-                $currentDatetime = gmdate('Y-m-d H:i:s');
+                $currentDatetime = \gmdate('Y-m-d H:i:s');
                 $videoService = new VideoService;
 
                 $video->setAttributes($form->getAttributes());
@@ -282,6 +282,34 @@ class VideoController extends Controller
                 'errors' => $video->getErrorSummary(true),
             ],
         ];
+    }
+
+    /**
+     * Лайк видео
+     *
+     * @return string
+     */
+    public function actionLike($id)
+    {
+        $video_id = (int) $id;
+
+        Video::updateAllCounters(['likes' => 1], ['video_id' => $video_id]);
+
+        return '';
+    }
+
+    /**
+     * Дизлайк видео
+     *
+     * @return string
+     */
+    public function actionDislike($id)
+    {
+        $video_id = (int) $id;
+
+        Video::updateAllCounters(['dislikes' => 1], ['video_id' => $video_id]);
+
+        return '';
     }
 
     /**
