@@ -34,6 +34,8 @@ class Module extends BaseModule
          // дефолтный путь до папки темплейтов.
          $this->setViewPath(__DIR__ . '/Resources/views');
 
+         require(__DIR__ . '/bootstrap.php');
+
          parent::__construct ($id, $parent, $config);
      }
 
