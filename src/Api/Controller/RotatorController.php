@@ -4,6 +4,7 @@ namespace SK\VideoModule\Api\Controller;
 use Yii;
 use yii\web\Request;
 use yii\rest\Controller;
+use yii\filters\VerbFilter;
 use SK\VideoModule\Rotator\UserBehaviorHandler;
 use SK\VideoModule\Rotator\UserBehaviorStatistic;
 
@@ -41,6 +42,8 @@ class RotatorController extends Controller
         $stats->categoriesClicked = $request->post('categoriesClicked', []);
         $stats->videosViewed = $request->post('videosViewed', []);
         $stats->videosClicked = $request->post('videosClicked', []);
+        $stats->thumbsViewed = $request->post('thumbsViewed', []);
+        $stats->thumbsClicked = $request->post('thumbsClicked', []);
         $stats->fromCategory = $request->post('fromCategory', null);
 
         $statsHandler->handle($stats);
