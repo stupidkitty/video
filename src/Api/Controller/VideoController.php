@@ -114,7 +114,7 @@ class VideoController extends Controller
             'noindex' => $video->noindex,
             'nofollow' => $video->nofollow,
             'views' => $video->views,
-            'publishedAt' => $video->published_at,
+            'publishedAt' => (new \DateTime($video->published_at))->format('Y-m-d\TH:i:s\Z'),
             'poster' => null,
             'categories' => [],
         ];
