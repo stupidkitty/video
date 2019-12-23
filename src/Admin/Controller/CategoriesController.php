@@ -277,7 +277,10 @@ class CategoriesController extends Controller
             ]),
             'columns' => [
                 'category_id',
-                'title',
+                [
+                    'attribute' => 'title',
+                    'label' => 'Name (название категории)',
+                ],
                 'meta_title',
                 'meta_description',
                 'h1',
