@@ -207,7 +207,7 @@ class CategoriesController extends Controller
 
     /**
      * Сохраняет порядок сортировки категорий, установленный пользователем.
-     * 
+     *
      * @return mixed
      */
     public function actionSaveOrder()
@@ -277,9 +277,9 @@ class CategoriesController extends Controller
             ]),
             'columns' => [
                 'category_id',
+                'title',
                 'meta_title',
                 'meta_description',
-                'title',
                 'h1',
                 'description',
                 'seotext',
