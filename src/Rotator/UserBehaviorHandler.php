@@ -43,26 +43,46 @@ class UserBehaviorHandler
         }
 
         // Обработка кликов по видео, в категории.
-        if (null !== $statistic->fromCategory && !empty($statistic->videosClicked)) {
-            $this->handleVideosClicked($statistic->videosClicked, $statistic->fromCategory);
+        if (!empty($statistic->videosClicked)) {
+            $this->handleVideosClicked($statistic->videosClicked);
         }
 
         // Обработка показанных видео на экране, в категории.
-        if (null !== $statistic->fromCategory && !empty($statistic->videosViewed)) {
-            $this->handleVideosViewed($statistic->videosViewed, $statistic->fromCategory);
+        if (!empty($statistic->videosViewed)) {
+            $this->handleVideosViewed($statistic->videosViewed);
         }
     }
 
     /**
      * Обработка кликов в видео в категориях. Учет кликов по идам видео.
      *
-     * @param array $videosIds
-     * @param int $categoryId
+     * @param array $data Массив упакованной информации по тумбам.
      * @return void
      */
-    protected function handleVideosClicked(array $videosIds, $categoryId)
+    protected function handleVideosClicked(array $data)
     {
-        RotationStats::updateAllCounters(['current_clicks' => 1], ['video_id' => $videosIds, 'category_id' => $categoryId]);
+        $inCategory = [];
+        $thumbs = [];
+        foreach($data as $item) {
+            $video = \json_decode(\base64_decode($item), true);
+
+            if (isset($video['id']) && isset($video['inCategoryId']) && 0 !== $categoryId = (int) $video['inCategoryId']) {
+                $inCategory[$categoryId][] = [
+                    'video_id' => (int) $video['id'],
+                ];
+            }
+
+            if (isset($video['id']) && isset($video['imageId'])) {
+                $thumbs['image_id'][] = (int) $video['imageId'];
+                $thumbs['video_id'][] = (int) $video['id'];
+            }
+        }
+
+        foreach ($inCategory as $key => $videosIds) {
+            RotationStats::updateAllCounters(['current_clicks' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
+        }
+
+        //Image::updateAllCounters(['current_clicks' => 1], ['image_id' => $thumbs['image_id'], 'video_id' =>  $thumbs['video_id']]);
     }
 
     /**
@@ -72,9 +92,30 @@ class UserBehaviorHandler
      * @param int $categoryId
      * @return void
      */
-    protected function handleVideosViewed(array $videosIds, $categoryId)
+    protected function handleVideosViewed(array $data)
     {
-        RotationStats::updateAllCounters(['current_shows' => 1], ['video_id' => $videosIds, 'category_id' => $categoryId]);
+        $inCategory = [];
+        $thumbs = [];
+        foreach($data as $item) {
+            $video = \json_decode(\base64_decode($item), true);
+Yii::warning($video);
+            if (isset($video['id']) && isset($video['inCategoryId']) && 0 !== $categoryId = (int) $video['inCategoryId']) {
+                $inCategory[$categoryId][] = [
+                    'video_id' => (int) $video['id'],
+                ];
+            }
+
+            if (isset($video['id']) && isset($video['imageId'])) {
+                $thumbs['image_id'][] = (int) $video['imageId'];
+                $thumbs['video_id'][] = (int) $video['id'];
+            }
+        }
+
+        foreach ($inCategory as $key => $videosIds) {
+            RotationStats::updateAllCounters(['current_shows' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
+        }
+
+        //Image::updateAllCounters(['current_shows' => 1], ['image_id' => $thumbs['image_id'], 'video_id' =>  $thumbs['video_id']]);
     }
 
     /**
@@ -83,8 +124,17 @@ class UserBehaviorHandler
      * @param array $categoriesIds
      * @return void
      */
-    protected function handleCategoriesClicked(array $categoriesIds)
+    protected function handleCategoriesClicked(array $data)
     {
+        $categoriesIds = [];
+        foreach ($data as $item) {
+            $category = \json_decode(\base64_decode($item), true);
+
+            if (isset($category['id']) && 0 !== $categoryId = (int) $category['id']) {
+                $categoriesIds[] = $categoryId;
+            }
+        }
+
         $db = Yii::$app->db;
 
         $dateTime = new \DateTime('now', new \DateTimeZone('utc'));
