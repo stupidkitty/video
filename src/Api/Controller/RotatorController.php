@@ -42,9 +42,6 @@ class RotatorController extends Controller
         $stats->categoriesClicked = $request->post('categoriesClicked', []);
         $stats->videosViewed = $request->post('videosViewed', []);
         $stats->videosClicked = $request->post('videosClicked', []);
-        $stats->thumbsViewed = $request->post('thumbsViewed', []);
-        $stats->thumbsClicked = $request->post('thumbsClicked', []);
-        $stats->fromCategory = $request->post('fromCategory', null);
 
         $statsHandler->handle($stats);
 
