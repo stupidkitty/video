@@ -117,17 +117,17 @@ class Category
             }
 
             // Отсеять уже использованные в других категориях (уникальные должны быть)
-            $unusedIds = array_diff($imagesIds, $usedImagesIds);
+            $unusedIds = \array_diff($imagesIds, $usedImagesIds);
 
             // Если уникальные иды остались, то выбрать первую и установить ее как обложку категории.
             if (!empty($unusedIds)) {
-                $firstId = array_shift($unusedIds);
+                $firstId = \array_shift($unusedIds);
                 $image = Image::findOne(['image_id' => $firstId]);
 
                 if (null !== $image && $image->filepath !== $category->image) {
                     //$category->setCoverImage($image);
                     $category->image = $image->filepath;
-                    $category->updated_at = gmdate('Y-m-d H:i:s');
+                    $category->updated_at = \gmdate('Y-m-d H:i:s');
                     $category->save();
                 }
 
