@@ -43,7 +43,7 @@ class VideoFilterForm extends Model
             [['show_thumb', 'bulk_edit', 'is_hd'], 'boolean'],
 
             ['videos_ids', 'filter', 'skipOnEmpty' => true, 'filter' => function ($value) {
-                return StringHelper::explode($value, $delimiter = ',', true, true);
+                return StringHelper::explode($value, ',', true, true);
             }],
             ['videos_ids', 'each', 'rule' => ['integer'], 'skipOnEmpty' => true],
             ['videos_ids', 'filter', 'filter' => 'array_filter', 'skipOnEmpty' => true],
