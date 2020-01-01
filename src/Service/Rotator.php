@@ -96,7 +96,6 @@ class Rotator
                 $currentIndex ++;
             }
 
-
             RotationStats::updateAll(
                 [
                     'current_shows' => 0,
@@ -142,7 +141,7 @@ class Rotator
             ->queryAll();
 
         foreach ($categories as $category) {
-            $resetLimit = $testPerPage - (int) $category['tested_diff'];
+            $resetLimit = $testPerPage;//($testPerPage - (int) $category['tested_diff']) * 2;
 
             // найдем топовые тумбы в этой категории.
             $untouchablesThumbs = RotationStats::find()
@@ -157,7 +156,7 @@ class Rotator
                 ->limit($untouchablesThumbsNum)
                 ->column();
 
-            // найдем худшие тумбы в категории. при этом исключим топовые (их ротировать нельзя).
+            // найдем старые тумбы в категории. при этом исключим топовые (их ротировать нельзя).
             $resetThumbs = RotationStats::find()
                 ->alias('rs')
                 ->select(['rs.video_id'])
