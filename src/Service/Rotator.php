@@ -149,6 +149,8 @@ class Rotator
                 ->select(['rs.video_id'])
                 ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
                 ->where(['rs.category_id' => $category['category_id']])
+                ->andWhere(['rs.best_image' => 1])
+                ->andWhere(['rs.tested_image' => 1])
                 ->andWhere(['>', 'rs.ctr', 0])
                 ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
                 ->andWhere(['v.status' => 10])
