@@ -24,11 +24,11 @@ class Categories extends Widget
      * - title: string, название
      * - position: integer, порядковый номер при ручной сортировке
      * - clicks: integer, клики по категориям тумб.
-     * 
+     *
      * @var array|string сортировка элементов
      */
     public $order = 'title';
-    
+
     /**
      * Лимит вывода категорий.
      *
@@ -42,7 +42,7 @@ class Categories extends Widget
      * @var boolean
      */
     public $groupByFirstLetter = false;
-    
+
     /**
      * Включает кеш виджета.
      *
@@ -56,7 +56,7 @@ class Categories extends Widget
      * @var integer
      */
     public $cacheDuration = 300;
-    
+
     /**
      * @var array Коллекция массивов категорий.
      */
@@ -142,9 +142,9 @@ class Categories extends Widget
             $categories = [];
 
             foreach ($query->all() as $category) {
-                $currentLetter = mb_strtolower(mb_substr($category['title'], 0, 1));
-                
-                if (is_numeric($currentLetter)) {
+                $currentLetter = \mb_strtolower(\mb_substr($category['title'], 0, 1));
+
+                if (\is_numeric($currentLetter)) {
                     $currentLetter = '#';
                 }
 
