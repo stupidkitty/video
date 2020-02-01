@@ -71,6 +71,8 @@ class AjaxController extends Controller
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
             $this->on(self::EVENT_AFTER_ACTION, [VideoSubscriber::class, 'onView'], $video);
+        } else {
+            Video::updateAllCounters(['views' => 1], ['video_id' => (int) $id]);
         }
 
         return $this->asJson($video);
