@@ -126,7 +126,7 @@ class Rotator
 
         $thumbsPerPage = (int) $settings->get('items_per_page', static::ITEMS_PER_PAGE, 'videos');
         $testThumbsPercent = (int) $settings->get('test_items_percent', static::TEST_PERCENT, 'videos');
-        $testPerPage = (int) ceil($thumbsPerPage * $testThumbsPercent / 100);
+        $testPerPage = (int) ceil(($thumbsPerPage / 100) * $testThumbsPercent);
         $untouchablesThumbsNum = $thumbsPerPage - $testPerPage;
 
         $sql = "SELECT `category_id`, COUNT(*) - SUM(`tested_image`) as `tested_diff`
@@ -164,7 +164,9 @@ class Rotator
                 ->select(['rs.video_id'])
                 ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
                 ->where(['rs.category_id' => $category['category_id']])
-                ->andWhere(['>', 'rs.ctr', 0])
+                ->andWhere(['rs.best_image' => 1])
+                ->andWhere(['rs.tested_image' => 1])
+                ->andWhere(['>=', 'rs.ctr', 0])
                 ->andFilterWhere(['NOT IN', 'rs.video_id', $untouchablesThumbs])
                 ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
                 ->andWhere(['v.status' => 10])
