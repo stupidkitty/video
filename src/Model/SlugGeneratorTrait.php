@@ -1,6 +1,7 @@
 <?php
 namespace SK\VideoModule\Model;
 
+use Yii;
 use URLify;
 
 trait SlugGeneratorTrait
@@ -18,7 +19,8 @@ trait SlugGeneratorTrait
             $title = $this->getTitle();
         }
 
-        $slug = URLify::filter($title, 240);
+        $lang = \substr(Yii::$app->language, 0, 2);
+        $slug = URLify::filter($title, 240, $lang);
 
         if (!$slug) {
             $slug = 'default-slug';
