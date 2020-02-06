@@ -2,7 +2,7 @@
 namespace SK\VideoModule\EventSubscriber;
 
 use SK\VideoModule\Model\RotationStats;
-use SK\VideoModule\Model\VideosCategoriesMap;
+use SK\VideoModule\Model\VideosCategories;
 
 final class CategorySubscriber
 {
@@ -30,7 +30,7 @@ final class CategorySubscriber
     {
         $category = $event->sender;
 
-        VideosCategoriesMap::deleteAll(['category_id' => $category->getId()]);
+        VideosCategories::deleteAll(['category_id' => $category->getId()]);
         RotationStats::deleteAll(['category_id' => $category->getId()]);
     }
 }

@@ -5,7 +5,7 @@ use Yii;
 use yii\db\Expression;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosRelatedMap;
-use SK\VideoModule\Model\VideosCategoriesMap;
+use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Settings\SettingsInterface;
 
 /**
@@ -97,7 +97,7 @@ class RelatedProvider
                 // выборка всех идентификаторов категорий поста.
             $categoriesIds = array_column($video['categories'], 'category_id');
             $relatedModels
-                ->leftJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
+                ->leftJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
                 ->andWhere(['vcm.category_id' => $categoriesIds]);
         }
 

@@ -3,10 +3,9 @@ namespace SK\VideoModule\Service;
 
 use Yii;
 use yii\helpers\ArrayHelper;
-use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\Model\VideosRelatedMap;
 use SK\VideoModule\Model\Video as VideoModel;
-use SK\VideoModule\Model\VideosCategoriesMap;
+use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Model\Category as CategoryModel;
 
 class Video
@@ -18,12 +17,12 @@ class Video
      * UPDATE `videos` AS `v`
      * LEFT JOIN (
      *     SELECT `video_id`, `image_id`, MAX(`ctr`) as `max_ctr`
-     *     FROM `videos_stats`
+     *     FROM `videos_categories_map`
      *     WHERE `ctr` != 0
      *     GROUP BY `video_id`
-     * ) as `vs` ON `v`.`video_id` = `vs`.`video_id`
-     * SET `v`.`max_ctr` = IFNULL(`vs`.`max_ctr`, 0)
-     * WHERE `v`.`max_ctr`!=`vs`.`max_ctr`
+     * ) as `vc` ON `v`.`video_id` = `vc`.`video_id`
+     * SET `v`.`max_ctr` = IFNULL(`vc`.`max_ctr`, 0)
+     * WHERE `v`.`max_ctr`!=`vc`.`max_ctr`
      * ```
      *
      * @return void
@@ -34,12 +33,12 @@ class Video
             UPDATE `videos` AS `v`
             LEFT JOIN (
                 SELECT `video_id`, MAX(`ctr`) as `max_ctr`
-                FROM `videos_stats`
+                FROM `videos_categories_map`
                 WHERE `ctr` != 0
                 GROUP BY `video_id`
-            ) as `vs` ON `v`.`video_id` = `vs`.`video_id`
-            SET `v`.`max_ctr` = IFNULL(`vs`.`max_ctr`, 0)
-            WHERE `v`.`max_ctr`!=`vs`.`max_ctr`
+            ) as `vc` ON `v`.`video_id` = `vc`.`video_id`
+            SET `v`.`max_ctr` = IFNULL(`vc`.`max_ctr`, 0)
+            WHERE `v`.`max_ctr` != `vc`.`max_ctr`
         ";
 
         Yii::$app->db
@@ -64,7 +63,6 @@ class Video
 
             foreach ($removeCategories as $removeCategory) {
                 $video->removeCategory($removeCategory);
-                RotationStats::deleteAll(['video_id' => $video->getId(), 'category_id' => $removeCategory->getId()]);
             }
         }
 
@@ -75,10 +73,6 @@ class Video
 
             foreach ($addCategories as $addCategory) {
                 $video->addCategory($addCategory);
-
-                if ($video->hasPoster()) {
-                    RotationStats::addVideo($addCategory, $video, $video->poster, true);
-                }
             }
         }
     }
@@ -104,10 +98,9 @@ class Video
             }
         }
 
-        VideosCategoriesMap::deleteAll(['video_id' => $video->getId()]);
+        VideosCategories::deleteAll(['video_id' => $video->getId()]);
         VideosRelatedMap::deleteAll(['video_id' => $video->getId()]);
         VideosRelatedMap::deleteAll(['related_id' => $video->getId()]);
-        RotationStats::deleteAll(['video_id' => $video->getId()]);
 
         return $video->delete();
     }

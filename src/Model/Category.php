@@ -26,7 +26,7 @@ use yii\db\ActiveRecord;
  * @property string $created_at
  * @property string $updated_at
  *
- * @property VideosCategoriesMap[] $videosCategoriesMap
+ * @property VideosCategories[] $videosCategories
  * @property Video[] $videos
  * @property RotationStats[] $rotationStats
  */
@@ -85,7 +85,7 @@ class Category extends ActiveRecord implements CategoryInterface, ToggleableInte
     {
         return $this
             ->hasMany(Video::class, ['video_id' => 'video_id'])
-            ->viaTable(VideosCategoriesMap::tableName(), ['category_id' => 'category_id']);
+            ->viaTable(VideosCategories::tableName(), ['category_id' => 'category_id']);
     }
 
     /**

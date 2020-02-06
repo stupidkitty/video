@@ -32,10 +32,9 @@ use SK\VideoModule\Query\VideoQuery;
  * @property string $created_at
  * @property string $updated_at
  *
- * @property VideosCategoriesMap[] $videosCategoriesMaps
+ * @property VideosCategories[] $videosCategories
  * @property Category[] $categories
  * @property Image[] $images
- * @property RotationStats[] $rotationStats
  */
 class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
 {
@@ -61,14 +60,14 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
             [['published_at', 'created_at', 'updated_at'], 'datetime', 'format' => 'php: Y-m-d H:i:s'],
             [['is_hd', 'noindex', 'nofollow'], 'default', 'value' => 0],
             ['on_index', 'default', 'value' => 1],
-            [['created_at', 'updated_at'], 'default', 'value' => gmdate('Y-m-d H:i:s')],
+            [['created_at', 'updated_at'], 'default', 'value' => \gmdate('Y-m-d H:i:s')],
             [['published_at'], 'default', 'value' => null],
         ];
     }
 
     public static function find()
     {
-        return new VideoQuery(get_called_class());
+        return new VideoQuery(\get_called_class());
     }
 
     /**
@@ -221,7 +220,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     public function getCategories()
     {
         return $this->hasMany(Category::class, ['category_id' => 'category_id'])
-            ->viaTable(VideosCategoriesMap::tableName(), ['video_id' => 'video_id']);
+            ->viaTable(VideosCategories::tableName(), ['video_id' => 'video_id']);
     }
 
     /**
@@ -229,7 +228,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
      */
      public function addCategory(CategoryInterface $category)
      {
-         $exists = VideosCategoriesMap::find()
+         $exists = VideosCategories::find()
              ->where(['video_id' => $this->video_id, 'category_id' => $category->category_id])
              ->exists();
 
@@ -255,7 +254,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
       */
      public function getDurationAsTime()
      {
-         return ltrim(gmdate('H:i:s', $this->duration), '0:');
+         return \ltrim(\gmdate('H:i:s', $this->duration), '0:');
      }
 
     /**

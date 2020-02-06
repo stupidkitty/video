@@ -1,19 +1,18 @@
 <?php
 namespace SK\VideoModule\Admin\Controller;
 
-use Yii;
-use yii\web\Response;
-use yii\db\Expression;
-use yii\web\Controller;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use yii\filters\ContentNegotiator;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Model\VideosRelatedMap;
-use SK\VideoModule\Model\VideosCategoriesMap;
 use SK\VideoModule\Service\Category as CategoryService;
+use Yii;
+use yii\db\Expression;
+use yii\filters\AccessControl;
+use yii\filters\ContentNegotiator;
+use yii\filters\VerbFilter;
+use yii\web\Controller;
+use yii\web\Response;
 
 /**
  * ToolsController это всякие инструменты.
@@ -26,15 +25,15 @@ class ToolsController extends Controller
     public function behaviors()
     {
         return [
-           'access' => [
-               'class' => AccessControl::class,
-               'rules' => [
-                   [
-                       'allow' => true,
-                       'roles' => ['@'],
-                   ],
-               ],
-           ],
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -92,10 +91,11 @@ class ToolsController extends Controller
      */
     public function actionClearStats()
     {
-         try {
-             // Очистка статистики тумб
-             RotationStats::updateAll([
-                'tested_image' => 0,
+        try {
+            // Очистка статистики тумб
+            VideosCategories::updateAll([
+                'is_tested' => 0,
+                'tested_at' => null,
                 'current_index' => 0,
                 'current_shows' => 0,
                 'current_clicks' => 0,
@@ -109,9 +109,19 @@ class ToolsController extends Controller
                 'clicks3' => 0,
                 'shows4' => 0,
                 'clicks4' => 0,
+                'shows5' => 0,
+                'clicks5' => 0,
+                'shows6' => 0,
+                'clicks6' => 0,
+                'shows7' => 0,
+                'clicks7' => 0,
+                'shows8' => 0,
+                'clicks8' => 0,
+                'shows9' => 0,
+                'clicks9' => 0,
             ]);
 
-                // Очитска просмотров, лайков, дизлайков.
+            // Очитска просмотров, лайков, дизлайков.
             Video::updateAll([
                 'likes' => 0,
                 'dislikes' => 0,
@@ -165,27 +175,22 @@ class ToolsController extends Controller
     public function actionClearVideos()
     {
         try {
-                // Очищаем стату тумб
-            Yii::$app->db->createCommand()
-                ->truncateTable(RotationStats::tableName())
-                ->execute();
-
-                // Очищаем релатеды.
+            // Очищаем релатеды.
             Yii::$app->db->createCommand()
                 ->truncateTable(VideosRelatedMap::tableName())
                 ->execute();
 
-                // Очищаем релатеды.
+            // Очищаем релатеды.
             Yii::$app->db->createCommand()
-                ->truncateTable(VideosCategoriesMap::tableName())
+                ->truncateTable(VideosCategories::tableName())
                 ->execute();
 
-                // Удаляем фотки
+            // Удаляем фотки
             Yii::$app->db->createCommand()
                 ->truncateTable(Image::tableName())
                 ->execute();
 
-                // Удаляем видео
+            // Удаляем видео
             Yii::$app->db->createCommand()
                 ->truncateTable(Video::tableName())
                 ->execute();

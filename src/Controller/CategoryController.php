@@ -12,7 +12,7 @@ use SK\VideoModule\Model\Category;
 use yii\base\ViewContextInterface;
 use yii\web\NotFoundHttpException;
 use SK\VideoModule\Form\FilterForm;
-use SK\VideoModule\Model\VideosCategoriesMap;
+use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use SK\VideoModule\Provider\RotateVideoProvider;
 use RS\Component\Core\Settings\SettingsInterface;
@@ -540,7 +540,7 @@ class CategoryController extends Controller implements ViewContextInterface
     {
         $query = Video::find()
             ->asThumbs()
-            ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
+            ->innerJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
             ->andwhere(['vcm.category_id' => $category['category_id']]);
 
         if ('all-time' === $filterForm->t) {

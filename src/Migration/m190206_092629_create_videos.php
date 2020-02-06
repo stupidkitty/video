@@ -13,7 +13,7 @@ class m190206_092629_create_videos extends Migration
     public function safeUp()
     {
         $tableOptions = null;
-        
+
         if ($this->db->driverName === 'mysql') {
             // http://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB';
@@ -161,7 +161,7 @@ class m190206_092629_create_videos extends Migration
         $this->createIndex('related_id', 'videos_related_map', 'related_id');
 
         /**
-         * Create `videos_related_map` table
+         * Create `videos_stats` table
          */
         $this->createTable('videos_stats', [
             'category_id' => 'smallint(5) UNSIGNED NOT NULL',

@@ -8,7 +8,7 @@ use SK\VideoModule\Model\Video;
 use yii\db\ActiveQueryInterface;
 use SK\VideoModule\Form\FilterForm;
 use SK\VideoModule\Model\RotationStats;
-use SK\VideoModule\Model\VideosCategoriesMap;
+use SK\VideoModule\Model\VideosCategories;
 
 class RotateVideoProvider extends BaseDataProvider
 {
@@ -287,7 +287,7 @@ class RotateVideoProvider extends BaseDataProvider
     {
         $query = Video::find()
             ->alias('v')
-            ->innerJoin(['vcm' => VideosCategoriesMap::tableName()], 'v.video_id = vcm.video_id')
+            ->innerJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
             ->andWhere(['vcm.category_id' => $this->category_id]);
 
         if ('all-time' === $this->filterForm->t) {

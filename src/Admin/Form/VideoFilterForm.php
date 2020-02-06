@@ -9,7 +9,7 @@ use yii\data\ActiveDataProvider;
 use RS\Component\User\Model\User;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
-use SK\VideoModule\Model\VideosCategoriesMap;
+use SK\VideoModule\Model\VideosCategories;
 
 /**
  * VideoFinder represents the model behind the search form about `ytubes\videos\admin\models\Video`.
@@ -101,7 +101,7 @@ class VideoFilterForm extends Model
         }
 
 		if (!empty($this->category_id)) {
-			$query->leftJoin(['vcm' => VideosCategoriesMap::tableName()], '`v`.`video_id` = `vcm`.`video_id`');
+			$query->leftJoin(['vcm' => VideosCategories::tableName()], '`v`.`video_id` = `vcm`.`video_id`');
 		}
 
         $query->andFilterWhere([

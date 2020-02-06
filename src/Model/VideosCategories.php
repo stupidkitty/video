@@ -12,7 +12,7 @@ use yii\db\ActiveRecord;
  * @property Videos $video
  * @property Videos $category
  */
-class VideosCategoriesMap extends ActiveRecord
+class VideosCategories extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -29,7 +29,22 @@ class VideosCategoriesMap extends ActiveRecord
     {
         return [
             [['category_id', 'video_id'], 'required'],
-            [['category_id', 'video_id'], 'integer'],
+            [
+                [
+                    'category_id',
+                    'video_id',
+                    'current_index',
+                    'current_shows',
+                    'current_clicks',
+                    'total_shows',
+                    'total_clicks',
+                ],
+                'integer'
+            ],
+            [['is_tested'], 'boolean'],
+            ['ctr', 'number'],
+            ['tested_at', 'datetime', 'format' => 'php: Y-m-d H:i:s'],
+            ['tested_at', 'default', 'value' => null],
         ];
     }
 
