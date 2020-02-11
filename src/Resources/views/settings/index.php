@@ -58,7 +58,8 @@ $this->params['breadcrumbs'][] = $this->title;
 						<?= $activeForm->field($form, 'reset_rotation_period')
 					    		->textInput(['maxlength' => true])
 					    		->label('Циклический сброс ротации')
-					    		->hint('Кол-во показов видео в категории, после которого последует полное обнуление данных ротации.')
+								->hint('Кол-во показов видео в категории, после которого последует полное обнуление данных ротации.
+										Указать 0 или пустую строку, если сброс не нужен.')
 					    ?>
 
 					    <?= $activeForm->field($form, 'test_items_start')
