@@ -21,7 +21,8 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
         $sql = "ALTER TABLE `videos_categories_map`
                     ADD `is_tested` TINYINT UNSIGNED NULL DEFAULT 0 AFTER `video_id`,
                     ADD `tested_at` TIMESTAMP NULL DEFAULT NULL AFTER `is_tested`,
-                    ADD `current_index` INT UNSIGNED NULL DEFAULT 0 AFTER `tested_at`,
+                    ADD `shows_before_reset` INT UNSIGNED NULL DEFAULT NULL AFTER `is_tested`,
+                    ADD `current_index` INT UNSIGNED NULL DEFAULT 0 AFTER `shows_before_reset`,
                     ADD `current_shows` SMALLINT UNSIGNED NULL DEFAULT 0 AFTER `current_index`,
                     ADD `current_clicks` SMALLINT UNSIGNED NULL DEFAULT 0 AFTER `current_shows`,
                     ADD `shows0` SMALLINT UNSIGNED NULL DEFAULT 0 AFTER `current_clicks`,
@@ -70,6 +71,8 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
         $sql = "ALTER TABLE `videos_categories_map` ADD INDEX (`total_shows`)";
         $this->execute($sql);
 
+        $sql = "ALTER TABLE `videos_categories_map` ADD INDEX (`shows_before_reset`)";
+        $this->execute($sql);
 
         /**
          * Перенос старых данных в таблицу категорий.
