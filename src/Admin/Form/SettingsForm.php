@@ -1,7 +1,6 @@
 <?php
 namespace SK\VideoModule\Admin\Form;
 
-use Yii;
 use yii\base\Model;
 
 class SettingsForm extends Model
@@ -10,6 +9,7 @@ class SettingsForm extends Model
      * @var integer Количество видео роликов на страницу (тумбы в категориях, или в новых, например).
      */
     public $items_per_page = 24;
+
     /**
      * @var integer Количество кнопок в строке пагинации (можно указать произвольно).
      */
@@ -18,30 +18,42 @@ class SettingsForm extends Model
     public $test_item_period = 200;
     public $test_items_percent = 15;
     public $test_items_start = 3;
+
+    /**
+     * @var boolean Период сброса ротации (в показах)
+     */
+    public $reset_rotation_period = 0;
+
     /**
      * @var boolean Включить отображение виджета.
      */
     public $related_enable = 0;
+
     /**
      * @var integer Количество похожих видео.
      */
     public $related_number = 12;
+
     /**
      * @var boolean Учитывать или нет описание исходного видео при поиске "похожих" видео.
      */
     public $related_allow_description = 0;
+
     /**
      * @var boolean Учитывать или нет категории исходного видео при поиске "похожих" видео.
      */
     public $related_allow_categories = 0;
+
     /**
      * @var integer Фиксированный интервал для автопостинга.
      */
     public $autoposting_fixed_interval = 8640;
+
     /**
      * @var integer Разброс времени для фиксированного интервала.
      */
     public $autoposting_spread_interval = 600;
+
     /**
      * @var boolean Флажок для проведения скрытой ротации.
      */
@@ -54,7 +66,7 @@ class SettingsForm extends Model
     {
         return [
             [['items_per_page'], 'integer', 'integerOnly' => true, 'min' => 1],
-            [['pagination_buttons_count', 'recalculate_ctr_period', 'test_item_period'], 'integer'],
+            [['pagination_buttons_count', 'recalculate_ctr_period', 'test_item_period', 'reset_rotation_period'], 'integer'],
             [['test_items_start'], 'integer', 'integerOnly' => true, 'min' => 3],
             [['test_items_percent'], 'integer', 'integerOnly' => true, 'min' => 0],
             ['test_items_percent', 'validateTestPercent'],
@@ -70,6 +82,7 @@ class SettingsForm extends Model
             [['test_item_period'], 'default', 'value' => 200],
             [['test_items_start'], 'default', 'value' => 3],
             [['test_items_percent'], 'default', 'value' => 15],
+            [['reset_rotation_period'], 'default', 'value' => null],
             [['related_number'], 'default', 'value' => 12],
             [['related_enable'], 'default', 'value' => 0],
             [['related_allow_description'], 'default', 'value' => 0],
