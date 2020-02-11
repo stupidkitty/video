@@ -53,9 +53,6 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
         $sql = "ALTER TABLE `videos_categories_map` DROP INDEX `category_id`";
         $this->execute($sql);
 
-        $sql = "ALTER TABLE `videos_categories_map` DROP INDEX `video_id`";
-        $this->execute($sql);
-
         $sql = "ALTER TABLE `videos_categories_map` ADD PRIMARY KEY (`category_id`, `video_id`)";
         $this->execute($sql);
 
