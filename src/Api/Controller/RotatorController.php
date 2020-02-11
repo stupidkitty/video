@@ -1,12 +1,13 @@
 <?php
 namespace SK\VideoModule\Api\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\rest\Controller;
-use yii\filters\VerbFilter;
 use SK\VideoModule\Rotator\UserBehaviorHandler;
 use SK\VideoModule\Rotator\UserBehaviorStatistic;
+use SK\VideoModule\Service\Rotator;
+use Yii;
+use yii\filters\VerbFilter;
+use yii\rest\Controller;
+use yii\web\Request;
 
 /**
  * RotatorController
@@ -23,7 +24,12 @@ class RotatorController extends Controller
                 'class' => VerbFilter::class,
                 'actions' => [
                     'stats' => ['post'],
+                    'reset-zero-ctr' => ['post'],
                 ],
+            ],
+            'authenticator' => [
+                'class' => HttpBearerAuth::class,
+                'except' => ['stats'],
             ],
         ];
     }
@@ -44,6 +50,23 @@ class RotatorController extends Controller
         $stats->videosClicked = $request->post('videosClicked', []);
 
         $statsHandler->handle($stats);
+
+        return '';
+    }
+
+    public function actionResetZeroCtr()
+    {
+        try {
+            $rotator = new Rotator;
+            $rotator->resetZeroCtr();
+        } catch (\Throwable $e) {
+            return [
+                'error' => [
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                ],
+            ];
+        }
 
         return '';
     }

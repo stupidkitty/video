@@ -34,7 +34,7 @@ class Rotator
      *
      * @return void
      */
-    public function markAsTestedRows()
+    public function markAsTestedRows(): void
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 
@@ -62,7 +62,7 @@ class Rotator
      *
      * @return void
      */
-    public function shiftHistoryCheckpoint()
+    public function shiftHistoryCheckpoint(): void
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 
@@ -105,7 +105,7 @@ class Rotator
      *
      * @return void
      */
-    public function resetOldTestedVideos()
+    public function resetOldTestedVideos(): void
     {
         $db = Yii::$app->db;
         $settings = Yii::$container->get(SettingsInterface::class);
@@ -188,5 +188,44 @@ class Rotator
                 'category_id' => $category['category_id'],
             ]);
         }
+    }
+
+    /**
+     * Resets statistics for rows with zero
+     *
+     * @return void
+     */
+    public function resetZeroCtr(): void
+    {
+        VideosCategories::updateAll([
+            'is_tested' => 0,
+            'tested_at' => null,
+            'current_index' => 0,
+            'current_shows' => 0,
+            'current_clicks' => 0,
+            'shows0' => 0,
+            'clicks0' => 0,
+            'shows1' => 0,
+            'clicks1' => 0,
+            'shows2' => 0,
+            'clicks2' => 0,
+            'shows3' => 0,
+            'clicks3' => 0,
+            'shows4' => 0,
+            'clicks4' => 0,
+            'shows5' => 0,
+            'clicks5' => 0,
+            'shows6' => 0,
+            'clicks6' => 0,
+            'shows7' => 0,
+            'clicks7' => 0,
+            'shows8' => 0,
+            'clicks8' => 0,
+            'shows9' => 0,
+            'clicks9' => 0,
+        ], [
+            'is_tested' => 1,
+            'ctr' => 0,
+        ]);
     }
 }
