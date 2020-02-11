@@ -6,7 +6,7 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\filters\ContentNegotiator;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\VideosCategories;
 
 /**
  * AjaxController содержит различные аякс действия.
@@ -65,8 +65,9 @@ class AjaxController extends Controller
     public function actionRestartZeroCtr()
     {
         try {
-            RotationStats::updateAll([
-                'tested_image' => 0,
+            VideosCategories::updateAll([
+                'is_tested' => 0,
+                'tested_at' => null,
                 'current_index' => 0,
                 'current_shows' => 0,
                 'current_clicks' => 0,
@@ -80,8 +81,18 @@ class AjaxController extends Controller
                 'clicks3' => 0,
                 'shows4' => 0,
                 'clicks4' => 0,
+                'shows5' => 0,
+                'clicks5' => 0,
+                'shows6' => 0,
+                'clicks6' => 0,
+                'shows7' => 0,
+                'clicks7' => 0,
+                'shows8' => 0,
+                'clicks8' => 0,
+                'shows9' => 0,
+                'clicks9' => 0,
             ], [
-                'tested_image' => 1,
+                'is_tested' => 1,
                 'ctr' => 0,
             ]);
 

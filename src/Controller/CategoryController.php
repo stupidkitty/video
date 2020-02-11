@@ -147,7 +147,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
                 [
                     'category_id' => $category['category_id'],
-                    'images_ids' => array_column($videos, 'image_id'),
+                    'videos_ids' => \array_column($videos, 'video_id'),
                     'page' => $page,
                 ]
             );
@@ -216,7 +216,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
                 [
                     'category_id' => $category['category_id'],
-                    'images_ids' => array_column($videos, 'image_id'),
+                    'videos_ids' => \array_column($videos, 'video_id'),
                     'page' => $page,
                 ]
             );
@@ -282,7 +282,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
                 [
                     'category_id' => $category['category_id'],
-                    'images_ids' => array_column($videos, 'image_id'),
+                    'videos_ids' => \array_column($videos, 'video_id'),
                     'page' => $page,
                 ]
             );
@@ -356,7 +356,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
                 [
                     'category_id' => $category['category_id'],
-                    'images_ids' => array_column($videos, 'image_id'),
+                    'videos_ids' => \array_column($videos, 'video_id'),
                     'page' => $page,
                 ]
             );
@@ -439,7 +439,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 ],
                 [
                     'category_id' => $category['category_id'],
-                    'images_ids' => array_column($videos, 'image_id'),
+                    'videos_ids' => \array_column($videos, 'video_id'),
                     'page' => $page,
                 ]
             );

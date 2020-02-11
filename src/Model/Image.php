@@ -16,7 +16,6 @@ use yii\db\ActiveRecord;
  * @property string $created_at
  *
  * @property Video $video
- * @property RotationStats[] $rotationStats
  */
 class Image extends ActiveRecord implements ImageInterface
 {

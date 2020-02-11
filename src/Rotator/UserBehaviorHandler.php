@@ -3,7 +3,7 @@ namespace SK\VideoModule\Rotator;
 
 use Yii;
 use yii\db\Expression;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Settings\SettingsInterface;
 
 class UserBehaviorHandler
@@ -79,7 +79,7 @@ class UserBehaviorHandler
         }
 
         foreach ($inCategory as $key => $videosIds) {
-            RotationStats::updateAllCounters(['current_clicks' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
+            VideosCategories::updateAllCounters(['current_clicks' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
         }
 
         //Image::updateAllCounters(['current_clicks' => 1], ['image_id' => $thumbs['image_id'], 'video_id' =>  $thumbs['video_id']]);
@@ -98,7 +98,7 @@ class UserBehaviorHandler
         $thumbs = [];
         foreach($data as $item) {
             $video = \json_decode(\base64_decode($item), true);
-Yii::warning($video);
+
             if (isset($video['id']) && isset($video['inCategoryId']) && 0 !== $categoryId = (int) $video['inCategoryId']) {
                 $inCategory[$categoryId][] = [
                     'video_id' => (int) $video['id'],
@@ -112,7 +112,7 @@ Yii::warning($video);
         }
 
         foreach ($inCategory as $key => $videosIds) {
-            RotationStats::updateAllCounters(['current_shows' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
+            VideosCategories::updateAllCounters(['current_shows' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
         }
 
         //Image::updateAllCounters(['current_shows' => 1], ['image_id' => $thumbs['image_id'], 'video_id' =>  $thumbs['video_id']]);

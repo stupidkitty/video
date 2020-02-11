@@ -7,7 +7,6 @@ use yii\data\BaseDataProvider;
 use SK\VideoModule\Model\Video;
 use yii\db\ActiveQueryInterface;
 use SK\VideoModule\Form\FilterForm;
-use SK\VideoModule\Model\RotationStats;
 use SK\VideoModule\Model\VideosCategories;
 
 class RotateVideoProvider extends BaseDataProvider
@@ -46,9 +45,9 @@ class RotateVideoProvider extends BaseDataProvider
      *
      * SELECT `v`.*
      * FROM `videos` as `v`
-     * LEFT JOIN `videos_stats` AS `vs` ON (`v`.`video_id` = `vs`.`video_id` AND `v`.`image_id` = `vs`.`image_id`)
-     * WHERE `v`.`published_at` <= NOW() AND `v`.`status` = 10 AND `vs`.`category_id` = 9 AND `vs`.`best_image` = 1 AND `vs`.`tested_image` = 1
-     * ORDER BY `vs`.`ctr` DESC
+     * INNER JOIN `videos_categories_map` AS `vcm` ON (`v`.`video_id` = `vcm`.`video_id`)
+     * WHERE `v`.`published_at` <= NOW() AND `v`.`status` = 10 AND `vcm`.`category_id` = 9 AND `vcm`.`is_tested` = 1
+     * ORDER BY `vcm`.`ctr` DESC
      */
     public function init()
     {
@@ -62,8 +61,8 @@ class RotateVideoProvider extends BaseDataProvider
 
         $this->query = Video::find()
             ->asThumbs()
-            ->addSelect(['vs.tested_image', 'vs.ctr'])
-            ->innerJoin(['vs' => RotationStats::tableName()], 'v.video_id = vs.video_id AND v.image_id = vs.image_id');
+            ->addSelect(['vs.is_tested', 'vs.ctr'])
+            ->innerJoin(['vs' => VideosCategories::tableName()], 'v.video_id = vs.video_id');
 
         if ('all-time' === $this->filterForm->t) {
             $this->query->untilNow();
@@ -122,8 +121,7 @@ class RotateVideoProvider extends BaseDataProvider
         if (0 === $totalTestedCount) {
             return $query
                ->andWhere(['vs.category_id' => $this->category_id])
-               ->andWhere(['vs.best_image' => 1])
-               ->andWhere(['vs.tested_image' => 0])
+               ->andWhere(['vs.is_tested' => 0])
                ->offset($pagination->getOffset())
                ->limit($pagination->getLimit())
                ->all();
@@ -136,8 +134,7 @@ class RotateVideoProvider extends BaseDataProvider
         if (0 === $totalTestCount) {
             return $query
                 ->andWhere(['vs.category_id' => $this->category_id])
-                ->andWhere(['vs.best_image' => 1])
-                ->andWhere(['vs.tested_image' => 1])
+                ->andWhere(['vs.is_tested' => 1])
                ->offset($pagination->getOffset())
                ->limit($pagination->getLimit())
                ->all();
@@ -205,16 +202,14 @@ class RotateVideoProvider extends BaseDataProvider
 
         $testedModels = $query
             ->andWhere(['vs.category_id' => $this->category_id])
-            ->andWhere(['vs.best_image' => 1])
-            ->andWhere(['vs.tested_image' => 1])
+            ->andWhere(['vs.is_tested' => 1])
             ->offset((int) $offsetTested)
             ->limit((int) $limitTested)
             ->all();
 
         $testModels = $testQuery
             ->andWhere(['vs.category_id' => $this->category_id])
-            ->andWhere(['vs.best_image' => 1])
-            ->andWhere(['vs.tested_image' => 0])
+            ->andWhere(['vs.is_tested' => 0])
             ->offset((int) $offsetTest)
             ->limit((int) $limitTest)
             ->all();
@@ -316,10 +311,9 @@ class RotateVideoProvider extends BaseDataProvider
     {
         $query = Video::find()
             ->alias('v')
-            ->innerJoin(['vs' => RotationStats::tableName()], 'v.video_id = vs.video_id AND v.image_id = vs.image_id')
+            ->innerJoin(['vs' => VideosCategories::tableName()], 'v.video_id = vs.video_id')
             ->andWhere(['vs.category_id' => $this->category_id])
-            ->andWhere(['vs.best_image' => 1])
-            ->andWhere(['vs.tested_image' => 1]);
+            ->andWhere(['vs.is_tested' => 1]);
 
         if ('all-time' === $this->filterForm->t) {
             $query->untilNow();

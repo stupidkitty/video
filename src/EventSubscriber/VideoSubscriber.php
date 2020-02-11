@@ -5,7 +5,7 @@ use Yii;
 use yii\web\Request;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\VideosCategories;
 
 final class VideoSubscriber
 {
@@ -25,7 +25,6 @@ final class VideoSubscriber
         }
 
         $video_id = isset($event->data['video_id']) ? $event->data['video_id'] : 0;
-        $image_id = isset($event->data['image_id']) ? $event->data['image_id'] : 0;
 
         // если рефера нет, не учитываем этот трафик.
         if (null === $request->getReferrer()) {
@@ -64,7 +63,7 @@ final class VideoSubscriber
 
             // Аадейт счетчика просмотров видео
             if (!empty($category_id)) {
-                RotationStats::updateAllCounters(['current_clicks' => 1], ['video_id' => $video_id, 'category_id' => $category_id, 'image_id' => $image_id]);
+                VideosCategories::updateAllCounters(['current_clicks' => 1], ['video_id' => $video_id, 'category_id' => $category_id]);
             }
         }
     }
@@ -84,14 +83,14 @@ final class VideoSubscriber
             return;
         }
 
-        if (empty($event->data['images_ids']) || empty($event->data['category_id'])) {
+        if (empty($event->data['videos_ids']) || empty($event->data['category_id'])) {
             return;
         }
 
-        RotationStats::updateAllCounters(['current_shows' => 1], ['image_id' => $event->data['images_ids'], 'category_id' => $event->data['category_id']]);
+        VideosCategories::updateAllCounters(['current_shows' => 1], ['video_id' => $event->data['videos_ids'], 'category_id' => $event->data['category_id']]);
 
         // Обновление клика по категории
-        $referHost = parse_url($request->getReferrer(), PHP_URL_HOST);
+        $referHost = \parse_url($request->getReferrer(), PHP_URL_HOST);
         $currentHost = $request->getHostName();
 
         if ($referHost === $currentHost && $event->data['page'] <= 1) {

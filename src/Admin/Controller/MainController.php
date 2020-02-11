@@ -13,7 +13,7 @@ use SK\VideoModule\Model\Video;
 use RS\Component\User\Model\User;
 use SK\VideoModule\Model\Category;
 use yii\web\NotFoundHttpException;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Admin\Form\VideoForm;
 use SK\VideoModule\Admin\Form\VideoFilterForm;
 use SK\VideoModule\Service\Video as VideoService;
@@ -91,28 +91,18 @@ class MainController extends Controller
     {
         $video = $this->findById($id);
 
-        $rotationStats = RotationStats::find()
-            ->with(['image', 'category'])
+        $categoriesRotationStats = VideosCategories::find()
+            ->with(['category'])
             ->where(['video_id' => $video->getId()])
             ->orderBy(['ctr' => SORT_DESC])
             ->all();
-
-        $thumbsRotationStats = [];
-
-        foreach ($rotationStats as $item) {
-            if (empty($thumbsRotationStats[$item->image->getId()]['image'])) {
-                $thumbsRotationStats[$item->image->getId()]['image'] = $item->image;
-            }
-
-            $thumbsRotationStats[$item->image->getId()]['categories'][] = $item;
-        }
 
         $statusLabel = $this->getStatusNames();
 
         return $this->render('view', [
             'video' => $video,
             'statusLabel' => $statusLabel,
-            'thumbsRotationStats' => $thumbsRotationStats,
+            'categoriesRotationStats' => $categoriesRotationStats,
         ]);
     }
 

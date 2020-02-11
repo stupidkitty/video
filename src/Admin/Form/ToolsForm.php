@@ -9,7 +9,7 @@ use ytubes\videos\models\Video;
 use ytubes\videos\models\VideoStatus;
 use ytubes\videos\models\Category;
 use ytubes\videos\models\Image;
-use ytubes\videos\models\RotationStats;
+use ytubes\videos\models\VideosCategories;
 use ytubes\videos\models\VideosRelatedMap;
 use ytubes\videos\models\finders\RelatedFinder;
 use ytubes\videos\admin\cron\jobs\SetCategoriesThumbs;
@@ -48,8 +48,9 @@ class ToolsForm extends Model
 	{
 			// Очистка статистики тумб
 		$q1 = Yii::$app->db->createCommand()
-			->update(RotationStats::tableName(), [
-					'tested_image' => 0,
+			->update(VideosCategories::tableName(), [
+					'is_tested' => 0,
+					'tested_at' => null,
 					'current_index' => 0,
 					'current_shows' => 0,
 					'current_clicks' => 0,
@@ -63,9 +64,16 @@ class ToolsForm extends Model
 					'clicks3' => 0,
 					'shows4' => 0,
 					'clicks4' => 0,
-					'total_shows' => 0,
-					'total_clicks' => 0,
-					'ctr' => 0,
+					'shows5' => 0,
+					'clicks5' => 0,
+					'shows6' => 0,
+					'clicks6' => 0,
+					'shows7' => 0,
+					'clicks7' => 0,
+					'shows8' => 0,
+					'clicks8' => 0,
+					'shows9' => 0,
+					'clicks9' => 0,
 				])
 			->execute();
 
@@ -106,7 +114,7 @@ class ToolsForm extends Model
 			->execute();
 
 			// Рандом в таблице videos_stats
-		$sql = 'UPDATE `' . RotationStats::tableName() . '` as `vs`
+		$sql = 'UPDATE `' . VideosCategories::tableName() . '` as `vs`
 				LEFT JOIN (
 					SELECT `video_id`, `published_at` FROM `' . Video::tableName() . '`
 				) as `v`
@@ -127,9 +135,9 @@ class ToolsForm extends Model
      */
 	public function clearVideos()
 	{
-			// Очищаем стату тумб
+			// Очищает таблицу категорий
 		Yii::$app->db->createCommand()
-			->truncateTable(RotationStats::tableName())
+			->truncateTable(VideosCategories::tableName())
 			->execute();
 
 			// Удаляем фотки

@@ -28,7 +28,6 @@ use yii\db\ActiveRecord;
  *
  * @property VideosCategories[] $videosCategories
  * @property Video[] $videos
- * @property RotationStats[] $rotationStats
  */
 class Category extends ActiveRecord implements CategoryInterface, ToggleableInterface, SlugAwareInterface
 {

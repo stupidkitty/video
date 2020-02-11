@@ -4,7 +4,7 @@ namespace SK\VideoModule\Service;
 use Yii;
 use yii\db\Expression;
 use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Settings\SettingsInterface;
 
 class Rotator
@@ -41,26 +41,18 @@ class Rotator
         $test_item_period = (int) $settings->get('test_item_period', static::TEST_ITEM_PERIOD, 'videos');
 
             // Завершим тестовый период у тумб, если набралась необходимая статистика.
-        $query = RotationStats::find()
-            ->select(['category_id', 'video_id', 'image_id', 'tested_image', 'tested_at'])
-            ->where(['tested_image' => 0])
+        $query = VideosCategories::find()
+            ->select(['category_id', 'video_id', 'is_tested', 'tested_at'])
+            ->where(['is_tested' => 0])
             ->andWhere(['>=', 'total_shows', $test_item_period]);
 
         foreach ($query->batch(50) as $rows) {
             foreach ($rows as $row) {
-                $row->tested_image = 1;
-                $row->tested_at = gmdate('Y-m-d H:i:s');
+                $row->is_tested = 1;
+                $row->tested_at = \gmdate('Y-m-d H:i:s');
                 $row->save();
             }
         }
-
-        /**
-         * Для нескольких тумб: выбрать все видео. Затем проверить есть ли у текущего фото еще не закончившие тест.
-         * Если все тумбы у видео закончили тест, то проверим, если ли у видео другие тумбы. Если есть, то начнем тестировать их.
-         * Для этого снимем флажок "лучшая тумба" и переведем его на новую.
-         * После того, как закончатся все тумбы (проверим, если нетестированные еще) Выберем лучшую тумбу из всех имеющихся по цтр
-         * и выставим у нее флажок "лучшая тумба".
-         */
     }
 
     /**
@@ -75,10 +67,10 @@ class Rotator
         $settings = Yii::$container->get(SettingsInterface::class);
 
         $recalculate_ctr_period = $settings->get('recalculate_ctr_period', static::RECALCULATE_CTR_PERIOD, 'videos');
-        $showsCheckpointValue = (int) ceil($recalculate_ctr_period / 5);
+        $showsCheckpointValue = (int) ceil($recalculate_ctr_period / 10);
 
-        $thumbStats = RotationStats::find()
-            ->select(['video_id', 'category_id', 'image_id', 'current_shows', 'current_clicks', 'current_index'])
+        $thumbStats = VideosCategories::find()
+            ->select(['video_id', 'category_id', 'current_shows', 'current_clicks', 'current_index'])
             ->where(['>=', 'current_shows', $showsCheckpointValue])
             ->asArray()
             ->all();
@@ -89,25 +81,19 @@ class Rotator
 
         foreach ($thumbStats as $thumbStat) {
             $currentIndex = (int) $thumbStat['current_index'];
+            $checkPointNumber = $currentIndex % 10;
 
-            if ($currentIndex == 4) {
-                $currentIndex = 0;
-            } else {
-                $currentIndex ++;
-            }
-
-            RotationStats::updateAll(
+            VideosCategories::updateAll(
                 [
                     'current_shows' => 0,
                     'current_clicks' => 0,
-                    'current_index' => $currentIndex,
+                    'current_index' => $currentIndex + 1,
                     "shows{$currentIndex}" => (int) $thumbStat['current_shows'],
                     "clicks{$currentIndex}" => (int) $thumbStat['current_clicks'],
                 ],
                 [
                     'video_id' => $thumbStat['video_id'],
                     'category_id' => $thumbStat['category_id'],
-                    'image_id' => $thumbStat['image_id'],
                 ]
             );
         }
@@ -129,9 +115,9 @@ class Rotator
         $testPerPage = (int) ceil(($thumbsPerPage / 100) * $testThumbsPercent);
         $untouchablesThumbsNum = $thumbsPerPage - $testPerPage;
 
-        $sql = "SELECT `category_id`, COUNT(*) - SUM(`tested_image`) as `tested_diff`
-                FROM `videos_stats` as `vs`
-                LEFT JOIN `videos` as `v` ON (`vs`.`video_id`=`v`.`video_id`)
+        $sql = "SELECT `category_id`, COUNT(*) - SUM(`is_tested`) as `tested_diff`
+                FROM `videos_categories_map` as `vcm`
+                LEFT JOIN `videos` as `v` ON (`vcm`.`video_id`=`v`.`video_id`)
                 WHERE `v`.`published_at`<= NOW() AND `v`.`status` = 10
                 GROUP BY `category_id`
                 HAVING `tested_diff` < :testSpotsNum"; // = 0
@@ -144,13 +130,12 @@ class Rotator
             $resetLimit = $testPerPage;//($testPerPage - (int) $category['tested_diff']) * 2;
 
             // найдем топовые тумбы в этой категории.
-            $untouchablesThumbs = RotationStats::find()
+            $untouchablesThumbs = VideosCategories::find()
                 ->alias('rs')
                 ->select(['rs.video_id'])
                 ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
                 ->where(['rs.category_id' => $category['category_id']])
-                ->andWhere(['rs.best_image' => 1])
-                ->andWhere(['rs.tested_image' => 1])
+                ->andWhere(['rs.is_tested' => 1])
                 ->andWhere(['>', 'rs.ctr', 0])
                 ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
                 ->andWhere(['v.status' => 10])
@@ -159,14 +144,12 @@ class Rotator
                 ->column();
 
             // найдем старые тумбы в категории. при этом исключим топовые (их ротировать нельзя).
-            $resetThumbs = RotationStats::find()
+            $resetThumbs = VideosCategories::find()
                 ->alias('rs')
                 ->select(['rs.video_id'])
                 ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
                 ->where(['rs.category_id' => $category['category_id']])
-                ->andWhere(['rs.best_image' => 1])
-                ->andWhere(['rs.tested_image' => 1])
-                ->andWhere(['>=', 'rs.ctr', 0])
+                ->andWhere(['rs.is_tested' => 1])
                 ->andFilterWhere(['NOT IN', 'rs.video_id', $untouchablesThumbs])
                 ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
                 ->andWhere(['v.status' => 10])
@@ -174,8 +157,8 @@ class Rotator
                 ->limit($resetLimit)
                 ->column();
 
-            RotationStats::updateAll([
-                'tested_image' => 0,
+            VideosCategories::updateAll([
+                'is_tested' => 0,
                 'tested_at' => null,
                 'current_index' => 0,
                 'current_shows' => 0,
@@ -190,6 +173,16 @@ class Rotator
                 'clicks3' => 0,
                 'shows4' => 0,
                 'clicks4' => 0,
+                'shows5' => 0,
+                'clicks5' => 0,
+                'shows6' => 0,
+                'clicks6' => 0,
+                'shows7' => 0,
+                'clicks7' => 0,
+                'shows8' => 0,
+                'clicks8' => 0,
+                'shows9' => 0,
+                'clicks9' => 0,
             ], [
                 'video_id' => $resetThumbs,
                 'category_id' => $category['category_id'],

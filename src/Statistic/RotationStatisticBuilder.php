@@ -1,11 +1,12 @@
 <?php
 namespace SK\VideoModule\Statistic;
 
-use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\Video;
+use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Statistic\Report\CategoryRotationReport;
 use SK\VideoModule\Statistic\Report\RotationStatisticReport;
+use yii\db\Expression;
 
 class RotationStatisticBuilder
 {
@@ -14,10 +15,10 @@ class RotationStatisticBuilder
     {
         $report = new RotationStatisticReport();
 
-        $report->setTotalThumbs($this->calculateTotalThumbs());
-        $report->setTestThumbs($this->calculateTestThumbs());
-        $report->setTestedThumbs($this->calculateTestedThumbs());
-        $report->setTestedZeroCtrThumbs($this->calculateTestedZeroCtrThumbs());
+        $report->setTotalThumbs($this->calculateTotalItems());
+        $report->setTestThumbs($this->calculateTestItems());
+        $report->setTestedThumbs($this->calculateTestedItems());
+        $report->setTestedZeroCtrThumbs($this->calculateTestedZeroCtrItems());
 
         $report->setCategoriesReports($this->buildCategoriesReport());
 
@@ -69,13 +70,13 @@ class RotationStatisticBuilder
     }
 
     /**
-     * Подсчитывает все активные тумбы в таблице ротации.
+     * Подсчитывает все активные видео в ротации.
      *
      * @return integer
      */
-    protected function calculateTotalThumbs()
+    protected function calculateTotalItems()
     {
-        $num = RotationStats::find()
+        $num = VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
             ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
@@ -85,16 +86,16 @@ class RotationStatisticBuilder
     }
 
     /**
-     * Подсчитывает протестированные активные тумбы в таблице ротации.
+     * Подсчитывает протестированные активные видео в таблице ротации.
      *
      * @return integer
      */
-    protected function calculateTestThumbs()
+    protected function calculateTestItems()
     {
-        $num = RotationStats::find()
+        $num = VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{vs}}.{{tested_image}}' => 0, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{vs}}.{{is_tested}}' => 0, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->count();
 
         return $num;
@@ -105,12 +106,12 @@ class RotationStatisticBuilder
      *
      * @return integer
      */
-    protected function calculateTestedThumbs()
+    protected function calculateTestedItems()
     {
-        $num = RotationStats::find()
+        $num = VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{vs}}.{{tested_image}}' => 1, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{vs}}.{{is_tested}}' => 1, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->count();
 
         return $num;
@@ -121,12 +122,12 @@ class RotationStatisticBuilder
      *
      * @return integer
      */
-    protected function calculateTestedZeroCtrThumbs()
+    protected function calculateTestedZeroCtrItems()
     {
-        $num = RotationStats::find()
+        $num = VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{vs}}.{{tested_image}}' => 1, '{{vs}}.{{ctr}}' => 0,  '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{vs}}.{{is_tested}}' => 1, '{{vs}}.{{ctr}}' => 0, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->count();
 
         return $num;
@@ -139,8 +140,8 @@ class RotationStatisticBuilder
      */
     protected function calculateCategoriesTotalThumbs()
     {
-        $totalThumbs = RotationStats::find()
-            ->select(new \yii\db\Expression('COUNT(*) as cnt'))
+        $totalThumbs = VideosCategories::find()
+            ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
             ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
@@ -158,12 +159,12 @@ class RotationStatisticBuilder
      */
     protected function calculateCategoriesUntilNowThumbs()
     {
-        $totalThumbs = RotationStats::find()
-            ->select(new \yii\db\Expression('COUNT(*) as cnt'))
+        $totalThumbs = VideosCategories::find()
+            ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
+            ->andWhere(['<=', '{{v}}.{{published_at}}', new Expression('NOW()')])
             ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
-            ->andWhere(['<=', '{{v}}.{{published_at}}', new \yii\db\Expression('NOW()')])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
             ->column();
@@ -178,12 +179,12 @@ class RotationStatisticBuilder
      */
     protected function calculateCategoriesAutopostingThumbs()
     {
-        $totalThumbs = RotationStats::find()
-            ->select(new \yii\db\Expression('COUNT(*) as cnt'))
+        $totalThumbs = VideosCategories::find()
+            ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->andWhere(['>=', '{{v}}.{{published_at}}', new \yii\db\Expression('NOW()')])
+            ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
             ->column();
@@ -198,12 +199,12 @@ class RotationStatisticBuilder
      */
     protected function calculateCategoriesTestThumbs()
     {
-        $testedThumbs = RotationStats::find()
-            ->select(new \yii\db\Expression('COUNT(*) as cnt'))
+        $testedThumbs = VideosCategories::find()
+            ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->andWhere(['{{vs}}.{{tested_image}}' => 0])
-            ->andWhere(['<=', '{{v}}.{{published_at}}', new \yii\db\Expression('NOW()')])
+            ->andWhere(['{{vs}}.{{is_tested}}' => 0])
+            ->andWhere(['<=', '{{v}}.{{published_at}}', new Expression('NOW()')])
             ->andWhere(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
@@ -219,12 +220,12 @@ class RotationStatisticBuilder
      */
     protected function calculateCategoriesTestedThumbs()
     {
-        $testedThumbs = RotationStats::find()
-            ->select(new \yii\db\Expression('COUNT(*) as cnt'))
+        $testedThumbs = VideosCategories::find()
+            ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->andWhere(['{{vs}}.{{tested_image}}' => 1])
-            ->andWhere(['<=', '{{v}}.{{published_at}}', new \yii\db\Expression('NOW()')])
+            ->andWhere(['{{vs}}.{{is_tested}}' => 1])
+            ->andWhere(['<=', '{{v}}.{{published_at}}', new Expression('NOW()')])
             ->andWhere(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')

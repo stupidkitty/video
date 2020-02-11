@@ -12,7 +12,6 @@ use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
 use SK\VideoModule\Model\ImportFeed;
-use SK\VideoModule\Model\RotationStats;
 use RS\Component\Core\Settings\SettingsInterface;
 use RS\Component\Core\Generator\TimeIntervalGenerator;
 
@@ -441,14 +440,6 @@ class VideosImport extends Model
                 if ($key === 0) {
                     $video->setPoster($screenshot);
                 }
-            }
-        }
-
-        foreach ($video->categories as $category) {
-            foreach ($video->images as $key => $screenshot) {
-                $isBestImage = (0 === $key) ? true : false;
-
-                RotationStats::addVideo($category, $video, $screenshot, $isBestImage);
             }
         }
 

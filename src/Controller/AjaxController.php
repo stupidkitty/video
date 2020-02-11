@@ -7,7 +7,7 @@ use yii\web\Controller;
 
 use yii\filters\VerbFilter;
 use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\RotationStats;
+use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
 
@@ -162,11 +162,9 @@ class AjaxController extends Controller
         }
 
         // Апдейт статы ротации тумбы
-        //RotationStats::updateAllCounters(['current_clicks' => 1], ['video_id' => $video_id, 'category_id' => $category['category_id'], 'image_id' => $image_id]);
-        $db->createCommand('UPDATE `videos_stats` SET `current_clicks`=`current_clicks`+1 WHERE `video_id`=:video_id AND `category_id`=:category_id AND `image_id`=:image_id')
+        $db->createCommand('UPDATE `videos_categories_map` SET `current_clicks`=`current_clicks`+1 WHERE `video_id`=:video_id AND `category_id`=:category_id AND `image_id`=:image_id')
             ->bindParam(':video_id', $video_id)
             ->bindParam(':category_id', $category_id)
-            ->bindParam(':image_id', $image_id)
             ->execute();
     }
 
@@ -197,14 +195,14 @@ class AjaxController extends Controller
         $request = $this->getRequest();
 
         $category_id = (int) $request->post('category_id', 0);
-        $images_ids = $request->post('images', '');
-        $images_ids = json_decode($images_ids, true);
+        $videos_ids = $request->post('videos_ids', '');
+        $videos_ids = json_decode($videos_ids, true);
 
-        if (!$category_id || empty($images_ids)) {
+        if (!$category_id || empty($videos_ids)) {
             return;
         }
 
-        RotationStats::updateAllCounters(['current_shows' => 1], ['image_id' => $images_ids, 'category_id' => $category_id]);
+        VideosCategories::updateAllCounters(['current_shows' => 1], ['video_id' => $videos_ids, 'category_id' => $category_id]);
     }
 
     /**

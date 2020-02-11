@@ -125,56 +125,39 @@ $this->params['breadcrumbs'][] = $video->title;
     </div>
 </div>
 
-<?php if (!empty($thumbsRotationStats)): ?>
+<?php if (!empty($categoriesRotationStats)): ?>
     <div class="box box-default">
         <div class="box-header with-border">
-            <h3 class="box-title">Статистика ротации по тумбам</h3>
+            <h3 class="box-title">Статистика ротации по категориям</h3>
         </div>
 
         <div class="box-body pad">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Thumb</th>
-                        <th>Stats</th>
+                        <th width="150">Category</th>
+                        <th>Ctr</th>
+                        <th>Total clicks</th>
+                        <th>Total shows</th>
+                        <th>Is tested</th>
+                        <th>Iteration num</th>
+                        <th>Current clicks</th>
+                        <th>Current shows</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                <?php foreach ($thumbsRotationStats as $item): ?>
-                    <tr>
-                        <td width="335"><?= Html::img($item['image']->filepath) ?></td>
-                        <td>
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th width="150">Category</th>
-                                        <th>Ctr</th>
-                                        <th>Total clicks</th>
-                                        <th>Total shows</th>
-                                        <th>Tested</th>
-                                        <th>Current clicks</th>
-                                        <th>Current shows</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                <?php foreach ($item['categories'] as $imageCategory): ?>
-                                    <tr>
-                                        <td><?= $imageCategory->category->title ?></td>
-                                        <td><?= $imageCategory->ctr ? "<b>{$imageCategory->ctr}</b>" : 0 ?></td>
-                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->total_clicks) ?></td>
-                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->total_shows) ?></td>
-                                        <td><?= $imageCategory->tested_image ? 'Yes' : 'No' ?></td>
-                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->current_clicks) ?></td>
-                                        <td><?= Yii::$app->formatter->asInteger($imageCategory->current_shows) ?></td>
-                                    </tr>
-                                <?php endforeach ?>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-
-                <?php endforeach ?>
+                    <?php foreach ($categoriesRotationStats as $row): ?>
+                        <tr>
+                            <td><?= $row->category->title ?></td>
+                            <td><?= $row->ctr ? "<b>{$row->ctr}</b>" : 0 ?></td>
+                            <td><?= Yii::$app->formatter->asInteger($row->total_clicks) ?></td>
+                            <td><?= Yii::$app->formatter->asInteger($row->total_shows) ?></td>
+                            <td><?= $row->is_tested ? 'Yes' : 'No' ?></td>
+                            <td><?= Yii::$app->formatter->asInteger($row->current_index) ?></td>
+                            <td><?= Yii::$app->formatter->asInteger($row->current_clicks) ?></td>
+                            <td><?= Yii::$app->formatter->asInteger($row->current_shows) ?></td>
+                        </tr>
+                    <?php endforeach ?>
                 </tbody>
             </table>
         </div>
