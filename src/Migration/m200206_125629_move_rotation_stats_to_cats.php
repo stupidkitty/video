@@ -98,9 +98,7 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
          */
         $this->dropTable('videos_stats');
     }
-    /* UPDATE `videos_categories_map` as `vcm`
-LEFT JOIN `videos_stats` as `vc` ON (`vcm`.`category_id`=`vc`.`category_id` AND `vcm`.`video_id`=`vc`.`video_id`)
-SET `vcm`.`is_tested`=`vc`.`tested_image`, `vcm`.`tested_at`=`vc`.`tested_at`, `vcm`.`current_index`=`vc`.`current_index`, `vcm`.`current_shows`=`vc`.`current_shows`, `vcm`.`current_clicks`=`vc`.`current_clicks`, `vcm`.`shows0`=`vc`.`shows0`, `vcm`.`clicks0`=`vc`.`clicks0`, `vcm`.`shows1`=`vc`.`shows1`, `vcm`.`clicks1`=`vc`.`clicks1`, `vcm`.`shows2`=`vc`.`shows2`, `vcm`.`clicks2`=`vc`.`clicks2`, `vcm`.`shows3`=`vc`.`shows3`, `vcm`.`clicks3`=`vc`.`clicks3`, `vcm`.`shows4`=`vc`.`shows4`, `vcm`.`clicks4`=`vc`.`clicks4`*/
+
     /**
      * {@inheritdoc}
      */
