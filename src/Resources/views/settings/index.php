@@ -55,6 +55,12 @@ $this->params['breadcrumbs'][] = $this->title;
 					    				По завершению теста тумба будет показываться на общих основаниях с учетом текущего CTR')
 					    ?>
 
+						<?= $activeForm->field($form, 'reset_rotation_period')
+					    		->textInput(['maxlength' => true])
+					    		->label('Циклический сброс ротации')
+					    		->hint('Кол-во показов видео в категории, после которого последует полное обнуление данных ротации.')
+					    ?>
+
 					    <?= $activeForm->field($form, 'test_items_start')
 					    		->textInput(['maxlength' => true])
 					    		->label('После какой тумбы будет тестовая зона')
