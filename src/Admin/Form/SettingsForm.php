@@ -82,7 +82,7 @@ class SettingsForm extends Model
             [['test_item_period'], 'default', 'value' => 200],
             [['test_items_start'], 'default', 'value' => 3],
             [['test_items_percent'], 'default', 'value' => 15],
-            [['reset_rotation_period'], 'default', 'value' => null],
+            [['reset_rotation_period'], 'default', 'value' => 0],
             [['related_number'], 'default', 'value' => 12],
             [['related_enable'], 'default', 'value' => 0],
             [['related_allow_description'], 'default', 'value' => 0],
