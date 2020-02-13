@@ -2,7 +2,7 @@
 namespace SK\VideoModule\Command;
 
 use yii\console\Controller;
-use SK\VideoModule\Service\Rotator as RotatorService;
+use SK\VideoModule\Service\Rotator;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -24,8 +24,8 @@ class RotatorController extends Controller
      */
     public function actionMarkTested()
     {
-        $rotatorService = new RotatorService();
-        $rotatorService->markAsTestedRows();
+        $rotator = new Rotator;
+        $rotator->markAsTestedRows();
     }
 
     /**
@@ -35,18 +35,29 @@ class RotatorController extends Controller
      */
     public function actionShiftViews()
     {
-        $rotatorService = new RotatorService();
-        $rotatorService->shiftHistoryCheckpoint();
+        $rotator = new Rotator;
+        $rotator->shiftHistoryCheckpoint();
     }
 
     /**
-     * Смещает указатель истори просмотров на следующий.
+     * Сброс N видео для продолжения ротации если категория отротирована.
      *
      * @return void
      */
     public function actionResetTested()
     {
-        $rotatorService = new RotatorService();
-        $rotatorService->resetOldTestedVideos();
+        $rotator = new Rotator;
+        $rotator->resetOldTestedVideos();
+    }
+
+    /**
+     * Сброс отротированных видео по показам.
+     *
+     * @return void
+     */
+    public function actionResetByShows()
+    {
+        $rotator = new Rotator;
+        $rotator->cyclicResetByShows();
     }
 }
