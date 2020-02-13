@@ -1,9 +1,9 @@
 <?php
 namespace SK\VideoModule\Model;
 
-use yii\db\ActiveRecord;
 use RS\Component\User\Model\User;
 use SK\VideoModule\Query\VideoQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "videos".
@@ -57,7 +57,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
             [['slug', 'title', 'description', 'short_description', 'video_preview', 'video_url', 'source_url', 'embed', 'template'], 'string'],
             [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
             [['is_hd', 'on_index', 'noindex', 'nofollow'], 'boolean'],
-            [['published_at', 'created_at', 'updated_at'], 'datetime', 'format' => 'php: Y-m-d H:i:s'],
+            [['published_at', 'created_at', 'updated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['is_hd', 'noindex', 'nofollow'], 'default', 'value' => 0],
             ['on_index', 'default', 'value' => 1],
             [['created_at', 'updated_at'], 'default', 'value' => \gmdate('Y-m-d H:i:s')],
@@ -161,18 +161,18 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-     public function addImage(ImageInterface $image)
-     {
-         $this->link('images', $image);
-     }
+    public function addImage(ImageInterface $image)
+    {
+        $this->link('images', $image);
+    }
 
     /**
      * @inheritdoc
      */
-     public function removeImage(ImageInterface $image)
-     {
-         $this->unlink('images', $image);
-     }
+    public function removeImage(ImageInterface $image)
+    {
+        $this->unlink('images', $image);
+    }
 
     /**
      * @return boolean
@@ -193,18 +193,18 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-     public function addScreenshot(Screenshot $screenshot)
-     {
-         $this->link('screenshots', $screenshot);
-     }
+    public function addScreenshot(Screenshot $screenshot)
+    {
+        $this->link('screenshots', $screenshot);
+    }
 
     /**
      * @inheritdoc
      */
-     public function removeScreenshot(Screenshot $screenshot)
-     {
-         $this->unlink('screenshots', $screenshot);
-     }
+    public function removeScreenshot(Screenshot $screenshot)
+    {
+        $this->unlink('screenshots', $screenshot);
+    }
 
     /**
      * @return boolean
@@ -226,36 +226,36 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-     public function addCategory(CategoryInterface $category)
-     {
-         $exists = VideosCategories::find()
-             ->where(['video_id' => $this->video_id, 'category_id' => $category->category_id])
-             ->exists();
+    public function addCategory(CategoryInterface $category)
+    {
+        $exists = VideosCategories::find()
+            ->where(['video_id' => $this->video_id, 'category_id' => $category->category_id])
+            ->exists();
 
-         if (!$exists) {
-             return $this->link('categories', $category);
-         }
+        if (!$exists) {
+            return $this->link('categories', $category);
+        }
 
-         return true;
-     }
+        return true;
+    }
 
     /**
      * @inheritdoc
      */
-     public function removeCategory(CategoryInterface $category)
-     {
-         $this->unlink('categories', $category, true);
-     }
+    public function removeCategory(CategoryInterface $category)
+    {
+        $this->unlink('categories', $category, true);
+    }
 
-     /**
-      * Переводит длительность видео в формат часов: "24:52", или: "1:45:29"
-      *
-      * @return string
-      */
-     public function getDurationAsTime()
-     {
-         return \ltrim(\gmdate('H:i:s', $this->duration), '0:');
-     }
+    /**
+     * Переводит длительность видео в формат часов: "24:52", или: "1:45:29"
+     *
+     * @return string
+     */
+    public function getDurationAsTime()
+    {
+        return \ltrim(\gmdate('H:i:s', $this->duration), '0:');
+    }
 
     /**
      * Return list of status codes and labels
@@ -265,10 +265,10 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     public static function getStatuses()
     {
         return [
-            self::STATUS_DISABLED  => 'Отключено',
-            self::STATUS_ACTIVE    => 'Опубликовано',
-            self::STATUS_MODERATE  => 'На модерации',
-            self::STATUS_DELETED   => 'Удалено',
+            self::STATUS_DISABLED => 'Отключено',
+            self::STATUS_ACTIVE => 'Опубликовано',
+            self::STATUS_MODERATE => 'На модерации',
+            self::STATUS_DELETED => 'Удалено',
         ];
     }
 }
