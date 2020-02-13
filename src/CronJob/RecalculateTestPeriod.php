@@ -18,9 +18,9 @@ class RecalculateTestPeriod implements HandlerInterface
         $settings = Yii::$container->get(SettingsInterface::class);
 
         $uniquesLastDay = Visitor::find()
-            ->distinct('ip')
+            ->select(new Expression('COUNT(DISTINCT `ip`)'))
             ->where(['>=', 'first_visit', new Expression('(NOW() - INTERVAL 1 DAY)')])
-            ->count();
+            ->scalar();
 
         $options = $this->getValuesByDailyUniqs($uniquesLastDay);
 
