@@ -88,8 +88,7 @@ class UserBehaviorHandler
     /**
      * Учет показов видео на экране в категориях.
      *
-     * @param array $videosIds
-     * @param int $categoryId
+     * @param array $data
      * @return void
      */
     protected function handleVideosViewed(array $data)
@@ -112,7 +111,7 @@ class UserBehaviorHandler
         }
 
         foreach ($inCategory as $key => $videosIds) {
-            VideosCategories::updateAllCounters(['current_shows' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
+            VideosCategories::updateAllCounters(['current_shows' => 1, 'shows_before_reset' => 1], ['video_id' => $videosIds, 'category_id' => $key]);
         }
 
         //Image::updateAllCounters(['current_shows' => 1], ['image_id' => $thumbs['image_id'], 'video_id' =>  $thumbs['video_id']]);

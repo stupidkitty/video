@@ -87,7 +87,7 @@ final class VideoSubscriber
             return;
         }
 
-        VideosCategories::updateAllCounters(['current_shows' => 1], ['video_id' => $event->data['videos_ids'], 'category_id' => $event->data['category_id']]);
+        VideosCategories::updateAllCounters(['current_shows' => 1, 'shows_before_reset' => 1], ['video_id' => $event->data['videos_ids'], 'category_id' => $event->data['category_id']]);
 
         // Обновление клика по категории
         $referHost = \parse_url($request->getReferrer(), PHP_URL_HOST);

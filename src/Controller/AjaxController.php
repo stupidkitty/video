@@ -202,7 +202,7 @@ class AjaxController extends Controller
             return;
         }
 
-        VideosCategories::updateAllCounters(['current_shows' => 1], ['video_id' => $videos_ids, 'category_id' => $category_id]);
+        VideosCategories::updateAllCounters(['current_shows' => 1, 'shows_before_reset' => 1], ['video_id' => $videos_ids, 'category_id' => $category_id]);
     }
 
     /**
