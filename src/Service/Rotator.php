@@ -206,7 +206,7 @@ class Rotator
     {
         return [
             'is_tested' => 0,
-            'tested_at' => null,
+            'tested_at' => \gmdate('Y-m-d H:i:s'),
             'shows_before_reset' => 0,
             'current_index' => 0,
             'current_shows' => 0,
