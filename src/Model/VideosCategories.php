@@ -33,6 +33,7 @@ class VideosCategories extends ActiveRecord
                 [
                     'category_id',
                     'video_id',
+                    'shows_before_reset',
                     'current_index',
                     'current_shows',
                     'current_clicks',

@@ -157,33 +157,7 @@ class Rotator
                 ->limit($resetLimit)
                 ->column();
 
-            VideosCategories::updateAll([
-                'is_tested' => 0,
-                'tested_at' => null,
-                'current_index' => 0,
-                'current_shows' => 0,
-                'current_clicks' => 0,
-                'shows0' => 0,
-                'clicks0' => 0,
-                'shows1' => 0,
-                'clicks1' => 0,
-                'shows2' => 0,
-                'clicks2' => 0,
-                'shows3' => 0,
-                'clicks3' => 0,
-                'shows4' => 0,
-                'clicks4' => 0,
-                'shows5' => 0,
-                'clicks5' => 0,
-                'shows6' => 0,
-                'clicks6' => 0,
-                'shows7' => 0,
-                'clicks7' => 0,
-                'shows8' => 0,
-                'clicks8' => 0,
-                'shows9' => 0,
-                'clicks9' => 0,
-            ], [
+            VideosCategories::updateAll($this->getResetFields(), [
                 'video_id' => $resetThumbs,
                 'category_id' => $category['category_id'],
             ]);
@@ -197,9 +171,43 @@ class Rotator
      */
     public function resetZeroCtr(): void
     {
-        VideosCategories::updateAll([
+        VideosCategories::updateAll($this->getResetFields(), [
+            'is_tested' => 1,
+            'ctr' => 0,
+        ]);
+    }
+
+    /**
+     * Циклический сброс данных ротатора на основе просмотров в категории.
+     * В таблице в бд соответствует колонка `shows_before_reset`.
+     *
+     * @return void
+     */
+    public function cyclicResetByShows(): void
+    {
+        $settings = Yii::$container->get(SettingsInterface::class);
+        $showsLimit = $settings->get('reset_rotation_period', 0, 'videos');
+
+        if (empty($showsLimit)) {
+            return;
+        }
+
+        VideosCategories::updateAll($this->getResetFields(), '`shows_before_reset` >= :limit AND `is_tested` = 1', [
+            ':limit' => $showsLimit
+        ]);
+    }
+
+    /**
+     * Reset fields.
+     *
+     * @return array
+     */
+    private function getResetFields(): array
+    {
+        return [
             'is_tested' => 0,
             'tested_at' => null,
+            'shows_before_reset' => 0,
             'current_index' => 0,
             'current_shows' => 0,
             'current_clicks' => 0,
@@ -223,9 +231,6 @@ class Rotator
             'clicks8' => 0,
             'shows9' => 0,
             'clicks9' => 0,
-        ], [
-            'is_tested' => 1,
-            'ctr' => 0,
-        ]);
+        ];
     }
 }
