@@ -167,8 +167,6 @@ class VideoController extends Controller
                 $video->setAttributes($form->getAttributes());
                 $video->generateSlug($form->slug);
                 $video->user_id = $user->getId();
-                $video->updated_at = $currentDatetime;
-                $video->created_at = $currentDatetime;
                 $video->published_at = $form->published_at;
 
                 if (!$video->save()) {
