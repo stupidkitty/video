@@ -96,6 +96,7 @@ class ToolsController extends Controller
             VideosCategories::updateAll([
                 'is_tested' => 0,
                 'tested_at' => null,
+                'shows_before_reset' => 0,
                 'current_index' => 0,
                 'current_shows' => 0,
                 'current_clicks' => 0,
