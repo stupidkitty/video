@@ -5,6 +5,7 @@ use SK\VideoModule\Rotator\UserBehaviorHandler;
 use SK\VideoModule\Rotator\UserBehaviorStatistic;
 use SK\VideoModule\Service\Rotator;
 use Yii;
+use yii\filters\auth\HttpBearerAuth;
 use yii\filters\VerbFilter;
 use yii\rest\Controller;
 use yii\web\Request;
