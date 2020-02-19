@@ -37,7 +37,8 @@ class Image extends ActiveRecord implements ImageInterface
         return [
             [['video_id', 'position', 'status'], 'integer'],
             [['filepath', 'source_url', 'filehash'], 'string'],
-            [['created_at'], 'safe'],
+            [['created_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['created_at'], 'default', 'value' => \gmdate('Y-m-d H:i:s')],
         ];
     }
 
