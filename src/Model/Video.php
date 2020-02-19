@@ -14,7 +14,6 @@ use yii\db\ActiveRecord;
  * @property string $slug
  * @property string $title
  * @property string $description
- * @property string $short_description
  * @property integer $orientation
  * @property integer $duration
  * @property string $video_preview
@@ -54,7 +53,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     public function rules()
     {
         return [
-            [['slug', 'title', 'description', 'short_description', 'video_preview', 'video_url', 'source_url', 'embed', 'template'], 'string'],
+            [['slug', 'title', 'description', 'video_preview', 'video_url', 'source_url', 'embed', 'template'], 'string'],
             [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
             [['is_hd', 'on_index', 'noindex', 'nofollow'], 'boolean'],
             [['published_at', 'created_at', 'updated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],

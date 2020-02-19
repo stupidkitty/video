@@ -22,8 +22,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'short_description')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'orientation')->textInput() ?>
 
     <?= $form->field($model, 'duration')->textInput() ?>

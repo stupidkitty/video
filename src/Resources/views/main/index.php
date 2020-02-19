@@ -96,7 +96,6 @@ $this->params['breadcrumbs'][] = $this->title;
 			            	'format' => 'html',
 			            ],
 			            // 'description:ntext',
-			            // 'short_description',
 			            // 'orientation',
 			            // 'duration',
 			            // 'video_url:url',

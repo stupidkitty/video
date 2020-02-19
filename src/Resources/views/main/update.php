@@ -66,8 +66,6 @@ $this->params['breadcrumbs'][] = $video->title;
 
                 <?= $activeForm->field($form, 'description')->textarea(['rows' => 5]) ?>
 
-                <?= $activeForm->field($form, 'short_description')->textInput(['maxlength' => true]) ?>
-
                 <?= $activeForm->field($form, 'categories_ids')->widget(
                         Select2::class,
                         [

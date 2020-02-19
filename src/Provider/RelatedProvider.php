@@ -65,7 +65,7 @@ class RelatedProvider
         $requiredRelatedNum = $this->settings->get('related_number', self::RELATED_NUMBER, 'videos');
 
         $query = Video::find()
-            ->select(['video_id', 'title', 'description', 'short_description'])
+            ->select(['video_id', 'title', 'description'])
             ->where(['video_id' => $video_id])
             ->asArray();
 
@@ -84,13 +84,13 @@ class RelatedProvider
         }
 
         if ($allowDescription) {
-            $searchString = trim($video['title'] . ' ' . $video['description'] . ' ' . $video['short_description']);
+            $searchString = trim($video['title'] . ' ' . $video['description']);
         } else {
             $searchString = trim($video['title']);
         }
 
         $relatedModels = Video::find()
-            ->select(['`v`.`video_id`', 'MATCH (`title`, `description`, `short_description`) AGAINST (:query) AS `relevance`'])
+            ->select(['`v`.`video_id`', 'MATCH (`title`, `description`) AGAINST (:query) AS `relevance`'])
             ->from (['v' => Video::tableName()]);
 
         if ($allowCategories && !empty($video['categories'])) {
@@ -102,7 +102,7 @@ class RelatedProvider
         }
 
         $relatedVideos = $relatedModels
-            ->andWhere('MATCH (`title`, `description`, `short_description`) AGAINST (:query)', [':query' => $searchString])
+            ->andWhere('MATCH (`title`, `description`) AGAINST (:query)', [':query' => $searchString])
             ->andWhere('`v`.`video_id`<>:video_id', [':video_id' => $video['video_id']])
             ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
             ->andWhere(['v.status' => Video::STATUS_ACTIVE])

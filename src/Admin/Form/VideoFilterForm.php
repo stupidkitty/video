@@ -93,8 +93,8 @@ class VideoFilterForm extends Model
 
         if ($this->title) {
             $query
-                ->select(['v.*', 'MATCH (`v`.`title`, `v`.`description`, `v`.`short_description`) AGAINST (:query) AS `relevance`'])
-                ->where('MATCH (`v`.`title`, `v`.`description`, `v`.`short_description`) AGAINST (:query IN BOOLEAN MODE)', [
+                ->select(['v.*', 'MATCH (`v`.`title`, `v`.`description`) AGAINST (:query) AS `relevance`'])
+                ->where('MATCH (`v`.`title`, `v`.`description`) AGAINST (:query IN BOOLEAN MODE)', [
                     ':query'=> $this->title,
                 ])
                 ->orderBy(['relevance' => SORT_DESC]);

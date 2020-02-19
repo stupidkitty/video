@@ -19,7 +19,7 @@ use RS\Component\Core\Settings\SettingsInterface;
 class SearchController extends Controller implements ViewContextInterface
 {
     protected $request;
-    
+
     /**
      * @inheritdoc
      */
@@ -111,8 +111,8 @@ class SearchController extends Controller implements ViewContextInterface
 
         if ($filterForm->load($request->get()) && $filterForm->isValid()) {
             $query
-                ->select('*, MATCH (`title`, `description`, `short_description`) AGAINST (:query) AS `relevance`')
-                ->where('MATCH (`title`, `description`, `short_description`) AGAINST (:query)', [
+                ->select('*, MATCH (`title`, `description`) AGAINST (:query) AS `relevance`')
+                ->where('MATCH (`title`, `description`) AGAINST (:query)', [
                     ':query' => $filterForm->getQuery(),
                 ])
                 ->untilNow()
@@ -153,7 +153,7 @@ class SearchController extends Controller implements ViewContextInterface
     protected function isMobile()
     {
         $deviceDetect = Yii::$container->get('device.detect');
-        
+
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 

@@ -11,7 +11,6 @@ class VideoForm extends Model
     public $title;
     public $slug;
     public $description;
-    public $short_description;
     public $video_url;
     public $source_url;
     public $embed;
@@ -46,7 +45,7 @@ class VideoForm extends Model
     {
         return [
             [['title'], 'required'],
-            [['slug', 'title', 'short_description', 'video_url', 'source_url', 'embed', 'template'], 'string', 'max' => 255],
+            [['slug', 'title', 'video_url', 'source_url', 'embed', 'template'], 'string', 'max' => 255],
             [['description'], 'string', 'max' => 3000],
             [['image_id', 'user_id', 'orientation', 'duration', 'status'], 'integer'],
             [['on_index', 'is_hd', 'noindex', 'nofollow'], 'boolean'],
@@ -56,7 +55,7 @@ class VideoForm extends Model
             ['categories_ids', 'filter', 'filter' => 'array_filter', 'skipOnEmpty' => true],
             ['categories_ids', 'default', 'value' => []],
 
-            [['title', 'description', 'short_description'], 'filter', 'filter' => function ($value) {
+            [['title', 'description'], 'filter', 'filter' => function ($value) {
                 $value = preg_replace('/\s+/', ' ', $value);
                 return trim($value);
             }],

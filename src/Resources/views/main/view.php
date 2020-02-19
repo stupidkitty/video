@@ -63,7 +63,6 @@ $this->params['breadcrumbs'][] = $video->title;
                         'title',
                         'slug',
                         'description:ntext',
-                        'short_description',
                         [
                             'label' => 'Categories',
                             'value' => function ($video) {
