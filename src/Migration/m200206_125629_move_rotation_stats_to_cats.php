@@ -117,7 +117,7 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
         $sql = "ALTER TABLE `videos` ADD `custom3` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `custom2`;";
         $this->execute($sql);
 
-        $this->dropIndex('videos', 'source_url');
+        $this->dropIndex('source_url', 'videos');
         $this->dropColumn('videos', 'short_description');
         $this->dropColumn('videos', 'video_url');
         $this->dropColumn('videos', 'source_url');
