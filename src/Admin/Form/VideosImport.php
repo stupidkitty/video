@@ -301,11 +301,8 @@ class VideosImport extends Model
         if (isset($row['video_id'])) {
             $existsVideoQuery->filterWhere(['video_id' => (int) $row['video_id']]);
         }
-            // Ищем, существует ли видео по урлу источника.
-        if (true === $this->skip_duplicate_urls && isset($row['source_url'])) {
-            $existsVideoQuery->orFilterWhere(['source_url' => $row['source_url']]);
-        }
-            // Ищем, существует ли видео по embed коду.
+
+        // Ищем, существует ли видео по embed коду.
         if (true === $this->skip_duplicate_embeds && isset($row['embed'])) {
             $existsVideoQuery->orFilterWhere(['embed' => $row['embed']]);
         }
@@ -319,7 +316,7 @@ class VideosImport extends Model
     }
 
     /**
-     * Осуществляет вставку видео. Если видео уже существут в базе (проверяется по source_url и embed), то вставка просто игнорируется.
+     * Осуществляет вставку видео. Если видео уже существут в базе (проверяется по embed), то вставка просто игнорируется.
      *
      * @param array $newVideo массив с данными для вставки нового видео.
      *

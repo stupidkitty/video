@@ -96,6 +96,7 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
         /**
          * Удаление колонок
          */
+        $this->dropIndex('videos', 'source_url');
         $this->dropColumn('videos', 'short_description');
         $this->dropColumn('videos', 'video_url');
         $this->dropColumn('videos', 'source_url');

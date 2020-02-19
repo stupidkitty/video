@@ -14,7 +14,6 @@ class VideoForm extends Model
     public $slug;
     public $description;
     public $video_preview;
-    public $source_url;
     public $embed;
     public $template;
     public $orientation;
@@ -45,7 +44,7 @@ class VideoForm extends Model
     {
         return [
             [['title'], 'required'],
-            [['slug', 'title', 'video_preview', 'source_url', 'embed', 'template'], 'string', 'max' => 255],
+            [['slug', 'title', 'video_preview', 'embed', 'template'], 'string', 'max' => 255],
             [['description'], 'string', 'max' => 3000],
             [['video_id', 'orientation', 'duration', 'status'], 'integer'],
             ['video_id', 'unique', 'targetClass' => Video::class],
@@ -65,7 +64,7 @@ class VideoForm extends Model
                 return trim($value);
             }],
 
-            [['slug', 'video_preview', 'source_url', 'embed', 'template'], 'trim'],
+            [['slug', 'video_preview', 'embed', 'template'], 'trim'],
             ['status', 'default', 'value' => 0],
             ['orientation', 'default', 'value' => 1],
             ['on_index', 'default', 'value' => 1],

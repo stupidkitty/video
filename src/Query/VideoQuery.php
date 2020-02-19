@@ -17,7 +17,6 @@ class VideoQuery extends ActiveQuery
                 'v.title',
                 'v.orientation',
                 'v.video_preview',
-                'v.source_url',
                 'v.duration',
                 'v.likes',
                 'v.dislikes',
