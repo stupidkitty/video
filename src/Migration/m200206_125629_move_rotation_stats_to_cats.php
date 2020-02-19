@@ -105,7 +105,6 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
         $sql = "ALTER TABLE `videos_categories` CHANGE `h1` `h1` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ''";
         $this->execute($sql);
 
-
         /**
          * Видео
          */
