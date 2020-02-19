@@ -115,6 +115,9 @@ class VideoController extends Controller
             'nofollow' => $video->nofollow,
             'views' => $video->views,
             'publishedAt' => (new \DateTime($video->published_at))->format('Y-m-d\TH:i:s\Z'),
+            'custom1' => $video->custom1,
+            'custom2' => $video->custom2,
+            'custom3' => $video->custom3,
             'poster' => null,
             'categories' => [],
         ];
@@ -161,7 +164,6 @@ class VideoController extends Controller
 
             try {
                 $video = new Video;
-                $currentDatetime = \gmdate('Y-m-d H:i:s');
                 $videoService = new VideoService;
 
                 $video->setAttributes($form->getAttributes());
@@ -186,7 +188,6 @@ class VideoController extends Controller
                         'filepath' => $imageUrl,
                         'source_url' => $imageUrl,
                         'status' => 10,
-                        'created_at' => $currentDatetime,
                     ]);
 
                     if ($image->save()) {

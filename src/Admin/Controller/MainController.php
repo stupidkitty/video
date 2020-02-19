@@ -119,13 +119,10 @@ class MainController extends Controller
         $form = new VideoForm;
 
         if ($form->load($this->getRequest()->post()) && $form->isValid()) {
-            $currentDatetime = gmdate('Y-m-d H:i:s');
             $videoService = new VideoService;
 
             $video->setAttributes($form->getAttributes());
             $video->generateSlug($form->slug);
-            $video->updated_at = $currentDatetime;
-            $video->created_at = $currentDatetime;
 
             $videoService->updateCategoriesByIds($video, $form->categories_ids);
 
@@ -172,7 +169,7 @@ class MainController extends Controller
         $form->setAttributes($video->getAttributes());
 
         if ($form->load($this->getRequest()->post()) && $form->isValid()) {
-            $currentDatetime = gmdate('Y-m-d H:i:s');
+            $currentDatetime = \gmdate('Y-m-d H:i:s');
             $videoService = new VideoService;
 
             $video->setAttributes($form->getAttributes());
@@ -251,17 +248,6 @@ class MainController extends Controller
 
         $videoService = new VideoService;
         $deletedNum = $videoService->deleteById($ajaxForm->videos_ids);
-        /*$videosQuery = Video::find()
-            ->where(['video_id' => $ajaxForm->videos_ids]);
-
-        $deletedNum = 0;
-        foreach ($videosQuery->batch(20) as $videos) {
-            foreach ($videos as $video) {
-                if ($video->delete()) {
-                    $deletedNum ++;
-                }
-            }
-        }*/
 
         return $this->asJson([
             'message' => Yii::t('videos', '<b>{num}</b> videos deleted', ['num' => $deletedNum])

@@ -99,7 +99,7 @@ $this->params['breadcrumbs'][] = $video->title;
                         ]
                     )
                     ->label('Время публикации')
-                    ->hint('Y-m-d H:i:s (eg. ' . gmdate('Y-m-d H:i:s') . ')');
+                    ->hint('Y-m-d H:i:s (eg. ' . \gmdate('Y-m-d H:i:s') . ')');
                 ?>
 
                 <?= $activeForm->field($form, 'user_id')->dropDownList($usersOptionsList, [
@@ -123,6 +123,12 @@ $this->params['breadcrumbs'][] = $video->title;
                 <?= $activeForm->field($form, 'status')->dropDownList($statusesOptionsList, [
                     'style' => 'width:initial;',
                 ]) ?>
+
+                <?= $activeForm->field($form, 'custom1')->textarea(['rows' => 4]) ?>
+
+                <?= $activeForm->field($form, 'custom2')->textarea(['rows' => 4]) ?>
+
+                <?= $activeForm->field($form, 'custom3')->textarea(['rows' => 4]) ?>
 
                 <?= $activeForm->field($form, 'is_hd')->checkbox() ?>
 

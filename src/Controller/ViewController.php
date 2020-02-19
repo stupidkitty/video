@@ -35,7 +35,7 @@ class ViewController extends Controller implements ViewContextInterface
             ],
             'pageCache' => [
                 'class' => PageCache::class,
-                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 'only' => ['index'],
                 'duration' => 3600,
                 'dependency' => [
@@ -56,12 +56,12 @@ class ViewController extends Controller implements ViewContextInterface
      */
     public function init()
     {
-        $this->request = Yii::$container->get(Request::class);
+        $this->request = $this->get(Request::class);
 
-        $response = Yii::$container->get(Response::class);
+        $response = $this->get(Response::class);
 
         $response->on($response::EVENT_AFTER_SEND, function () {
-            $request = Yii::$container->get(Request::class);
+            $request = $this->get(Request::class);
 
             Yii::$app->trigger('video-show', new VideoShow([
                 'id' => (int) $request->get('id', 0),
@@ -95,7 +95,7 @@ class ViewController extends Controller implements ViewContextInterface
      */
     public function actionIndex($id = 0, $slug = '')
     {
-        $settings = Yii::$container->get(SettingsInterface::class);
+        $settings = $this->get(SettingsInterface::class);
 
         $identify = (0 !== (int) $id) ? (int) $id : $slug;
         $video = $this->findByIdentify($identify);
@@ -147,7 +147,7 @@ class ViewController extends Controller implements ViewContextInterface
      */
     protected function isMobile()
     {
-        $deviceDetect = Yii::$container->get('device.detect');
+        $deviceDetect = $this->get('device.detect');
 
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
@@ -157,9 +157,9 @@ class ViewController extends Controller implements ViewContextInterface
      *
      * @return \yii\web\Request
      */
-    protected function getRequest()
+    protected function get($name)
     {
-        return $this->request;
+        return Yii::$container->get($name);
     }
 
     /**
@@ -171,7 +171,7 @@ class ViewController extends Controller implements ViewContextInterface
      */
     protected function registerXRobotsTag(array $video)
     {
-        $response = Yii::$container->get(Response::class);
+        $response = $this->get(Response::class);
 
         $crawlerRestrictionTypes = [];
         if (true === (bool) $video['noindex']) {

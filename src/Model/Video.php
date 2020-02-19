@@ -52,7 +52,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     public function rules()
     {
         return [
-            [['slug', 'title', 'description', 'video_preview', 'embed', 'template'], 'string'],
+            [['slug', 'title', 'description', 'video_preview', 'embed', 'template', 'custom1', 'custom2', 'custom3'], 'string'],
             [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
             [['is_hd', 'on_index', 'noindex', 'nofollow'], 'boolean'],
             [['published_at', 'created_at', 'updated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],

@@ -93,6 +93,9 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
                     `vcm`.`clicks4`=`vc`.`clicks4`";
         $this->execute($sql);
 
+        /**
+         * Смена кодировки у видео категорий
+         */
         $sql = "ALTER TABLE `videos_categories` CHANGE `meta_title` `meta_title` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ''";
         $this->execute($sql);
 
@@ -102,9 +105,19 @@ class m200206_125629_move_rotation_stats_to_cats extends Migration
         $sql = "ALTER TABLE `videos_categories` CHANGE `h1` `h1` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ''";
         $this->execute($sql);
 
+
         /**
-         * Удаление колонок
+         * Видео
          */
+        $sql = "ALTER TABLE `videos` ADD `custom1` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `status`;";
+        $this->execute($sql);
+
+        $sql = "ALTER TABLE `videos` ADD `custom2` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `custom1`;";
+        $this->execute($sql);
+
+        $sql = "ALTER TABLE `videos` ADD `custom3` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `custom2`;";
+        $this->execute($sql);
+
         $this->dropIndex('videos', 'source_url');
         $this->dropColumn('videos', 'short_description');
         $this->dropColumn('videos', 'video_url');

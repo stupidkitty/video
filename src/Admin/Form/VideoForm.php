@@ -25,6 +25,9 @@ class VideoForm extends Model
     public $noindex;
     public $nofollow;
     public $published_at;
+    public $custom1;
+    public $custom2;
+    public $custom3;
     /** @var array $categories_ids Список айди категорий видео ролика. */
     public $categories_ids = [];
 
@@ -44,7 +47,7 @@ class VideoForm extends Model
         return [
             [['title'], 'required'],
             [['slug', 'title', 'embed', 'template'], 'string', 'max' => 255],
-            [['description'], 'string', 'max' => 3000],
+            [['description', 'custom1', 'custom2', 'custom3'], 'string'],
             [['image_id', 'user_id', 'orientation', 'duration', 'status'], 'integer'],
             [['on_index', 'is_hd', 'noindex', 'nofollow'], 'boolean'],
             [['published_at'], 'safe'],

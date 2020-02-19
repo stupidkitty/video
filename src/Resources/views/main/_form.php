@@ -20,13 +20,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'description')->textarea(['rows' => 4]) ?>
 
     <?= $form->field($model, 'orientation')->textInput() ?>
 
     <?= $form->field($model, 'duration')->textInput() ?>
 
-    <?= $form->field($model, 'embed')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'embed')->textarea(['rows' => 3]) ?>
 
     <?= $form->field($model, 'likes')->textInput() ?>
 
@@ -44,9 +44,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'published_at')->textInput() ?>
 
-    <?= $form->field($model, 'created_at')->textInput() ?>
+    <?= $form->field($model, 'custom1')->textarea(['rows' => 4]) ?>
 
-    <?= $form->field($model, 'updated_at')->textInput() ?>
+    <?= $form->field($model, 'custom2')->textarea(['rows' => 4]) ?>
+
+    <?= $form->field($model, 'custom3')->textarea(['rows' => 4]) ?>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? Yii::t('videos', 'Create') : Yii::t('videos', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
