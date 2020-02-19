@@ -98,7 +98,6 @@ $this->params['breadcrumbs'][] = $this->title;
 			            // 'description:ntext',
 			            // 'orientation',
 			            // 'duration',
-			            // 'video_url:url',
 			            // 'embed:ntext',
 			            // 'on_index',
 			            // 'likes',

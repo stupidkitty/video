@@ -11,8 +11,6 @@ class VideoForm extends Model
     public $title;
     public $slug;
     public $description;
-    public $video_url;
-    public $source_url;
     public $embed;
     public $template;
     /** @var integer $image_id Идентификатор постера из числа скриншотов видео. */
@@ -45,7 +43,7 @@ class VideoForm extends Model
     {
         return [
             [['title'], 'required'],
-            [['slug', 'title', 'video_url', 'source_url', 'embed', 'template'], 'string', 'max' => 255],
+            [['slug', 'title', 'embed', 'template'], 'string', 'max' => 255],
             [['description'], 'string', 'max' => 3000],
             [['image_id', 'user_id', 'orientation', 'duration', 'status'], 'integer'],
             [['on_index', 'is_hd', 'noindex', 'nofollow'], 'boolean'],
@@ -60,7 +58,7 @@ class VideoForm extends Model
                 return trim($value);
             }],
 
-            [['slug', 'video_url', 'source_url', 'embed', 'template'], 'trim'],
+            [['slug', 'embed', 'template'], 'trim'],
             ['status', 'default', 'value' => 0],
             ['orientation', 'default', 'value' => 1],
             [['is_hd', 'noindex', 'nofollow'], 'default', 'value' => 0],

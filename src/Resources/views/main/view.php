@@ -90,8 +90,6 @@ $this->params['breadcrumbs'][] = $video->title;
                             },
                             'format' => 'html',
                         ],
-                        'video_url:url',
-                        'source_url:url',
                         'embed:ntext',
                         'video_preview',
                         'likes',

@@ -26,8 +26,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'duration')->textInput() ?>
 
-    <?= $form->field($model, 'video_url')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'embed')->textarea(['rows' => 6]) ?>
 
     <?= $form->field($model, 'likes')->textInput() ?>

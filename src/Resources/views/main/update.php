@@ -108,8 +108,6 @@ $this->params['breadcrumbs'][] = $video->title;
 
                 <?= $activeForm->field($form, 'duration')->textInput(['placeholder' => 324])->hint('В секундах') ?>
 
-                <?= $activeForm->field($form, 'video_url')->textInput(['maxlength' => true])->hint('Прямой урл до видео файла') ?>
-
                 <?= $activeForm->field($form, 'source_url')->textInput(['maxlength' => true])->hint('Урл источника видео. Страница с видео, например.') ?>
 
                 <?= $activeForm->field($form, 'embed')->textarea(['rows' => 4]) ?>
