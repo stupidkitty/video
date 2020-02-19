@@ -162,7 +162,7 @@ class AjaxController extends Controller
         }
 
         // Апдейт статы ротации тумбы
-        $db->createCommand('UPDATE `videos_categories_map` SET `current_clicks`=`current_clicks`+1 WHERE `video_id`=:video_id AND `category_id`=:category_id AND `image_id`=:image_id')
+        $db->createCommand('UPDATE `videos_categories_map` SET `current_clicks`=`current_clicks`+1 WHERE `video_id`=:video_id AND `category_id`=:category_id')
             ->bindParam(':video_id', $video_id)
             ->bindParam(':category_id', $category_id)
             ->execute();
