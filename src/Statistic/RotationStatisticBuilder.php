@@ -58,7 +58,7 @@ class RotationStatisticBuilder
 
             if (isset($categoriesAutopostingThumbs[$key])) {
                 $report->setAutopostingThumbs((int) $categoriesAutopostingThumbs[$key]);
-                $report->setUntilNowTotalThumbs($categoryTotalThumbs - $categoriesAutopostingThumbs[$key]);
+                $report->setUntilNowTotalThumbs($categoryTotalThumbs - (int) $categoriesAutopostingThumbs[$key]);
             } else {
                 $report->setUntilNowTotalThumbs($categoryTotalThumbs);
             }
@@ -183,7 +183,7 @@ class RotationStatisticBuilder
             ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->andWhere(['>=', '{{v}}.{{published_at}}', new \yii\db\Expression('NOW()')])
+            ->andWhere(['>=', '{{v}}.{{published_at}}', new Expression('NOW()')])
             ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
