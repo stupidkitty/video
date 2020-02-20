@@ -1,12 +1,11 @@
 <?php
 namespace SK\VideoModule\Service;
 
-use Yii;
-use yii\helpers\ArrayHelper;
-use SK\VideoModule\Model\VideosRelatedMap;
+use SK\VideoModule\Model\Category as CategoryModel;
 use SK\VideoModule\Model\Video as VideoModel;
 use SK\VideoModule\Model\VideosCategories;
-use SK\VideoModule\Model\Category as CategoryModel;
+use SK\VideoModule\Model\VideosRelatedMap;
+use Yii;
 
 class Video
 {
@@ -51,10 +50,10 @@ class Video
      */
     public function updateCategoriesByIds(VideoModel $video, array $newCategoriesIds)
     {
-        $oldCategoriesIds = ArrayHelper::getColumn($video->categories, 'category_id');
+        $oldCategoriesIds = \array_column($video->categories, 'category_id');
 
-        $removeCategoriesIds = array_diff($oldCategoriesIds, $newCategoriesIds);
-        $addCategoriesIds = array_diff($newCategoriesIds, $oldCategoriesIds);
+        $removeCategoriesIds = \array_diff($oldCategoriesIds, $newCategoriesIds);
+        $addCategoriesIds = \array_diff($newCategoriesIds, $oldCategoriesIds);
 
         if (!empty($removeCategoriesIds)) {
             $removeCategories = CategoryModel::find()
@@ -76,7 +75,6 @@ class Video
             }
         }
     }
-
 
     /**
      * Удаление видео.
@@ -117,11 +115,10 @@ class Video
         $query = VideoModel::find()
             ->where(['video_id' => $id]);
 
-
         foreach ($query->batch(20) as $videos) {
             foreach ($videos as $video) {
                 if ($this->delete($video)) {
-                    $deletedNum ++;
+                    $deletedNum++;
                 }
             }
         }
