@@ -88,8 +88,8 @@ class Rotator
                     'current_shows' => 0,
                     'current_clicks' => 0,
                     'current_index' => $currentIndex + 1,
-                    "shows{$currentIndex}" => (int) $thumbStat['current_shows'],
-                    "clicks{$currentIndex}" => (int) $thumbStat['current_clicks'],
+                    "shows{$checkPointNumber}" => (int) $thumbStat['current_shows'],
+                    "clicks{$checkPointNumber}" => (int) $thumbStat['current_clicks'],
                 ],
                 [
                     'video_id' => $thumbStat['video_id'],
