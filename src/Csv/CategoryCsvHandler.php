@@ -1,9 +1,8 @@
 <?php
 namespace SK\VideoModule\Csv;
 
-use Offdev\Csv\Parser;
-use Offdev\Csv\Stream;
-use Offdev\Csv\Validator;
+use Csv\Parser;
+use Csv\Validator;
 use SK\VideoModule\Csv\CategoryCsvDto;
 
 class CategoryCsvHandler
@@ -11,34 +10,32 @@ class CategoryCsvHandler
     public function handle(CategoryCsvDto $dto)
     {
         try {
-            $stream = Stream::factory(\fopen($dto->file, 'r'));
-            $parser = new Parser($stream, [
-                Parser::OPTION_BUFSIZE => 1024 * 20,
-                Parser::OPTION_HEADER => $dto->options->isSkipFirstLine === true,
-                Parser::OPTION_DELIMITER => $dto->delimiter,
-                Parser::OPTION_STRING_ENCLOSURE => $dto->enclosure,
-                Parser::OPTION_ESCAPE_CHAR => '\\',
-                Parser::OPTION_THROWS => false,
+            $file = $dto->file->openFile();
+            $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::READ_AHEAD | \SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
+            $file->setCsvControl($dto->delimiter, $dto->enclosure);
+
+            $parser = new Parser($file, [
+                'hasHeader' => $dto->isSkipFirstLine === true,
+                'skipFirstLine' => $dto->isSkipFirstLine,
+                'stopWhenError' => false,
+                //'ignoreKeys' => ['skip'], сделать игнор ключей
             ]);
-            /*$parser->setValidator(new Validator([
-                'required|integer', // fappy id
-                'regex:/^$/i', // top id
-                'required|string', // title
-                'required|integer', // video width
-                'required|integer', // video height
-                'required|integer', // duration
-                'required|string|in:HD,SD', // quality
-                'date_format:Y-m-d H:i:s|nullable', // post_date
-                'string|nullable', // categories
-                'string|nullable', // tags
-                'string|nullable', // models
-                'required|string', // video link
-                'required|string', // url on fappy
-                'required|string', // screenshots_prefix
-                'required|string', // main_screenshot
-                'required|string', // screenshots
-            ]));*/
-            $parser->setProcessor(new CategoryRowProcessing($dto->fields, $dto->options));
+            $parser->setValidator(new Validator([
+                'category_id' => 'integer',
+                'title' => 'string',
+                'skip' => 'string',
+                'slug' => 'string',
+                'meta_title' => 'string',
+                'meta_description' => 'string',
+                'h1' => 'string',
+                'description' => 'string',
+                'seotext' => 'string',
+                'param1' => 'string',
+                'param2' => 'string',
+                'param3' => 'string'
+            ]));
+            $parser->setRowHandler(new CategoryRowProcessing($dto->fields, $dto->options));
+            $parser->setHeader($dto->fields);
             $parser->run();
         } catch (\Throwable $e) {
             //$this->logger->error($e->getMessage());
