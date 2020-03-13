@@ -8,4 +8,5 @@ class CategoryCsvDto
     public $fields = [];
     public $file;
     public $options;
+    public $isSkipFirstLine = true;
 }
