@@ -1,11 +1,11 @@
 <?php
 namespace SK\VideoModule\Csv;
 
-use Offdev\Csv\Item;
-use Offdev\Csv\ProcessorInterface;
+use Csv\Item;
+use Csv\RowHandlerInterface;
 use SK\VideoModule\Csv\CategoryImportOptions;
 
-class CategoryRowProcessing implements ProcessorInterface
+class CategoryRowProcessing implements RowHandlerInterface
 {
     private $options;
     private $fields;
@@ -16,28 +16,28 @@ class CategoryRowProcessing implements ProcessorInterface
         $this->options = $options;
       }
 
-    public function processRecord(Item $row): void
+    public function success(Item $row): void
     {
         try {
             //echo 'Success:' . $row->get(0);
-            $data = $this->prepareRow($row);
-            dump($data);
+            //$data = $this->prepareRow($row);
+            dump($row);
         } catch (\Throwable $e) {
             \Yii::warning($e->getMessage());
         }
     }
 
-    public function processInvalidRecord(Item $row): void
+    public function failure(Item $row): void
     {
+        echo 'fail:';
         dump($row);
     }
 
     public function eof(): void
     {
-        echo "---EOF---" . PHP_EOL;
     }
 
-    private function prepareRow($row)
+    /*private function prepareRow($row)
     {
         $data = [];
         $arrayValues = array_values($row['items']);
@@ -46,5 +46,5 @@ class CategoryRowProcessing implements ProcessorInterface
         }
         dump($row, $data, $this->fields, $arrayValues); exit;
         return $data;
-    }
+    }*/
 }
