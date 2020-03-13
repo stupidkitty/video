@@ -115,10 +115,10 @@ class CategoriesImportForm extends Model
         $dto->enclosure = $this->enclosure;
         $dto->fields = $this->fields;
         $dto->file = new \SplFileInfo($this->csv_file->tempName);
+        $dto->isSkipFirstLine = (bool) $this->isSkipFirstLine;
 
         $dto->options = new CategoryImportOptions;
         $dto->options->isUpdate = (bool) $this->isUpdate;
-        $dto->options->isSkipFirstLine = (bool) $this->isSkipFirstLine;
         $dto->options->isEnable = (bool) $this->isEnable;
         $dto->options->isReplaceSlug = (bool) $this->isReplaceSlug;
 
