@@ -224,7 +224,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-    public function addCategory(CategoryInterface $category)
+    public function addCategory(Category $category)
     {
         $exists = VideosCategories::find()
             ->where(['video_id' => $this->video_id, 'category_id' => $category->category_id])
@@ -240,7 +240,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-    public function removeCategory(CategoryInterface $category)
+    public function removeCategory(Category $category)
     {
         $this->unlink('categories', $category, true);
     }

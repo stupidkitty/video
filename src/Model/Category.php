@@ -29,7 +29,7 @@ use yii\db\ActiveRecord;
  * @property VideosCategories[] $videosCategories
  * @property Video[] $videos
  */
-class Category extends ActiveRecord implements CategoryInterface, ToggleableInterface, SlugAwareInterface
+class Category extends ActiveRecord implements ToggleableInterface, SlugAwareInterface
 {
     use SlugGeneratorTrait, ToggleableTrait;
 
@@ -73,7 +73,8 @@ class Category extends ActiveRecord implements CategoryInterface, ToggleableInte
                 'integer'
             ],
             [['on_index', 'enabled'], 'boolean'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['created_at', 'updated_at'], 'default', 'value' => \gmdate('Y-m-d H:i:s')],
         ];
     }
 

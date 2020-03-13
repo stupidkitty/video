@@ -27,7 +27,7 @@ interface VideoInterface
      * @return bool
      */
     public function hasPoster();
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -71,12 +71,12 @@ interface VideoInterface
     /**
      * @inheritdoc
      */
-     public function addCategory(CategoryInterface $category);
+     public function addCategory(Category $category);
 
     /**
      * @inheritdoc
      */
-     public function removeCategory(CategoryInterface $category);
+     public function removeCategory(Category $category);
 
     /**
      * @inheritdoc

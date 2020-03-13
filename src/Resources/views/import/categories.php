@@ -101,12 +101,6 @@ $this->params['breadcrumbs'][] = 'Категории видео';
                 </div>
 
                 <div class="form-group">
-                    <label class="control-label" for="csv-rows">Данные для вставки (содержимое csv)</label>
-                    <?= Html::activeTextarea($form, 'csv_rows', ['id' => 'csv-rows', 'class' => 'form-control', 'rows' => 6]) ?>
-                    <div class="help-block"></div>
-                </div>
-
-                <div class="form-group">
                     <label for="csv_file">Файл импорта</label>
                     <?= Html::fileInput('csv_file', null, ['id' => 'csv_file']) ?>
 
@@ -114,18 +108,23 @@ $this->params['breadcrumbs'][] = 'Категории видео';
                 </div>
 
                 <div class="form-group">
-                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'skip_first_line', ['label' => false]) ?> <span>Пропустить первую строчку</span></label>
+                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isSkipFirstLine', ['label' => false]) ?> <span>Пропустить первую строчку</span></label>
                     <div class="help-block">Активировать, если в первой строке указаны названия столбцов</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'update_category', ['label' => false]) ?> <span>Обновить при совпадении id или названия</span></label>
+                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isUpdate', ['label' => false]) ?> <span>Обновить при совпадении id или названия</span></label>
                     <div class="help-block">Если опция не активна, при совпадении идентификатора или названия импортируемая категория будет игнорироваться.</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'enable', ['label' => false]) ?> <span>Активировать при вставке</span></label>
+                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isEnable', ['label' => false]) ?> <span>Активировать при вставке</span></label>
                     <div class="help-block">Вставленные или обновленные категории будут автоматически активированы.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isReplaceSlug', ['label' => false]) ?> <span>Обновить слаг</span></label>
+                    <div class="help-block">Будет сгенерирован новый слаг из названия, если не указан в полях.</div>
                 </div>
 
             <?php ActiveForm::end() ?>
@@ -136,9 +135,6 @@ $this->params['breadcrumbs'][] = 'Категории видео';
             <?= Html::submitButton('Добавить', ['class' => 'btn btn-default', 'form' => 'category-import-form']) ?>
             <?= Html::a('К списку', ['list-feeds'], ['class' => 'btn btn-warning']) ?>
         </div>
-
-
-
 </div>
 
 <?php
@@ -164,7 +160,7 @@ $js = <<< 'JS'
         });
 
         $(csvSelectOptions).each(function() {
-            tagSelect.append($('<option>').attr('value',this.value).text(this.text));
+            tagSelect.append($('<option>').attr('value', this.value).text(this.text));
         });
 
         tagSelect.appendTo(tagDiv);

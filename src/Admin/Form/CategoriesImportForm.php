@@ -5,9 +5,12 @@ use Yii;
 use LimitIterator;
 use SplFileObject;
 use yii\base\Model;
+use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 use yii\helpers\StringHelper;
 use SK\VideoModule\Model\Category;
+use SK\VideoModule\Csv\CategoryCsvDto;
+use SK\VideoModule\Csv\CategoryImportOptions;
 
 /**
  * Модель для обработки формы импорта категорий через цсв файлы или просто текст.
@@ -17,13 +20,13 @@ class CategoriesImportForm extends Model
     public $delimiter;
     public $enclosure;
     public $fields;
-    public $skip_first_line;
 
-    public $csv_rows;
     public $csv_file;
 
-    public $update_category;
-    public $enable;
+    public $isUpdate;
+    public $isEnable;
+    public $isSkipFirstLine;
+    public $isReplaceSlug;
 
     protected $not_inserted_rows = [];
 
@@ -31,7 +34,6 @@ class CategoriesImportForm extends Model
      * @var int $imported_rows_num количество вставленных записей.
      */
     protected $imported_rows_num = 0;
-
 
     protected $options = [
         'skip' => 'Пропустить',
@@ -58,10 +60,12 @@ class CategoriesImportForm extends Model
         $this->delimiter = '|';
         $this->enclosure = '"';
         $this->fields = ['skip'];
-        $this->update_category = false;
-        $this->skip_first_line = true;
-        $this->enable = true;
-            // Отключить логи
+        $this->isUpdate = false;
+        $this->isEnable = true;
+        $this->isSkipFirstLine = true;
+        $this->isReplaceSlug = false;
+
+        // Отключить логи
         if (Yii::$app->hasModule('log') && is_object(Yii::$app->log->targets['file'])) {
             Yii::$app->log->targets['file']->enabled = false;
         }
@@ -82,17 +86,14 @@ class CategoriesImportForm extends Model
     {
         return [
             [['delimiter', 'fields'], 'required'],
-            ['fields', 'each', 'rule' => ['in', 'range' => array_keys($this->options)], 'skipOnEmpty' => false],
+            ['fields', 'each', 'rule' => ['in', 'range' => \array_keys($this->options)], 'skipOnEmpty' => false],
 
-            [['delimiter', 'enclosure', 'csv_rows'], 'string'],
-            [['delimiter', 'enclosure', 'csv_rows'], 'trim'],
+            [['delimiter', 'enclosure'], 'string'],
+            [['delimiter', 'enclosure'], 'trim'],
 
-            [['update_category', 'skip_first_line', 'enable'], 'boolean'],
-            [['update_category', 'skip_first_line', 'enable'], 'filter', 'filter' => function ($value) {
-                return (bool) $value;
-            }],
+            [['isUpdate', 'isSkipFirstLine', 'isEnable', 'isReplaceSlug'], 'boolean'],
 
-            [['csv_file'], 'file', 'checkExtensionByMimeType' => false, 'skipOnEmpty' => true, 'extensions' => 'csv', 'maxFiles' => 1, 'mimeTypes' => 'text/plain'],
+            [['csv_file'], 'file', 'checkExtensionByMimeType' => false, 'skipOnEmpty' => false, 'extensions' => 'csv', 'maxFiles' => 1, 'mimeTypes' => 'text/plain'],
         ];
     }
 
@@ -101,7 +102,27 @@ class CategoriesImportForm extends Model
      */
     public function isValid()
     {
+        $this->csv_file = UploadedFile::getInstance($this, 'csv_file');
+
         return $this->validate();
+    }
+
+    public function getData()
+    {
+        $dto = new CategoryCsvDto;
+
+        $dto->delimiter = $this->delimiter;
+        $dto->enclosure = $this->enclosure;
+        $dto->fields = $this->fields;
+        $dto->file = new \SplFileInfo($this->csv_file->tempName);
+
+        $dto->options = new CategoryImportOptions;
+        $dto->options->isUpdate = (bool) $this->isUpdate;
+        $dto->options->isSkipFirstLine = (bool) $this->isSkipFirstLine;
+        $dto->options->isEnable = (bool) $this->isEnable;
+        $dto->options->isReplaceSlug = (bool) $this->isReplaceSlug;
+
+        return $dto;
     }
 
     /**
@@ -123,7 +144,7 @@ class CategoriesImportForm extends Model
 
             @unlink($this->csv_file->tempName);
 
-        // Если файла нет, но загружено через текстовое поле, то будем читать с него.
+            // Если файла нет, но загружено через текстовое поле, то будем читать с него.
         } elseif (!empty($this->csv_rows)) {
             file_put_contents($filepath, $this->csv_rows);
         }
@@ -160,7 +181,7 @@ class CategoriesImportForm extends Model
         $iterator = new LimitIterator($file, $startLine);
 
         foreach ($iterator as $lineNumber => $csvParsedString) {
-                // Совпадает ли количество заданных полей с количеством элементов в CSV строке
+            // Совпадает ли количество заданных полей с количеством элементов в CSV строке
             $elementsNum = count($csvParsedString);
             if ($fieldsNum !== $elementsNum) {
                 $row = $this->str_putcsv($csvParsedString, $this->delimiter, $this->enclosure);
@@ -180,7 +201,7 @@ class CategoriesImportForm extends Model
             }
 
             if (true === $this->insertItem($newItem)) {
-                $this->imported_rows_num ++;
+                $this->imported_rows_num++;
             } else {
                 $this->not_inserted_rows[] = $this->str_putcsv($csvParsedString, $this->delimiter, $this->enclosure);
             }
@@ -199,7 +220,7 @@ class CategoriesImportForm extends Model
     {
         $currentTime = gmdate('Y-m-d H:i:s');
 
-            // Ищем, существует ли категория.
+        // Ищем, существует ли категория.
         if (!empty($newCategory['category_id'])) {
             $category = Category::findOne($newCategory['category_id']);
         } elseif (!empty($newCategory['title'])) {
@@ -209,16 +230,16 @@ class CategoriesImportForm extends Model
             return false;
         }
 
-            // Если название все таки пустое, значит оно будет идом категории.
+        // Если название все таки пустое, значит оно будет идом категории.
         if (empty($newCategory['title'])) {
             $newCategory['title'] = $newCategory['category_id'];
         }
 
-            // Если ничего не нашлось, будем вставлять новый.
+        // Если ничего не нашлось, будем вставлять новый.
         if (null === $category) {
             $category = new Category();
         } else {
-                // Если переписывать не нужно существующую категорию, то просто проигнорировать ее.
+            // Если переписывать не нужно существующую категорию, то просто проигнорировать ее.
             if (false === $this->update_category) {
                 $this->addError('csv_rows', "<b>{$category->title}</b> дубликат");
                 return false;
@@ -288,7 +309,8 @@ class CategoriesImportForm extends Model
     /**
      * @inheritdoc
      */
-    public function hasNotInsertedRows() {
+    public function hasNotInsertedRows()
+    {
         return !empty($this->not_inserted_rows);
     }
 

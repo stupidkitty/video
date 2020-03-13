@@ -12,6 +12,7 @@ use yii\data\ActiveDataProvider;
 use RS\Component\User\Model\User;
 use yii\web\NotFoundHttpException;
 use SK\VideoModule\Model\ImportFeed;
+use SK\VideoModule\Csv\CategoryCsvHandler;
 use SK\VideoModule\Admin\Form\VideosImport;
 use SK\VideoModule\Admin\Form\CategoriesImportForm;
 
@@ -101,14 +102,15 @@ class ImportController extends Controller
     {
         $form = new CategoriesImportForm;
 
-        $form->csv_file = UploadedFile::getInstance($form, 'csv_file');
-
         if ($form->load($this->getRequest()->post()) && $form->isValid()) {
-            $form->save();
+            $dto = $form->getData();
+            $csvHandler = new CategoryCsvHandler;
+            $csvHandler->handle($dto);
+            /*$form->save();
 
             if (0 < $form->getImportedRowsNum()) {
                 Yii::$app->session->setFlash('success', Yii::t('videos', '<b>{num}</b> categories added or updated', ['num' => $form->getImportedRowsNum()]));
-            }
+            }*/
         }
 
         return $this->render('categories', [
