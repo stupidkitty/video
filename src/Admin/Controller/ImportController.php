@@ -52,6 +52,7 @@ class ImportController extends Controller
      */
     public function actionVideos($preset = 0)
     {
+        $request = $this->get(Request::class);
         $importFeed = ImportFeed::find()
             ->where(['feed_id' => $preset])
             ->one();
@@ -64,7 +65,7 @@ class ImportController extends Controller
 
         $model->csv_file = UploadedFile::getInstance($model, 'csv_file');
 
-        if ($model->load($this->getRequest()->post()) && $model->validate()) {
+        if ($model->load($request->post()) && $model->validate()) {
             $model->save();
 
             if (0 < $model->getImportedRowsNum()) {
@@ -100,21 +101,21 @@ class ImportController extends Controller
      */
     public function actionCategories()
     {
+        $request = $this->get(Request::class);
+        $csvHandler = $this->get(CategoryCsvHandler::class);
         $form = new CategoriesImportForm;
+        $isProcessed = false;
 
-        if ($form->load($this->getRequest()->post()) && $form->isValid()) {
-            $dto = $form->getData();
-            $csvHandler = new CategoryCsvHandler;
-            $csvHandler->handle($dto);
-            /*$form->save();
-
-            if (0 < $form->getImportedRowsNum()) {
-                Yii::$app->session->setFlash('success', Yii::t('videos', '<b>{num}</b> categories added or updated', ['num' => $form->getImportedRowsNum()]));
-            }*/
+        if ($form->load($request->post()) && $form->isValid()) {
+            $handlerConfig = $form->getData();
+            $csvHandler->handle($handlerConfig);
+            $isProcessed = true;
         }
 
         return $this->render('categories', [
+            'isProcessed' => $isProcessed,
             'form' => $form,
+            'failedItems' => $csvHandler->getFailedItems()
         ]);
     }
 
@@ -148,9 +149,10 @@ class ImportController extends Controller
      */
     public function actionAddFeed()
     {
+        $request = $this->get(Request::class);
         $feed = new ImportFeed();
 
-        if ($feed->load($this->getRequest()->post()) && $feed->save()) {
+        if ($feed->load($request->post()) && $feed->save()) {
             return $this->redirect(['videos', 'preset' => $feed->feed_id]);
         }
 
@@ -166,9 +168,10 @@ class ImportController extends Controller
      */
     public function actionUpdateFeed($id)
     {
+        $request = $this->get(Request::class);
         $feed = $this->findById($id);
 
-        if ($feed->load($this->getRequest()->post()) && $feed->save()) {
+        if ($feed->load($request->post()) && $feed->save()) {
             return $this->redirect(['videos', 'preset' => $feed->feed_id]);
         }
 
@@ -215,8 +218,8 @@ class ImportController extends Controller
      *
      * @return \yii\web\Request
      */
-    protected function getRequest()
+    protected function get($name)
     {
-        return Yii::$container->get(Request::class);
+        return Yii::$container->get($name);
     }
 }
