@@ -42,25 +42,35 @@ $this->params['breadcrumbs'][] = 'Категории видео';
     </div>
 
         <div class="box-body pad">
+            <?php if ($isProcessed): ?>
+                <div class="alert alert-success alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    Данные обработаны.
+                </div>
+            <?php endif ?>
 
-            <?php if ($form->hasErrors('csv_rows')): ?>
+            <?php if ($failedItems->isNotEmpty()): ?>
                 <div class="alert alert-danger alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                     <h4><i class="icon fa fa-exclamation-circle"></i> Следующие записи не были добавлены: </h4>
+
                     <ul>
-                    <?php foreach ($form->getErrors('csv_rows') as $errorMessage): ?>
-                        <?php if (is_array($errorMessage)): ?>
-                            <?php $key = key($errorMessage); ?>
-                            <li>Категория: <b><?= Html::encode($key) ?></b>:</li>
-                            <ul>
-                                <?php foreach ($errorMessage[$key] as $error): ?>
-                                    <li><?= $error ?></li>
-                                <?php endforeach ?>
-                            </ul>
-                        <?php else: ?>
-                            <li><?= $errorMessage ?></li>
-                        <?php endif ?>
-                    <?php endforeach ?>
+                        <?php foreach ($failedItems as $failedItem): ?>
+                            <li>
+                                <label>Строка:</label> <?= $failedItem['item']->toJson() ?></br>
+                                <?php if ($failedItem['message'] !== ''): ?>
+                                    <label>Ошибка:</label> <?= $failedItem['message'] ?></br>
+                                <?php endif ?>
+                                <?php if (!empty($failedItem['details'])): ?>
+                                    <label>Детали:</label>
+                                    <ul>
+                                    <?php foreach ($failedItem['details'] as $error): ?>
+                                        <li><?= $error ?></li>
+                                    <?php endforeach ?>
+                                </ul>
+                                <?php endif ?>
+                            </li>
+                        <?php endforeach ?>
                     </ul>
                 </div>
             <?php endif ?>
@@ -112,8 +122,9 @@ $this->params['breadcrumbs'][] = 'Категории видео';
                     <div class="help-block">Активировать, если в первой строке указаны названия столбцов</div>
                 </div>
 
+                <h4 style="margin-top: 30px">Опции вставки\замены</h4>
                 <div class="form-group">
-                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isUpdate', ['label' => false]) ?> <span>Обновить при совпадении id или названия</span></label>
+                    <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isUpdate', ['label' => false]) ?> <span>Обновить при совпадении id, названия или слага</span></label>
                     <div class="help-block">Если опция не активна, при совпадении идентификатора или названия импортируемая категория будет игнорироваться.</div>
                 </div>
 
@@ -124,7 +135,7 @@ $this->params['breadcrumbs'][] = 'Категории видео';
 
                 <div class="form-group">
                     <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isReplaceSlug', ['label' => false]) ?> <span>Обновить слаг</span></label>
-                    <div class="help-block">Будет сгенерирован новый слаг из названия, если не указан в полях.</div>
+                    <div class="help-block">Будет сгенерирован новый слаг из названия, если таковой не указан в полях csv.</div>
                 </div>
 
             <?php ActiveForm::end() ?>
