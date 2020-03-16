@@ -143,6 +143,7 @@ $this->params['breadcrumbs'][] = $video->title;
                         <th>Iteration num</th>
                         <th>Current clicks</th>
                         <th>Current shows</th>
+                        <th>Reset counter</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -156,6 +157,7 @@ $this->params['breadcrumbs'][] = $video->title;
                             <td><?= Yii::$app->formatter->asInteger($row->current_index) ?></td>
                             <td><?= Yii::$app->formatter->asInteger($row->current_clicks) ?></td>
                             <td><?= Yii::$app->formatter->asInteger($row->current_shows) ?></td>
+                            <td><?= Yii::$app->formatter->asInteger($row->shows_before_reset) ?></td>
                         </tr>
                     <?php endforeach ?>
                 </tbody>
