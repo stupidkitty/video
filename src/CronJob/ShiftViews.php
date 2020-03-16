@@ -6,7 +6,7 @@ use SK\CronModule\Handler\HandlerInterface;
 
 class ShiftViews implements HandlerInterface
 {
-    public function run()
+    public function run(): void
     {
         $rotator = new Rotator;
         $rotator->shiftHistoryCheckpoint();

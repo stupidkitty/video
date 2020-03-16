@@ -6,7 +6,7 @@ use SK\CronModule\Handler\HandlerInterface;
 
 class UpdatePopularity implements HandlerInterface
 {
-    public function run()
+    public function run(): void
     {
         $category = new CategoryService();
         $category->updatePopularity();

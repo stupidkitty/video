@@ -6,7 +6,7 @@ use SK\CronModule\Handler\HandlerInterface;
 
 class CountVideos implements HandlerInterface
 {
-    public function run()
+    public function run(): void
     {
         $category = new CategoryService();
         $category->countVideos();

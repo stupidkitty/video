@@ -6,7 +6,7 @@ use SK\CronModule\Handler\HandlerInterface;
 
 class AssignCoverImages implements HandlerInterface
 {
-    public function run()
+    public function run(): void
     {
         $category = new CategoryService();
         $category->assignCoverImages();

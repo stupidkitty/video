@@ -13,7 +13,7 @@ use yii\db\Expression;
  */
 class RecalculateTestPeriod implements HandlerInterface
 {
-    public function run()
+    public function run(): void
     {
         $settings = Yii::$container->get(SettingsInterface::class);
 

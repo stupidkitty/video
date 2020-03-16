@@ -11,7 +11,7 @@ use SK\CronModule\Handler\HandlerInterface;
  */
 class ResetRotationByShows implements HandlerInterface
 {
-    public function run()
+    public function run(): void
     {
         $rotator = new Rotator;
         $rotator->cyclicResetByShows();
