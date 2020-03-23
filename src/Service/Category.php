@@ -3,10 +3,12 @@ namespace SK\VideoModule\Service;
 
 use Yii;
 use SK\VideoModule\Model\Image;
-use SK\VideoModule\Model\Category as CategoryModel;
-use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Model\Video;
+use SK\VideoModule\Model\VideosCategories;
 
 use SK\VideoModule\Provider\RotateVideoProvider;
+use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Model\Category as CategoryModel;
 
 class Category
 {
@@ -85,7 +87,7 @@ class Category
         $settings = Yii::$container->get(SettingsInterface::class);
 
         $categories = CategoryModel::find()
-            ->select(['category_id', 'title', 'enabled'])
+            ->select(['category_id', 'image', 'updated_at'])
             ->where(['enabled' => 1])
             ->all();
 
@@ -97,20 +99,17 @@ class Category
         $usedImagesIds = [];
 
         foreach ($categories as $category) {
-            // Выбрать тумбы с первой страницы категории
-            $dataProvider = new RotateVideoProvider([
-                'pagination' => [
-                    'defaultPageSize' => (int) $settings->get('items_per_page', 24, 'videos'),
-                    'pageSize' => (int) $settings->get('items_per_page', 24, 'videos'),
-                    'forcePageParam' => false,
-                ],
-                'sort' => false,
-                'category_id' => $category->getId(),
-                'testPerPagePercent' => (int) $settings->get('test_items_percent', 15, 'videos'),
-                'testVideosStartPosition' => (int) $settings->get('test_items_start', 3, 'videos'),
-            ]);
-
-            $imagesIds = array_column($dataProvider->getModels(), 'image_id');
+            $videos = Video::find()
+                ->alias('v')
+                ->select(['v.video_id', 'v.image_id'])
+                ->innerJoin(['vs' => VideosCategories::tableName()], 'v.video_id = vs.video_id')
+                ->andWhere(['vs.category_id' => $category->category_id])
+                ->untilNow()
+                ->onlyActive()
+                ->orderBy(['vs.is_tested' => SORT_DESC, 'vs.ctr' => SORT_DESC])
+                ->limit((int) $settings->get('items_per_page', 24, 'videos'))
+                ->all();
+            $imagesIds = \array_column($videos, 'image_id');
 
             if (empty($imagesIds)) {
                 continue;
@@ -132,7 +131,7 @@ class Category
                 }
 
                 // Записать, что данная тумба уже используется.
-                $usedImagesIds[] = $image->getId();
+                $usedImagesIds[] = $image->image_id;
             }
         }
     }
