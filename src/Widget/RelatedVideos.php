@@ -9,7 +9,7 @@ use SK\VideoModule\Provider\RelatedProvider;
 
 class RelatedVideos extends Widget
 {
-    private $cacheKey = 'videos:widget:related_videos:';
+    private $cacheKey = 'videos:widget:related_videos';
     /**
      * @var string путь к темплейту виджета
      */
@@ -61,21 +61,31 @@ class RelatedVideos extends Widget
             return;
         }
 
-        $videos = $this->getVideos();
+        $cacheKey = $this->buildCacheKey();
 
-        if (empty($videos)) {
-            return;
+        $html = Yii::$app->cache->get($cacheKey);
+
+        if (false === $html) {
+            $videos = $this->getVideos();
+
+            if (empty($videos)) {
+                return;
+            }
+
+            if (\is_array($this->range)) {
+                $rangeStart = ($this->range[0] > 0) ? $this->range[0] - 1 : 0 ;
+                $rangeEnd = (!isset($this->range[1])) ? 1 : $this->range[1] ;
+                $videos = \array_slice($videos, $rangeStart, $rangeEnd);
+            }
+
+            $html = $this->render($this->template, [
+                'videos' => $videos,
+            ]);
+
+            Yii::$app->cache->set($cacheKey, $html, 600);
         }
 
-        if (is_array($this->range)) {
-            $rangeStart = ($this->range[0] > 0) ? $this->range[0] - 1 : 0 ;
-            $rangeEnd = (!isset($this->range[1])) ? 1 : $this->range[1] ;
-            $videos = array_slice($videos, $rangeStart, $rangeEnd);
-        }
-
-        return $this->render($this->template, [
-            'videos' => $videos,
-        ]);
+        return $html;
     }
 
     /**
@@ -89,24 +99,16 @@ class RelatedVideos extends Widget
             return $this->videos;
         }
 
-        $cacheKey = $this->buildCacheKey();
-
-        $this->videos = Yii::$app->cache->get($cacheKey);
-
-        if (false === $this->videos) {
-            $relatedProvider = new RelatedProvider;
-            $this->videos = $relatedProvider->getModels($this->video_id);
-
-            if (!empty($this->videos)) {
-                Yii::$app->cache->set($cacheKey, $this->videos, 300);
-            }
-        }
+        $relatedProvider = new RelatedProvider;
+        $this->videos = $relatedProvider->getModels($this->video_id);
 
         return $this->videos;
     }
 
     private function buildCacheKey()
     {
-        return $this->cacheKey . $this->video_id;
+        $range = \implode(':', (array) $this->range);
+
+        return "{$this->cacheKey}:{$this->video_id}:{$range}";
     }
 }
