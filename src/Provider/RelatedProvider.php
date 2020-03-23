@@ -26,7 +26,7 @@ class RelatedProvider
 
     public function getFromTable($video_id)
     {
-        $requiredRelatedNum = $this->settings->get('related_number', self::RELATED_NUMBER, 'videos');
+        $requiredRelatedNum = $this->settings->get('related_number', static::RELATED_NUMBER, 'videos');
 
             //SELECT `v`.* FROM `videos_related_map` AS `r` LEFT JOIN `videos` AS `v` ON `v`.`video_id` = `r`.`related_id` WHERE `r`.`video_id`=10
         $videos = Video::find()
@@ -44,7 +44,7 @@ class RelatedProvider
 
     public function getModels($video_id)
     {
-        $requiredRelatedNum = $this->settings->get('related_number', self::RELATED_NUMBER, 'videos');
+        $requiredRelatedNum = $this->settings->get('related_number', static::RELATED_NUMBER, 'videos');
 
         $related = $this->getFromTable($video_id);
 
@@ -62,7 +62,7 @@ class RelatedProvider
     {
         $allowCategories = $this->settings->get('related_allow_categories', false, 'videos');
         $allowDescription = $this->settings->get('related_allow_description', false, 'videos');
-        $requiredRelatedNum = $this->settings->get('related_number', self::RELATED_NUMBER, 'videos');
+        $requiredRelatedNum = $this->settings->get('related_number', static::RELATED_NUMBER, 'videos');
 
         $query = Video::find()
             ->select(['video_id', 'title', 'description'])
