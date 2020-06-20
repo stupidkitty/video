@@ -30,6 +30,11 @@ class CategoriesImportForm extends Model
      */
     protected $imported_rows_num = 0;
 
+    /**
+     * Options for selection of csv fileds
+     *
+     * @var string[]
+     */
     protected $options = [
         'skip' => 'Пропустить',
         'category_id' => 'id',
@@ -44,6 +49,14 @@ class CategoriesImportForm extends Model
         'param2' => 'Доп. поле 2',
         'param3' => 'Доп. поле 3',
     ];
+
+    /**
+     * @return string[]
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
 
     /**
      * @inheritdoc
