@@ -12,30 +12,6 @@ $this->params['breadcrumbs'][] = 'Категории видео';
 
 ?>
 
-<?php if ($form->hasNotInsertedRows()): ?>
-<?php $numNotInsertedRows = count($form->getNotInsertedRows()) ?>
-<div class="box box-danger collapsed-box">
-    <div class="box-header with-border">
-        <h3 class="box-title">Не вставленные строки</h3>
-
-        <div class="box-tools pull-right">
-            <span data-toggle="tooltip" title="" class="badge bg-red" data-original-title="<?= $numNotInsertedRows ?> строки"><?= $numNotInsertedRows ?></span>
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>
-                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
-        </div>
-    </div>
-            <!-- /.box-header -->
-    <div class="box-body" style="display: none;">
-        <?= Html::textarea('csv_not_inserted_rows', implode(PHP_EOL, $form->getNotInsertedRows()), [
-                'id' => 'csv-not-inserted-rows',
-                'class' => 'form-control csv-not-inserted-rows',
-                'rows' => 12
-            ])
-        ?>
-    </div>
-</div>
-<?php endif ?>
-
 <div class="box box-primary">
     <div class="box-header with-border">
         <i class="glyphicon glyphicon-import text-light-violet"></i><h3 class="box-title">Импорт категорий</h3>
