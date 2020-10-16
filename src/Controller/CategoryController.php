@@ -1,30 +1,30 @@
 <?php
+
 namespace SK\VideoModule\Controller;
 
-use Yii;
-use yii\data\Sort;
-use yii\web\Request;
-use yii\web\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Video;
-use yii\data\ActiveDataProvider;
-use SK\VideoModule\Model\Category;
-use yii\base\ViewContextInterface;
-use yii\web\NotFoundHttpException;
-use SK\VideoModule\Form\FilterForm;
-use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Filter\QueryParamsFilter;
-use SK\VideoModule\Provider\RotateVideoProvider;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use SK\VideoModule\Form\FilterForm;
+use SK\VideoModule\Model\Category;
+use SK\VideoModule\Model\Video;
+use SK\VideoModule\Model\VideosCategories;
+use SK\VideoModule\Provider\RotateVideoProvider;
+use Yii;
+use yii\base\ViewContextInterface;
+use yii\data\ActiveDataProvider;
+use yii\data\Sort;
+use yii\filters\PageCache;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
+use yii\web\Response;
 
 /**
  * CategoryController implements the CRUD actions for Videos model.
  */
 class CategoryController extends Controller implements ViewContextInterface
 {
-    protected $request;
-
     /**
      * @inheritdoc
      */
@@ -54,21 +54,11 @@ class CategoryController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    \implode(':', \array_values($this->request->get())),
+                    \implode(':', \array_values($this->getRequest()->get())),
                     $this->isMobile(),
                 ],
             ],
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        $this->request = Yii::$container->get(Request::class);
-
-        parent::init();
     }
 
     /**
@@ -179,10 +169,10 @@ class CategoryController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
-        $query = $this->buildInitialQuery($category,  $filterForm);
+        $query = $this->buildInitialQuery($category, $filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -249,10 +239,10 @@ class CategoryController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
-        $query = $this->buildInitialQuery($category,  $filterForm);
+        $query = $this->buildInitialQuery($category, $filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -319,10 +309,10 @@ class CategoryController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
-        $query = $this->buildInitialQuery($category,  $filterForm);
+        $query = $this->buildInitialQuery($category, $filterForm);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -373,24 +363,27 @@ class CategoryController extends Controller implements ViewContextInterface
         ]);
     }
 
-
     /**
      * List videos in category ordered by ctr
      *
+     * @param int $id
+     * @param string $slug
+     * @param int $page
+     * @param string $t
+     * @param Response $response
+     * @param SettingsInterface $settings
      * @return mixed
+     * @throws NotFoundHttpException
      */
-    public function actionCtr($id = 0, $slug = '', $page = 1, $t = 'all-time')
+    public function actionCtr(int $id = 0, string $slug = '', int $page = 1, string $t = 'all-time', Response $response, SettingsInterface $settings)
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $identify = (0 !== (int) $id) ? (int) $id : $slug;
         $category = $this->findByIdentify($identify);
 
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
         $dataProvider = new RotateVideoProvider([
@@ -427,7 +420,7 @@ class CategoryController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
@@ -459,12 +452,11 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * List all categories
      *
+     * @param SettingsInterface $settings
      * @return mixed
      */
-    public function actionAllCategories($sort = '') // Переименовать этот метод в AllCategories (template too)
+    public function actionAllCategories(SettingsInterface $settings) // Переименовать этот метод в AllCategories (template too)
     {
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $sort = new Sort([
             'attributes' => [
                 'abc' => [
@@ -509,9 +501,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * Find category by primary key or by slug
      *
      * @param int|string $identify
-     *
-     * @return Category
-     *
+     * @return array|Category|\yii\db\ActiveRecord
      * @throws NotFoundHttpException
      */
     public function findByIdentify($identify)
@@ -519,7 +509,7 @@ class CategoryController extends Controller implements ViewContextInterface
         $query = Category::find()
             ->asArray();
 
-        if (is_integer($identify)) {
+        if (\is_integer($identify)) {
             $query->where(['category_id' => $identify]);
         } else {
             $query->where(['slug' => $identify]);
@@ -613,6 +603,6 @@ class CategoryController extends Controller implements ViewContextInterface
      */
     protected function getRequest()
     {
-        return $this->request;
+        return Yii::$container->get(Request::class);
     }
 }

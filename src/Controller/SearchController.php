@@ -12,14 +12,13 @@ use yii\base\ViewContextInterface;
 use SK\VideoModule\Form\SearchForm;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
+use yii\web\Response;
 
 /**
  * SearchController implements the search action.
  */
 class SearchController extends Controller implements ViewContextInterface
 {
-    protected $request;
-
     /**
      * @inheritdoc
      */
@@ -43,21 +42,11 @@ class SearchController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    \implode(':', \array_values($this->request->get())),
+                    \implode(':', \array_values($this->getRequest()->get())),
                     $this->isMobile(),
                 ],
             ],
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        $this->request = Yii::$container->get(Request::class);
-
-        parent::init();
     }
 
     /**
@@ -73,14 +62,16 @@ class SearchController extends Controller implements ViewContextInterface
 
     /**
      * Lists categorized Videos models.
+     *
+     * @param int $page
+     * @param string $q
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
      * @return mixed
      */
-    public function actionIndex($page = 1, $q = '')
+    public function actionIndex(int $page = 1, string $q = '', Request $request, Response $response, SettingsInterface $settings)
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-        $request = $this->getRequest();
-
         // задрочка для чпу, форма доложна быть методом POST --begin
         /*if ($request->isPost && '' !== $request->post('q', '')) {
             $request->setQueryParams(['q' => $request->post('q', ''), 'page' => $page]);
@@ -131,7 +122,7 @@ class SearchController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if (empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         return $this->render('search', [
@@ -164,6 +155,6 @@ class SearchController extends Controller implements ViewContextInterface
      */
     protected function getRequest()
     {
-        return $this->request;
+        return Yii::$container->get(Request::class);
     }
 }

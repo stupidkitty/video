@@ -19,8 +19,6 @@ use SK\VideoModule\EventSubscriber\VideoSubscriber;
  */
 class ViewController extends Controller implements ViewContextInterface
 {
-    protected $request;
-
     /**
      * @inheritdoc
      */
@@ -44,7 +42,7 @@ class ViewController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    \implode(':', \array_values($this->request->get())),
+                    \implode(':', \array_values($this->getRequest()->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -56,13 +54,10 @@ class ViewController extends Controller implements ViewContextInterface
      */
     public function init()
     {
-        $this->request = $this->get(Request::class);
-
+        $request = $this->get(Request::class);
         $response = $this->get(Response::class);
 
-        $response->on($response::EVENT_AFTER_SEND, function () {
-            $request = $this->get(Request::class);
-
+        $response->on($response::EVENT_AFTER_SEND, function () use ($request) {
             Yii::$app->trigger('video-show', new VideoShow([
                 'id' => (int) $request->get('id', 0),
                 'slug' => $request->get('slug', ''),

@@ -17,8 +17,6 @@ use RS\Component\Core\Settings\SettingsInterface;
  */
 class VideosController extends Controller implements ViewContextInterface
 {
-    protected $request;
-    
     /**
      * @inheritdoc
      */
@@ -47,21 +45,11 @@ class VideosController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    \implode(':', \array_values($this->request->get())),
+                    \implode(':', \array_values($this->getRequest()->get())),
                     $this->isMobile(),
                 ],
             ],
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        $this->request = Yii::$container->get(Request::class);
-
-        parent::init();
     }
 
     /**
@@ -94,7 +82,7 @@ class VideosController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -168,7 +156,7 @@ class VideosController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -217,7 +205,7 @@ class VideosController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -262,7 +250,7 @@ class VideosController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -311,7 +299,7 @@ class VideosController extends Controller implements ViewContextInterface
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->request->get());
+        $filterForm->load($this->getRequest()->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -378,7 +366,7 @@ class VideosController extends Controller implements ViewContextInterface
     protected function isMobile()
     {
         $deviceDetect = Yii::$container->get('device.detect');
-        
+
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 
@@ -389,6 +377,6 @@ class VideosController extends Controller implements ViewContextInterface
      */
     protected function getRequest()
     {
-        return $this->request;
+        return Yii::$container->get(Request::class);
     }
 }

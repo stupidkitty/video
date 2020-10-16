@@ -1,15 +1,16 @@
 <?php
+
 namespace SK\VideoModule\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\web\Controller;
-
-use yii\filters\VerbFilter;
-use SK\VideoModule\Model\Video;
-use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use SK\VideoModule\Model\Video;
+use SK\VideoModule\Model\VideosCategories;
+use Yii;
+use yii\filters\VerbFilter;
+use yii\web\Controller;
+use yii\web\Request;
+use yii\web\Response;
 
 /**
  * AjaxController представляет различные аякс действия.
@@ -36,6 +37,11 @@ class AjaxController extends Controller
         ];
     }
 
+    /**
+     * @param \yii\base\Action $action
+     * @return bool
+     * @throws \yii\web\BadRequestHttpException
+     */
     public function beforeAction($action)
     {
         $this->enableCsrfValidation = false;
@@ -43,13 +49,16 @@ class AjaxController extends Controller
         return parent::beforeAction($action);
     }
 
-    public function actionGetVideo($id)
+    /**
+     * @param int $id
+     * @param SettingsInterface $settings
+     * @return Response
+     */
+    public function actionGetVideo(int $id, SettingsInterface $settings)
     {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: POST, GET');
         header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
-
-        $settings = Yii::$container->get(SettingsInterface::class);
 
         $video = Video::find()
             ->alias('v')
@@ -78,33 +87,36 @@ class AjaxController extends Controller
         return $this->asJson($video);
     }
 
-
     /**
      * Update click by category_id
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
+     * @throws \yii\di\NotInstantiableException
      */
-    public function actionCategoryClick()
+    public function actionCategoryClick(Request $request, Response $response, SettingsInterface $settings)
     {
         $crawlerDetect = Yii::$container->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
-            Yii::$app->response->setStatusCode(404);
+            $response->setStatusCode(404);
 
             return '';
         }
 
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         if ($settings->get('internal_register_activity', true, 'videos')) {
-            Yii::$app->response->setStatusCode(404);
+            $response->setStatusCode(404);
 
             return '';
         }
 
         $db = Yii::$app->db;
 
-        $categoryId = $this->getRequest()->post('id', 0);
+        $categoryId = $request->post('id', 0);
         $dateTime = new \DateTime('now', new \DateTimeZone('utc'));
 
         $currentDate = $dateTime->format('Y-m-d');
@@ -115,12 +127,12 @@ class AjaxController extends Controller
             ON DUPLICATE KEY UPDATE `clicks`=`clicks`+1";
 
         $db->createCommand($sql)
-           ->bindValues([
-               'category_id' => (int) $categoryId,
-               'current_date' => $currentDate,
-               'current_hour' => (int) $currentHour,
-           ])
-           ->execute();
+            ->bindValues([
+                'category_id' => (int) $categoryId,
+                'current_date' => $currentDate,
+                'current_hour' => (int) $currentHour,
+            ])
+            ->execute();
 
         return '';
     }
@@ -128,19 +140,22 @@ class AjaxController extends Controller
     /**
      * Счетчик кликов по тумбе в категории.
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    public function actionVideoClick()
+    public function actionVideoClick(Request $request, Response $response, SettingsInterface $settings)
     {
         $crawlerDetect = Yii::$container->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
-            Yii::$app->response->setStatusCode(404);
+            $response->setStatusCode(404);
 
             return '';
         }
-
-        $settings = Yii::$container->get(SettingsInterface::class);
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
             Yii::$app->response->setStatusCode(404);
@@ -148,42 +163,40 @@ class AjaxController extends Controller
             return '';
         }
 
-        $db = Yii::$app->db;
-        $request = $this->getRequest();
-
         $video_id = (int) $request->post('video_id', 0);
-        $image_id = (int) $request->post('image_id', 0);
         $category_id = (int) $request->post('category_id', 0);
 
-        if (!$video_id || !$image_id || !$category_id) {
-            Yii::$app->response->setStatusCode(404);
+        if (!$video_id || !$category_id) {
+            $response->setStatusCode(404);
 
             return '';
         }
 
         // Апдейт статы ротации тумбы
-        $db->createCommand('UPDATE `videos_categories_map` SET `current_clicks`=`current_clicks`+1 WHERE `video_id`=:video_id AND `category_id`=:category_id')
-            ->bindParam(':video_id', $video_id)
-            ->bindParam(':category_id', $category_id)
-            ->execute();
+        VideosCategories::updateAllCounters(['current_clicks' => 1], ['video_id' => $video_id, 'category_id' => $category_id]);
+
+        return '';
     }
 
     /**
      * Учет показов тумб на странице категории.
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    public function actionThumbsLog()
+    public function actionThumbsLog(Request $request, Response $response, SettingsInterface $settings)
     {
         $crawlerDetect = Yii::$container->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
-            Yii::$app->response->setStatusCode(404);
+            $response->setStatusCode(404);
 
             return '';
         }
-
-        $settings = Yii::$container->get(SettingsInterface::class);
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
             Yii::$app->response->setStatusCode(404);
@@ -191,31 +204,32 @@ class AjaxController extends Controller
             return '';
         }
 
-        $db = Yii::$app->db;
-        $request = $this->getRequest();
-
         $category_id = (int) $request->post('category_id', 0);
         $videos_ids = $request->post('videos_ids', '');
-        $videos_ids = json_decode($videos_ids, true);
+        $videos_ids = \json_decode($videos_ids, true);
 
         if (!$category_id || empty($videos_ids)) {
-            return;
+            return '';
         }
 
         VideosCategories::updateAllCounters(['current_shows' => 1, 'shows_before_reset' => 1], ['video_id' => $videos_ids, 'category_id' => $category_id]);
+
+        return '';
     }
 
     /**
-     * Лайк видео
+     * Video has been liked
      *
+     * @param Request $request
+     * @param Response $response
      * @return string
      */
-    public function actionLike()
+    public function actionLike(Request $request, Response $response)
     {
-        $video_id = (int) $this->getRequest()->post('id', 0);
+        $video_id = (int) $request->post('id', 0);
 
-        if (!$video_id) {
-            Yii::$app->response->setStatusCode(404);
+        if ($video_id === 0) {
+            $response->setStatusCode(404);
 
             return '';
         }
@@ -226,34 +240,24 @@ class AjaxController extends Controller
     }
 
     /**
-     * Дизлайк видео
+     * Video has been disliked
      *
+     * @param Request $request
+     * @param Response $response
      * @return string
      */
-    public function actionDislike()
+    public function actionDislike(Request $request, Response $response)
     {
-        $video_id = (int) $this->getRequest()->post('id', 0);
+        $video_id = (int) $request->post('id', 0);
 
-        if (!$video_id) {
-            Yii::$app->response->setStatusCode(404);
+        if ($video_id === 0) {
+            $response->setStatusCode(404);
 
             return '';
         }
 
-        $db = Yii::$app->db;
-
         Video::updateAllCounters(['dislikes' => 1], '`video_id` = :video_id', [':video_id' => $video_id]);
 
         return '';
-    }
-
-    /**
-     * Get request class form DI container
-     *
-     * @return \yii\web\Request
-     */
-    protected function getRequest()
-    {
-        return Yii::$container->get(Request::class);
     }
 }
