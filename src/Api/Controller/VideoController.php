@@ -1,6 +1,7 @@
 <?php
 namespace SK\VideoModule\Api\Controller;
 
+use SK\VideoModule\Elastic\Search;
 use Yii;
 use yii\web\User;
 use yii\web\Request;
@@ -206,6 +207,11 @@ class VideoController extends Controller
 
                 $transaction->commit();
 
+                // Elasticsearch вставить новый док
+                $search = new Search();
+                $search->fill($video);
+                $search->save();
+
                 return [
                     'message' => "Video \"{$video->title}\" created",
                 ];
@@ -242,7 +248,14 @@ class VideoController extends Controller
 
         $video->load(['Video' => $request->getBodyParams()]);
 
+
         if ($video->save()) {
+            // Elasticsearch обновление дока
+            Search::deleteDoc($id);
+            $search = new Search();
+            $search->fill($vieo);
+            $search->save();
+
             return [
                 'message' => Yii::t('videos', 'Video "{title}" has been updated', ['title' => $video->title]),
             ];
@@ -269,6 +282,8 @@ class VideoController extends Controller
         $videoService = new VideoService;
 
         if ($videoService->delete($video)) {
+            // Elasticsearch delete doc
+            Search::deleteDoc($id);
             return '';
         }
 
