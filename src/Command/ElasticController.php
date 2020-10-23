@@ -15,10 +15,13 @@ class ElasticController extends Controller
 
     public function actionCreate()
     {
+<<<<<<< HEAD
         if (Search::existsIndex()){
             Search::deleteIndex();
         }
 
+=======
+>>>>>>> 6df0e73... elastic start
         Search::createIndex();
 
         $videos = Video::find()->where([
@@ -36,9 +39,24 @@ class ElasticController extends Controller
         print 'The ElasticSearch index was created (' . Search::index() . '). Documents: ' . count($videos) . PHP_EOL;
     }
 
+<<<<<<< HEAD
     public function actionExists()
     {
        print Search::existsIndex() ? 'true' : 'false';
+=======
+    public function actionSpam()
+    {
+        $videos = Video::find()->all();
+
+        for($i = 0; $i < 10; $i++) {
+            foreach ($videos as $video) {
+                $elastic = new Search();
+                $elastic->fill($video, false);
+                $elastic->save();
+            }
+            print 'push';
+        }
+>>>>>>> 6df0e73... elastic start
     }
 
     public function actionDelete()
@@ -51,14 +69,23 @@ class ElasticController extends Controller
 
     public function actionPing()
     {
+<<<<<<< HEAD
         print Search::client()->ping() ? 'pong' : 'error';
+=======
+        print Search::client()->ping();
+>>>>>>> 6df0e73... elastic start
     }
 
     public function actionSearch($query)
     {
         $search = new Search();
         foreach ($search->search($query) as $item) {
+<<<<<<< HEAD
             print_r($item);
+=======
+            print 'title: ' . $item['_source']['title'] . PHP_EOL;
+            print 'description: ' . $item['_source']['description'] . PHP_EOL . PHP_EOL;
+>>>>>>> 6df0e73... elastic start
         }
     }
 }
