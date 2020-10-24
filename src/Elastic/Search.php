@@ -73,7 +73,7 @@ class Search
                 'settings' => [
                     "analysis" => [
                         'filter' => [
-                            'stopwords_ru' => [
+                            'russian_stop' => [
                                 'type' => 'stop',
                                 'stopwords' => '_russian_',
                                 'ignore_case' => true,
@@ -92,7 +92,7 @@ class Search
                                 'filter' => [
                                     'lowercase',
                                     "russian_stop",
-                                    "russian_stemmer",
+                                    "ru_stemmer",
                                 ]
                             ]
                         ]
