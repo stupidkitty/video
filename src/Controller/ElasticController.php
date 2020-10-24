@@ -1,6 +1,5 @@
 <?php
 
-<<<<<<< HEAD
 namespace SK\VideoModule\Controller;
 
 use SK\VideoModule\Elastic\Search;
@@ -83,24 +82,3 @@ class ElasticController extends SearchController implements ViewContextInterface
         ]);
     }
 }
-=======
-
-namespace SK\VideoModule\Controller;
-
-use SK\VideoModule\Elastic\Search;
-use yii\web\Controller;
-use Yii;
-use yii\web\Request;
-
-class ElasticController extends Controller
-{
-    public function actionIndex(Request $request)
-    {
-        $search = new Search();
-        $videos = $search->search($request->getQueryParam('q'));
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        return $videos;
-    }
-
-}
->>>>>>> 6df0e73... elastic start
