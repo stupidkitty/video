@@ -30,7 +30,7 @@ class Search
     {
         return [
             [
-                'categories' => ['type' => 'keyword', 'boost' => '10'],
+                'categories' => ['type' => 'text', 'boost' => '10'],
                 'title' => ['type' => 'text', 'boost' => '3'],
                 'description' => ['type' => 'text', 'boost' => '1'],
             ]
