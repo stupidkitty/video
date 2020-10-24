@@ -1,4 +1,5 @@
 <?php
+
 namespace SK\VideoModule\Query;
 
 use yii\db\ActiveQuery;
@@ -11,23 +12,23 @@ class VideoQuery extends ActiveQuery
     public function asThumbs()
     {
         return $this->select([
-                'v.video_id',
-                'v.image_id',
-                'v.slug',
-                'v.title',
-                'v.orientation',
-                'v.video_preview',
-                'v.duration',
-                'v.likes',
-                'v.dislikes',
-                'v.comments_num',
-                'v.is_hd',
-                'v.noindex',
-                'v.nofollow',
-                'v.views',
-                'v.template',
-                'v.published_at'
-            ])
+            'v.video_id',
+            'v.image_id',
+            'v.slug',
+            'v.title',
+            'v.orientation',
+            'v.video_preview',
+            'v.duration',
+            'v.likes',
+            'v.dislikes',
+            'v.comments_num',
+            'v.is_hd',
+            'v.noindex',
+            'v.nofollow',
+            'v.views',
+            'v.template',
+            'v.published_at'
+        ])
             ->alias('v')
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
@@ -36,6 +37,17 @@ class VideoQuery extends ActiveQuery
             ->with(['poster' => function ($query) {
                 $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
             }]);
+    }
+
+    /**
+     * Выборка по video_id, сортировано по порядку элементов в массиве video_id, т.е. релевантные первые
+     * @param $ids array video_id [1,2,3,4]
+     * @return \yii\db\ActiveQuery
+     */
+    public function byIds($ids)
+    {
+        return $this->where(['in', 'video_id', $ids])
+            ->orderBy([new \yii\db\Expression('FIELD (video_id, ' . implode(',', $ids) . ')')]);
     }
 
     /**
@@ -88,8 +100,8 @@ class VideoQuery extends ActiveQuery
     public function withViewRelations()
     {
         return $this->with(['poster' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }])
+            $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
+        }])
             ->with(['categories' => function ($query) {
                 $query->select(['category_id', 'title', 'slug', 'h1'])
                     ->where(['enabled' => 1]);

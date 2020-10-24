@@ -17,6 +17,11 @@ class Search
         return ClientBuilder::create()->build();
     }
 
+    public static function existsIndex()
+    {
+        return self::client()->indices()->exists(['index' => self::index()]);
+    }
+
     /**
      * @return array Маппинг этой модели
      * Типы полей: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html#field-datatypes
@@ -24,36 +29,11 @@ class Search
     public static function mapping()
     {
         return [
-            'video_id' => ['type' => 'integer'],
-            'image_id' => ['type' => 'integer'],
-            'user_id' => ['type' => 'integer'],
-            'slug' => ['type' => 'keyword'],
-            'categories' => ['type' => 'keyword', 'boost' => 2],
-
-            'title' => ['type' => 'text'],
-            'description' => ['type' => 'text'],
-            'orientation' => ['type' => 'byte'],
-            'duration' => ['type' => 'integer'],
-
-            'video_preview' => ['type' => 'keyword'],
-            'embed' => ['type' => 'keyword'],
-            'on_index' => ['type' => 'boolean'],
-            'noindex' => ['type' => 'boolean'],
-
-            'nofollow' => ['type' => 'boolean'],
-            'likes' => ['type' => 'integer'],
-            'dislikes' => ['type' => 'integer'],
-            'comments_num' => ['type' => 'integer'],
-
-            'is_hd' => ['type' => 'boolean'],
-            'views' => ['type' => 'integer'],
-            'max_ctr' => ['type' => 'double'],
-            'template' => ['type' => 'keyword'],
-
-            'status' => ['type' => 'byte'],
-            'published_at' => ['type' => 'date'],
-            'created_at' => ['type' => 'date'],
-            'updated_at' => ['type' => 'date'],
+            [
+                'categories' => ['type' => 'keyword', 'boost' => '10'],
+                'title' => ['type' => 'text', 'boost' => '3'],
+                'description' => ['type' => 'text', 'boost' => '1'],
+            ]
         ];
     }
 
@@ -68,7 +48,7 @@ class Search
     public static function updateMapping()
     {
         $params = [
-            'index' => 'my_index',
+            'index' => self::index(),
             'body' => [
                 'mappings' => [
                     '_source' => [
@@ -92,26 +72,27 @@ class Search
             'body' => [
                 'settings' => [
                     "analysis" => [
-                        "filter" => [
-                            "ru_stop" => [
-                                "type" => "stop",
-                                "stopwords" => "_russian_"
+                        'filter' => [
+                            'stopwords_ru' => [
+                                'type' => 'stop',
+                                'stopwords' => '_russian_',
+                                'ignore_case' => true,
                             ],
-                            "ru_stemmer" => [
-                                "type" => "stemmer",
-                                "language" => "russian"
+                            'ru_stemmer' => [
+                                'type' => 'stemmer',
+                                'language' => 'russian'
                             ]
                         ],
-                        "analyzer" => [
-                            "default" => [
-                                "char_filter" => [
-                                    "html_strip"
+                        'analyzer' => [
+                            'default' => [
+                                'char_filter' => [
+                                    'html_strip'
                                 ],
-                                "tokenizer" => "standard",
-                                "filter" => [
-                                    "lowercase",
-                                    "ru_stop",
-                                    "ru_stemmer"
+                                'tokenizer' => 'standard',
+                                'filter' => [
+                                    'lowercase',
+                                    "russian_stop",
+                                    "russian_stemmer",
                                 ]
                             ]
                         ]
@@ -150,41 +131,15 @@ class Search
     {
         if ($setPrimaryKey) $this->primaryKey = $video->video_id;
 
-        $this->attributes = [
-            'video_id' => $video->video_id,
-            'image_id' => $video->image_id,
-            'user_id' => $video->user_id,
-            'slug' => $video->slug,
-            'status' => $video->status,
-            'categories' => $video->getCategories(),
+        $categories = [];
+        foreach ($video->getCategories()->all() as $category) {
+            array_push($categories, $category->title);
+        }
 
+        $this->attributes = [
+            'categories' => $categories,
             'title' => $video->title,
             'description' => $video->description,
-            'orientation' => $video->orientation,
-            'duration' => $video->duration,
-
-            'video_preview' => $video->video_preview,
-            'embed' => $video->embed,
-            'on_index' => $video->on_index,
-            'noindex' => $video->noindex,
-
-            'nofollow' => $video->nofollow,
-            'likes' => $video->likes,
-            'dislikes' => $video->dislikes,
-            'comments_num' => $video->comments_num,
-
-            'is_hd' => $video->is_hd,
-            'views' => $video->views,
-            'max_ctr' => $video->max_ctr,
-            'template' => $video->template,
-
-            'custom1' => $video->custom1,
-            'custom2' => $video->custom2,
-            'custom3' => $video->custom3,
-
-            'published_at' => $video->published_at,
-            'created_at' => $video->created_at,
-            'updated_at' => $video->updated_at,
         ];
     }
 
@@ -203,24 +158,22 @@ class Search
         $params = [
             'index' => self::index(),
             'body' => [
-                'size' => 50,
-                "query" => [
-                    'bool' => [
-                        'must' => [
-                        'multi_match' => [
-                            'query' => $query,
-                            "fields" => [
-                                'description', 'title',
-                            ],
-                            'type' => 'best_fields',
-                        ]],
-                        'must' => [
-
-                        ]
-                    ]
-                ]
+                'size' => 500,
+                'query' => [
+                    'multi_match' => [
+                        'query' => $query,
+                        'fields' => ['categories', 'title', 'description'],
+                        'type' => 'cross_fields',
+                    ]]
             ]
         ];
-        return self::client()->search($params)['hits']['hits'];
+        $res = self::client()->search($params)['hits'];
+        if (!$res['total']['value']) return false;
+
+        $ids = [];
+        foreach ($res['hits'] as $item) {
+            array_push($ids, $item['_id']);
+        }
+        return $ids;
     }
 }

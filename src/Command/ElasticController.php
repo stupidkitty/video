@@ -15,6 +15,10 @@ class ElasticController extends Controller
 
     public function actionCreate()
     {
+        if (Search::existsIndex()){
+            Search::deleteIndex();
+        }
+
         Search::createIndex();
 
         $videos = Video::find()->where([
@@ -32,18 +36,9 @@ class ElasticController extends Controller
         print 'The ElasticSearch index was created (' . Search::index() . '). Documents: ' . count($videos) . PHP_EOL;
     }
 
-    public function actionSpam()
+    public function actionExists()
     {
-        $videos = Video::find()->all();
-
-        for($i = 0; $i < 10; $i++) {
-            foreach ($videos as $video) {
-                $elastic = new Search();
-                $elastic->fill($video, false);
-                $elastic->save();
-            }
-            print 'push';
-        }
+       print Search::existsIndex() ? 'true' : 'false';
     }
 
     public function actionDelete()
@@ -56,15 +51,14 @@ class ElasticController extends Controller
 
     public function actionPing()
     {
-        print Search::client()->ping();
+        print Search::client()->ping() ? 'pong' : 'error';
     }
 
     public function actionSearch($query)
     {
         $search = new Search();
         foreach ($search->search($query) as $item) {
-            print 'title: ' . $item['_source']['title'] . PHP_EOL;
-            print 'description: ' . $item['_source']['description'] . PHP_EOL . PHP_EOL;
+            print_r($item);
         }
     }
 }
