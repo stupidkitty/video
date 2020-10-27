@@ -158,10 +158,10 @@ class Search
                 'from' => ($page - 1) * $pageSize,
                 'query' => [
                     'bool' => [
-                        'must' => [
+                        'filter' => [
                             'range' => [
                                 'published_at' => [
-                                    "lt" => 'now/d'
+                                    "lte" => 'now/d'
                                 ]
                             ]
                         ],
