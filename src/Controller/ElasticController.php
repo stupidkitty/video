@@ -44,7 +44,9 @@ class ElasticController extends SearchController implements ViewContextInterface
 
             } else {
                 $query = Video::find()->byIds($search['ids'])->asThumbs();
-                $query->asArray();
+                $query->untilNow()
+                    ->andFilterWhere(['orientation' => $filterForm->orientation])
+                    ->asArray();
 
                 $videos = $query->all();
                 $pagination = new Pagination(['totalCount' => $search['count'], 'pageSize' => $pageSize]);
