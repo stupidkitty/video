@@ -4,6 +4,7 @@ namespace SK\VideoModule\Controller;
 
 use SK\VideoModule\Elastic\Search;
 use Yii;
+use yii\data\Pagination;
 use yii\helpers\Url;
 use yii\web\Request;
 use yii\web\Controller;
@@ -35,35 +36,18 @@ class ElasticController extends SearchController implements ViewContextInterface
     {
         $filterForm = new SearchForm();
         if ($filterForm->load($request->get()) && $filterForm->isValid()) {
+            $pageSize = $settings->get('items_per_page', 24, 'videos');
 
-            $search = new Search();
-            $ids = $search->search($filterForm->getQuery());
-
-            if (!$ids) {
+            $search = Search::search($filterForm->getQuery(), $page, $pageSize);
+            if (!$search['ids']) {
                 $response->statusCode = 404;
+
             } else {
-                $query = Video::find()->byIds($ids)->asThumbs();
+                $query = Video::find()->byIds($search['ids'])->asThumbs();
+                $query->asArray();
 
-                $dataProvider = new ActiveDataProvider([
-                    'query' => $query,
-                    'pagination' => [
-                        'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
-                        'pageSize' => $settings->get('items_per_page', 24, 'videos'),
-                        'forcePageParam' => false,
-                        'validatePage' => false,
-                    ],
-                ]);
-
-                $query->untilNow()
-                    ->onlyActive()
-                    ->andFilterWhere(['orientation' => $filterForm->orientation])
-                    ->asArray();
-
-                $dataProvider->setTotalCount($query->cachedCount());
-
-                $videos = $dataProvider->getModels();
-                $totalCount = $dataProvider->getTotalCount();
-                $pagination = $dataProvider->getPagination();
+                $videos = $query->all();
+                $pagination = new Pagination(['totalCount' => $search['count'], 'pageSize' => $pageSize]);
             }
         }
 
@@ -77,7 +61,7 @@ class ElasticController extends SearchController implements ViewContextInterface
             'settings' => $settings,
             'pagination' => $pagination ?? null,
             'videos' => $videos ?? null,
-            'totalCount' => $totalCount ?? null,
+            'totalCount' => $search['count'] ?? null,
             'query' => $filterForm->getQuery(),
         ]);
     }

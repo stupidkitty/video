@@ -29,37 +29,26 @@ class Search
     public static function mapping()
     {
         return [
-            [
-                'categories' => ['type' => 'text', 'boost' => '10'],
-                'title' => ['type' => 'text', 'boost' => '3'],
-                'description' => ['type' => 'text', 'boost' => '1'],
-            ]
+            'categories' => ['type' => 'text', 'boost' => '10'],
+            'title' => ['type' => 'text', 'boost' => '3'],
+            'description' => ['type' => 'text', 'boost' => '1'],
+            'published_at' => ['type' => 'date', 'format' => 'strict_date_optional_time||epoch_millis||yyyy-MM-dd HH:mm:ss'],
         ];
     }
+
 
     public static function index()
     {
-        return 'jues';
+        return static::getDsnAttribute('dbname', \Yii::$app->getDb()->dsn);
     }
 
-    /**
-     * Создание или обновление маппинга модели
-     */
-    public static function updateMapping()
+    private static function getDsnAttribute($name, $dsn)
     {
-        $params = [
-            'index' => self::index(),
-            'body' => [
-                'mappings' => [
-                    '_source' => [
-                        'enabled' => true
-                    ],
-                    'properties' => self::mapping()
-                ]
-            ]
-        ];
-
-        self::client()->indices()->create($params);
+        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
+            return $match[1];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -70,6 +59,12 @@ class Search
         $params = [
             'index' => self::index(),
             'body' => [
+                'mappings' => [
+                    '_source' => [
+                        'enabled' => true
+                    ],
+                    'properties' => self::mapping()
+                ],
                 'settings' => [
                     "analysis" => [
                         'filter' => [
@@ -140,6 +135,7 @@ class Search
             'categories' => $categories,
             'title' => $video->title,
             'description' => $video->description,
+            'published_at' => $video->published_at
         ];
     }
 
@@ -153,18 +149,31 @@ class Search
         self::client()->delete($params);
     }
 
-    public function search($query)
+    public static function search($query, $page = 1, $pageSize = 24)
     {
         $params = [
             'index' => self::index(),
             'body' => [
-                'size' => 500,
+                'size' => $pageSize,
+                'from' => ($page - 1) * $pageSize,
                 'query' => [
-                    'multi_match' => [
-                        'query' => $query,
-                        'fields' => ['categories', 'title', 'description'],
-                        'type' => 'cross_fields',
-                    ]]
+                    'bool' => [
+                        'must' => [
+                            'range' => [
+                                'published_at' => [
+                                    "lt" => 'now/d'
+                                ]
+                            ]
+                        ],
+                        'must' => [
+                            'multi_match' => [
+                                'query' => $query,
+                                'fields' => ['categories', 'title', 'description'],
+                                'type' => 'cross_fields',
+                            ]
+                        ],
+                    ]
+                ]
             ]
         ];
         $res = self::client()->search($params)['hits'];
@@ -174,6 +183,6 @@ class Search
         foreach ($res['hits'] as $item) {
             array_push($ids, $item['_id']);
         }
-        return $ids;
+        return ['ids' => $ids, 'count' => intval($res['total']['value'])];
     }
 }
