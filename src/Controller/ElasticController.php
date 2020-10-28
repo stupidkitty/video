@@ -2,7 +2,7 @@
 
 namespace SK\VideoModule\Controller;
 
-use SK\VideoModule\Elastic\Search;
+use SK\VideoModule\Elastic\Elastic;
 use Yii;
 use yii\data\Pagination;
 use yii\helpers\Url;
@@ -18,9 +18,9 @@ use RS\Component\Core\Settings\SettingsInterface;
 use yii\web\Response;
 
 /**
- * SearchController implements the search action.
+ * ElasticController implements the search action.
  */
-class ElasticController extends SearchController implements ViewContextInterface
+class ElasticController extends SearchController
 {
     /**
      * Lists categorized Videos models.
@@ -38,18 +38,24 @@ class ElasticController extends SearchController implements ViewContextInterface
         if ($filterForm->load($request->get()) && $filterForm->isValid()) {
             $pageSize = $settings->get('items_per_page', 24, 'videos');
 
-            $search = Search::search($filterForm->getQuery(), $page, $pageSize);
-            if (!$search['ids']) {
+            $elasticSearchRes = Elastic::find()
+                ->setPage($page)
+                ->setPageSize($pageSize)
+                ->setSearchQuery($filterForm->getQuery())
+                ->asArrayIds();
+
+            if (!$elasticSearchRes) {
                 $response->statusCode = 404;
 
             } else {
-                $query = Video::find()->byIds($search['ids'])->asThumbs();
-                $query->untilNow()
+                $query = Video::find()->byIds($elasticSearchRes['ids'])
+                    ->orderByIds($elasticSearchRes['ids'])
+                    ->asThumbs()
                     ->andFilterWhere(['orientation' => $filterForm->orientation])
                     ->asArray();
 
                 $videos = $query->all();
-                $pagination = new Pagination(['totalCount' => $search['count'], 'pageSize' => $pageSize]);
+                $pagination = new Pagination(['totalCount' => $elasticSearchRes['count'], 'pageSize' => $pageSize]);
             }
         }
 
@@ -63,7 +69,7 @@ class ElasticController extends SearchController implements ViewContextInterface
             'settings' => $settings,
             'pagination' => $pagination ?? null,
             'videos' => $videos ?? null,
-            'totalCount' => $search['count'] ?? null,
+            'totalCount' => $elasticSearchRes['count'] ?? null,
             'query' => $filterForm->getQuery(),
         ]);
     }

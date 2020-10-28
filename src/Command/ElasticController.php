@@ -4,7 +4,7 @@
 namespace SK\VideoModule\Command;
 
 use Elasticsearch\ClientBuilder;
-use SK\VideoModule\Elastic\Search;
+use SK\VideoModule\Elastic\Elastic;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideoInterface;
 use yii\console\Controller;
@@ -15,50 +15,42 @@ class ElasticController extends Controller
 
     public function actionCreate()
     {
-        if (Search::existsIndex()){
-            Search::deleteIndex();
+        if (Elastic::existsIndex()){
+            Elastic::deleteIndex();
         }
 
-        Search::createIndex();
+        Elastic::createIndex();
 
         $videos = Video::find()->where([
             'status' => VideoInterface::STATUS_ACTIVE
         ])->all();
 
         foreach ($videos as $video) {
-            $elastic = new Search();
+            $elastic = new Elastic();
             $elastic->fill($video);
             $elastic->save();
         }
 
-        Yii::info('The ElasticSearch index was created (' . Search::index() . ').', __METHOD__);
+        Yii::info('The ElasticSearch index was created (' . Elastic::index() . ').', __METHOD__);
 
-        print 'The ElasticSearch index was created (' . Search::index() . '). Documents: ' . count($videos) . PHP_EOL;
+        print 'The ElasticSearch index was created (' . Elastic::index() . '). Documents: ' . count($videos) . PHP_EOL;
     }
 
     public function actionExists()
     {
-       print Search::existsIndex() ? 'true' : 'false';
+       print Elastic::existsIndex() ? 'true' : 'false';
     }
 
     public function actionDelete()
     {
-        Search::deleteIndex();
+        Elastic::deleteIndex();
 
-        Yii::info('The ElasticSearch index was deleted (' . Search::index() . ').', __METHOD__);
-        print 'The ElasticSearch index was deleted ' . Search::index() . PHP_EOL;
+        Yii::info('The ElasticSearch index was deleted (' . Elastic::index() . ').', __METHOD__);
+        print 'The ElasticSearch index was deleted ' . Elastic::index() . PHP_EOL;
     }
 
     public function actionPing()
     {
-        print Search::client()->ping() ? 'pong' : 'error';
-    }
-
-    public function actionSearch($query)
-    {
-        $search = new Search();
-        foreach ($search->search($query) as $item) {
-            print_r($item);
-        }
+        print Elastic::client()->ping() ? 'pong' : 'error';
     }
 }

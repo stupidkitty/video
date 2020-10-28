@@ -40,20 +40,29 @@ class VideoQuery extends ActiveQuery
     }
 
     /**
-     * Выборка по video_id, сортировано по порядку элементов в массиве video_id, т.е. релевантные первые
-     * @param $ids array video_id [1,2,3,4]
-     * @return \yii\db\ActiveQuery
+     * Выборка по video_id
+     * @param array $ids
+     * @return ActiveQuery
      */
-    public function byIds($ids)
+    public function byIds(array $ids)
     {
-        return $this->where(['in', 'video_id', $ids])
-            ->orderBy([new \yii\db\Expression('FIELD (video_id, ' . implode(',', $ids) . ')')]);
+        return $this->where(['in', 'video_id', $ids]);
+    }
+
+    /**
+     * Сортировка по порядку элементов в массиве video_id
+     * @param array $ids
+     * @return ActiveQuery
+     */
+    public function orderByIds(array $ids)
+    {
+        return $this->orderBy([new Expression('FIELD (video_id, ' . implode(',', $ids) . ')')]);
     }
 
     /**
      * Добавляет к запросу условие "только активные"
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function onlyActive()
     {
@@ -63,7 +72,7 @@ class VideoQuery extends ActiveQuery
     /**
      * Добавляет к запросу условие "только активные"
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function onlyHd()
     {
@@ -73,7 +82,7 @@ class VideoQuery extends ActiveQuery
     /**
      * Добавляет к запросу условие "до текущего времени"
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function untilNow()
     {
@@ -83,7 +92,7 @@ class VideoQuery extends ActiveQuery
     /**
      * Добавляет к запросу условие "между текущей датой и заданной"
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function rangedUntilNow($rangeStart)
     {
@@ -95,7 +104,7 @@ class VideoQuery extends ActiveQuery
     /**
      * Подключает связанные модели для страницы просмотра видео.
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function withViewRelations()
     {
@@ -111,7 +120,7 @@ class VideoQuery extends ActiveQuery
     /**
      * Подключает связанные модели для страницы просмотра видео.
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function whereIdOrSlug($identify)
     {
