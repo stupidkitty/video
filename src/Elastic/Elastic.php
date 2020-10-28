@@ -55,14 +55,14 @@ class Elastic
         $params = [
             'index' => self::index(),
             'body' => [
+
+                'settings' => \Yii::$app->params['elasticsearch']['indexSettings'],
                 'mappings' => [
                     '_source' => [
                         'enabled' => true
                     ],
-                    "analyzer" => "default",
                     'properties' => self::mapping()
                 ],
-                'settings' => \Yii::$app->params['elasticsearch']['indexSettings']
 
             ]
         ];
