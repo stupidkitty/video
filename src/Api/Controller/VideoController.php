@@ -253,7 +253,7 @@ class VideoController extends Controller
             // Elasticsearch обновление дока
             Elastic::deleteDoc($id);
             $search = new Elastic();
-            $search->fill($vieo);
+            $search->fill($video);
             $search->save();
 
             return [
