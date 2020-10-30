@@ -148,7 +148,7 @@ class ViewController extends Controller implements ViewContextInterface
     }
 
     /**
-     * Get request class form DI container
+     * Get instance by tag name form DI container
      *
      * @param $name
      * @return object

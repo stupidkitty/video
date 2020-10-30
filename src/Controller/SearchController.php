@@ -33,7 +33,7 @@ class SearchController extends Controller implements ViewContextInterface
             ],
             'pageCache' => [
                 'class' => PageCache::class,
-                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
                 'duration' => 3600,
                 'dependency' => [
@@ -42,7 +42,7 @@ class SearchController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    \implode(':', \array_values($this->getRequest()->get())),
+                    \implode(':', \array_values($this->get(Request::class)->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -61,7 +61,7 @@ class SearchController extends Controller implements ViewContextInterface
     }
 
     /**
-     * Lists categorized Videos models.
+     * Search action.
      *
      * @param int $page
      * @param string $q
@@ -140,8 +140,10 @@ class SearchController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function isMobile()
+    protected function isMobile(): bool
     {
         $deviceDetect = Yii::$container->get('device.detect');
 
@@ -149,12 +151,15 @@ class SearchController extends Controller implements ViewContextInterface
     }
 
     /**
-     * Get request class form DI container
+     * Get instance by tag name form DI container
      *
-     * @return \yii\web\Request
+     * @param $name
+     * @return object
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function getRequest()
+    protected function get(string $name)
     {
-        return Yii::$container->get(Request::class);
+        return Yii::$container->get($name);
     }
 }
