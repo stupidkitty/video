@@ -1,16 +1,15 @@
 <?php
+
 namespace SK\VideoModule\Api\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\rest\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Category;
-use yii\web\NotFoundHttpException;
-use yii\filters\auth\HttpBearerAuth;
-use SK\VideoModule\Api\Form\VideoForm;
 use RS\Component\Core\Settings\SettingsInterface;
-use SK\VideoModule\Service\Video as VideoService;
+use SK\VideoModule\Model\Category;
+use Yii;
+use yii\filters\auth\HttpBearerAuth;
+use yii\filters\PageCache;
+use yii\rest\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
 
 /**
  * VideoController
@@ -81,17 +80,18 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Gets info about auto posting. Max date post and count future posts.
      *
+     * @param int $id
      * @return mixed
      */
-    public function actionView($id)
+    public function actionView(int $id)
     {
         $responseData = [];
 
         try {
             $category = $this->findById($id);
-        } catch (\NotFoundHttpException $e) {
+        } catch (NotFoundHttpException $e) {
             $responseData['result']['category']['id'] = (int) $id;
             $responseData['result']['category']['errors'][] = $e->getMessage();
 
@@ -123,7 +123,7 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Gets info about auto posting. Max date post and count future posts.
      *
      * @return mixed
      */
@@ -211,11 +211,12 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Gets info about auto posting. Max date post and count future posts.
      *
+     * @param int $id
      * @return mixed
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id)
     {
         /*$video = $this->findById($id);
         $request = Yii::$container->get(Request::class);
@@ -239,11 +240,12 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Gets info about auto posting. Max date post and count future posts.
      *
+     * @param $id
      * @return mixed
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id)
     {
         /*$video = $this->findById($id);
         $videoService = new VideoService;
@@ -267,11 +269,11 @@ class CategoriesController extends Controller
      * Finds the Category model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
-     * @return Category the loaded model
+     * @param int $id
+     * @return array|Category|\yii\db\ActiveRecord
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findById($id)
+    protected function findById(int $id)
     {
         $category = Category::find()
             ->where(['category_id' => (int) $id, 'enabled' => 1])
