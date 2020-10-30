@@ -1,18 +1,19 @@
 <?php
+
 namespace SK\VideoModule\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\web\Response;
-use yii\web\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Video;
-use yii\base\ViewContextInterface;
-use yii\web\NotFoundHttpException;
-use SK\VideoModule\Event\VideoShow;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Event\VideoShow;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use SK\VideoModule\Model\Video;
+use Yii;
+use yii\base\ViewContextInterface;
+use yii\filters\PageCache;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
+use yii\web\Response;
 
 /**
  * ViewController implements the CRUD actions for Videos model.
