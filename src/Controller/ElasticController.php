@@ -2,19 +2,12 @@
 
 namespace SK\VideoModule\Controller;
 
-use SK\VideoModule\Elastic\Elastic;
-use Yii;
-use yii\data\Pagination;
-use yii\helpers\Url;
-use yii\web\Request;
-use yii\web\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Video;
-use yii\data\ActiveDataProvider;
-use yii\base\ViewContextInterface;
-use SK\VideoModule\Form\SearchForm;
-use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Elastic\Elastic;
+use SK\VideoModule\Form\SearchForm;
+use SK\VideoModule\Model\Video;
+use yii\data\Pagination;
+use yii\web\Request;
 use yii\web\Response;
 
 /**
@@ -25,18 +18,19 @@ class ElasticController extends SearchController
     /**
      * Lists categorized Videos models.
      *
-     * @param int $page
-     * @param string $q
      * @param Request $request
      * @param Response $response
      * @param SettingsInterface $settings
+     * @param int $page
+     * @param string $q
      * @return mixed
      */
-    public function actionIndex(int $page = 1, string $q = '', Request $request, Response $response, SettingsInterface $settings)
+    public function actionIndex(Request $request, Response $response, SettingsInterface $settings, int $page = 1, string $q = '')
     {
         $filterForm = new SearchForm();
+
         if ($filterForm->load($request->get()) && $filterForm->isValid()) {
-            $pageSize = $settings->get('items_per_page', 24, 'videos');
+            $pageSize = (int) $settings->get('items_per_page', 24, 'videos');
 
             $elasticSearchRes = Elastic::find()
                 ->setPage($page)
@@ -46,7 +40,6 @@ class ElasticController extends SearchController
 
             if (!$elasticSearchRes) {
                 $response->statusCode = 404;
-
             } else {
                 $query = Video::find()->byIds($elasticSearchRes['ids'])
                     ->orderByIds($elasticSearchRes['ids'])

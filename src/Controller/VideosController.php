@@ -1,16 +1,18 @@
 <?php
+
 namespace SK\VideoModule\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\web\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Video;
-use yii\data\ActiveDataProvider;
-use yii\base\ViewContextInterface;
-use SK\VideoModule\Form\FilterForm;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Form\FilterForm;
+use SK\VideoModule\Model\Video;
+use Yii;
+use yii\base\ViewContextInterface;
+use yii\data\ActiveDataProvider;
+use yii\filters\PageCache;
+use yii\web\Controller;
+use yii\web\Request;
+use yii\web\Response;
 
 /**
  * VideosController implements the CRUD actions for Videos model.
@@ -35,7 +37,7 @@ class VideosController extends Controller implements ViewContextInterface
             ],
             'pageCache' => [
                 'class' => PageCache::class,
-                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
                 'duration' => 600,
                 'dependency' => [
@@ -45,7 +47,7 @@ class VideosController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    \implode(':', \array_values($this->getRequest()->get())),
+                    \implode(':', \array_values($this->get(Request::class)->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -66,23 +68,28 @@ class VideosController extends Controller implements ViewContextInterface
     /**
      * Lists all Videos models.
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
      * @param int $page Текущая страница.
-     *
      * @param string $o Сортировка выборки
-     *
      * @param string $t Ограничение выборки по времени.
-     *
      * @return mixed
      */
-    public function actionIndex($page = 1, $o = 'date', $t = 'all-time')
+    public function actionIndex(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $page = 1,
+        string $o = 'date',
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => $o,
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -132,7 +139,7 @@ class VideosController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         return $this->render('all_videos', [
@@ -146,17 +153,27 @@ class VideosController extends Controller implements ViewContextInterface
 
     /**
      * Lists all Videos models. Order by date
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $page
+     * @param string $t
      * @return mixed
      */
-    public function actionDate($page = 1, $t = 'all-time')
+    public function actionDate(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'date'
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -181,7 +198,7 @@ class VideosController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         return $this->render('all_videos', [
@@ -195,17 +212,27 @@ class VideosController extends Controller implements ViewContextInterface
 
     /**
      * Lists all Videos models. Order by views
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $page
+     * @param string $t
      * @return mixed
      */
-    public function actionViews($page = 1, $t = 'all-time')
+    public function actionViews(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'views'
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -229,6 +256,10 @@ class VideosController extends Controller implements ViewContextInterface
         $videos = $dataProvider->getModels();
         $pagination = $dataProvider->getPagination();
 
+        if ($page > 1 && empty($videos)) {
+            $response->statusCode = 404;
+        }
+
         return $this->render('all_videos', [
             'page' => $page,
             'sort' => $this->action->id,
@@ -240,17 +271,27 @@ class VideosController extends Controller implements ViewContextInterface
 
     /**
      * Lists all Videos models. Order by likes
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $page
+     * @param string $t
      * @return mixed
      */
-    public function actionLikes($page = 1, $t = 'all-time')
+    public function actionLikes(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'likes'
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -275,7 +316,7 @@ class VideosController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         return $this->render('all_videos', [
@@ -289,17 +330,27 @@ class VideosController extends Controller implements ViewContextInterface
 
     /**
      * Lists all Videos models. Order by ctr
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $page
+     * @param string $t
      * @return mixed
      */
-    public function actionCtr($page = 1, $t = 'all-time')
+    public function actionCtr(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'ctr'
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($filterForm);
@@ -324,7 +375,7 @@ class VideosController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         return $this->render('all_videos', [
@@ -336,7 +387,11 @@ class VideosController extends Controller implements ViewContextInterface
         ]);
     }
 
-    protected function buildInitialQuery($filterForm)
+    /**
+     * @param FilterForm $filterForm
+     * @return \SK\VideoModule\Query\VideoQuery
+     */
+    protected function buildInitialQuery(FilterForm $filterForm)
     {
         $query = Video::find()
             ->asThumbs()
@@ -362,21 +417,26 @@ class VideosController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function isMobile()
+    protected function isMobile(): bool
     {
-        $deviceDetect = Yii::$container->get('device.detect');
+        $deviceDetect = $this->get('device.detect');
 
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 
     /**
-     * Get request class form DI container
+     * Get instance by tag name form DI container
      *
-     * @return \yii\web\Request
+     * @param $name
+     * @return object
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function getRequest()
+    protected function get(string $name)
     {
-        return Yii::$container->get(Request::class);
+        return Yii::$container->get($name);
     }
 }

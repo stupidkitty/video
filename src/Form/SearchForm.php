@@ -1,7 +1,7 @@
 <?php
+
 namespace SK\VideoModule\Form;
 
-use Yii;
 use yii\base\Model;
 use yii\helpers\StringHelper;
 
@@ -10,7 +10,13 @@ use yii\helpers\StringHelper;
  */
 class SearchForm extends Model
 {
-    public $q;
+    /**
+     * @var string
+     */
+    public $q = '';
+    /**
+     * @var string
+     */
     public $orientation;
 
     /**
@@ -19,7 +25,7 @@ class SearchForm extends Model
     public function rules()
     {
         return [
-            [['q'], 'filter', 'filter' => function($value) {
+            [['q'], 'filter', 'filter' => function ($value) {
                 $value = \trim(\strip_tags($value));
                 return \str_replace(['<', '>', '=', '(', ')', ';', '/'], '', $value);
             }],
@@ -28,11 +34,11 @@ class SearchForm extends Model
             [['orientation'], 'string'],
             ['orientation', 'filter', 'skipOnEmpty' => true, 'filter' => function ($value) {
                 $values = StringHelper::explode($value, $delimiter = '-', true, true);
-                
+
                 \array_walk($values, function (&$value) {
                     $value = \str_ireplace(['straight', 'lesbian', 'shemale', 'gay'], [1, 2, 3, 4], $value);
                 });
-                
+
                 return $values;
             }],
         ];
@@ -57,19 +63,11 @@ class SearchForm extends Model
     }
 
     /**
-     * @inheritdoc
+     * Gets filtered user query
+     *
+     * @return string
      */
-    public function attributeLabels()
-    {
-        return [
-            'q' => Yii::t('app', 'Search'),
-        ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->q;
     }

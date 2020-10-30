@@ -63,7 +63,7 @@ class AjaxController extends Controller
         $video = Video::find()
             ->alias('v')
             ->withViewRelations()
-            ->whereIdOrSlug((int) $id)
+            ->whereIdOrSlug($id)
             ->untilNow()
             ->onlyActive()
             ->asArray()
@@ -81,7 +81,7 @@ class AjaxController extends Controller
         if ($settings->get('internal_register_activity', true, 'videos')) {
             $this->on(self::EVENT_AFTER_ACTION, [VideoSubscriber::class, 'onView'], $video);
         } else {
-            Video::updateAllCounters(['views' => 1], ['video_id' => (int) $id]);
+            Video::updateAllCounters(['views' => 1], ['video_id' => $id]);
         }
 
         return $this->asJson($video);
@@ -100,7 +100,7 @@ class AjaxController extends Controller
      */
     public function actionCategoryClick(Request $request, Response $response, SettingsInterface $settings)
     {
-        $crawlerDetect = Yii::$container->get('crawler.detect');
+        $crawlerDetect = $this->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
             $response->setStatusCode(404);
@@ -116,11 +116,11 @@ class AjaxController extends Controller
 
         $db = Yii::$app->db;
 
-        $categoryId = $request->post('id', 0);
+        $categoryId = (int) $request->post('id', 0);
         $dateTime = new \DateTime('now', new \DateTimeZone('utc'));
 
         $currentDate = $dateTime->format('Y-m-d');
-        $currentHour = $dateTime->format('H');
+        $currentHour = (int) $dateTime->format('H');
 
         $sql = "        INSERT INTO `videos_categories_stats` (`category_id`, `date`, `hour`)
                              VALUES (:category_id, :current_date, :current_hour)
@@ -128,9 +128,9 @@ class AjaxController extends Controller
 
         $db->createCommand($sql)
             ->bindValues([
-                'category_id' => (int) $categoryId,
+                'category_id' => $categoryId,
                 'current_date' => $currentDate,
-                'current_hour' => (int) $currentHour,
+                'current_hour' => $currentHour,
             ])
             ->execute();
 
@@ -149,7 +149,7 @@ class AjaxController extends Controller
      */
     public function actionVideoClick(Request $request, Response $response, SettingsInterface $settings)
     {
-        $crawlerDetect = Yii::$container->get('crawler.detect');
+        $crawlerDetect = $this->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
             $response->setStatusCode(404);
@@ -158,7 +158,7 @@ class AjaxController extends Controller
         }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
-            Yii::$app->response->setStatusCode(404);
+            $response->setStatusCode(404);
 
             return '';
         }
@@ -190,7 +190,7 @@ class AjaxController extends Controller
      */
     public function actionThumbsLog(Request $request, Response $response, SettingsInterface $settings)
     {
-        $crawlerDetect = Yii::$container->get('crawler.detect');
+        $crawlerDetect = $this->get('crawler.detect');
 
         if ($crawlerDetect->isCrawler()) {
             $response->setStatusCode(404);
@@ -199,7 +199,7 @@ class AjaxController extends Controller
         }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
-            Yii::$app->response->setStatusCode(404);
+            $response->setStatusCode(404);
 
             return '';
         }
@@ -259,5 +259,18 @@ class AjaxController extends Controller
         Video::updateAllCounters(['dislikes' => 1], '`video_id` = :video_id', [':video_id' => $video_id]);
 
         return '';
+    }
+
+    /**
+     * Get instance by tag name form DI container
+     *
+     * @param $name
+     * @return object
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    protected function get(string $name)
+    {
+        return Yii::$container->get($name);
     }
 }

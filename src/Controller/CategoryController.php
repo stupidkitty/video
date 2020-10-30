@@ -203,6 +203,7 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'date'
         ]);
         $filterForm->load($request->get());
         $filterForm->isValid();
@@ -286,6 +287,7 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'views'
         ]);
         $filterForm->load($request->get());
         $filterForm->isValid();
@@ -369,6 +371,7 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'likes'
         ]);
         $filterForm->load($request->get());
         $filterForm->isValid();
@@ -452,6 +455,7 @@ class CategoryController extends Controller implements ViewContextInterface
 
         $filterForm = new FilterForm([
             't' => $t,
+            'o' => 'ctr'
         ]);
         $filterForm->load($request->get());
         $filterForm->isValid();

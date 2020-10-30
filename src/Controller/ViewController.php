@@ -83,13 +83,13 @@ class ViewController extends Controller implements ViewContextInterface
     /**
      * Показывает страницу просмотра видео.
      *
+     * @param SettingsInterface $settings
      * @param integer $id
      * @param string $slug
-     * @param SettingsInterface $settings
      * @return mixed
      * @throws NotFoundHttpException
      */
-    public function actionIndex(int $id = 0, string $slug = '', SettingsInterface $settings)
+    public function actionIndex(SettingsInterface $settings, int $id = 0, string $slug = '')
     {
         $identify = (0 !== (int) $id) ? (int) $id : $slug;
         $video = $this->findByIdentify($identify);
