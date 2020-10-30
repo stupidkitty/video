@@ -38,13 +38,13 @@ class InfoController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Gets info about auto posting. Max date post and count future posts.
+     *
+     * @param SettingsInterface $settings
      * @return array
      */
-    public function actionIndex()
+    public function actionIndex(SettingsInterface $settings)
     {
-        $settings = Yii::$container->get(SettingsInterface::class);
-
         $data = [];
 
         $data['total_videos_num'] = Video::find()->count();
