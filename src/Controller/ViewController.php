@@ -42,7 +42,7 @@ class ViewController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    \implode(':', \array_values($this->getRequest()->get())),
+                    \implode(':', \array_values($this->get(Request::class)->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -85,13 +85,12 @@ class ViewController extends Controller implements ViewContextInterface
      *
      * @param integer $id
      * @param string $slug
-     *
+     * @param SettingsInterface $settings
      * @return mixed
+     * @throws NotFoundHttpException
      */
-    public function actionIndex($id = 0, $slug = '')
+    public function actionIndex(int $id = 0, string $slug = '', SettingsInterface $settings)
     {
-        $settings = $this->get(SettingsInterface::class);
-
         $identify = (0 !== (int) $id) ? (int) $id : $slug;
         $video = $this->findByIdentify($identify);
 
@@ -112,12 +111,11 @@ class ViewController extends Controller implements ViewContextInterface
     /**
      * Find video by id or slug
      *
-     * @param integer $id
-     * @param string $slug
-     * @return null|Video
+     * @param int|string $identify
+     * @return array
      * @throws NotFoundHttpException
      */
-    protected function findByIdentify($identify)
+    protected function findByIdentify($identify): array
     {
         $video = Video::find()
             ->alias('v')
@@ -139,8 +137,10 @@ class ViewController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function isMobile()
+    protected function isMobile(): bool
     {
         $deviceDetect = $this->get('device.detect');
 
@@ -150,9 +150,12 @@ class ViewController extends Controller implements ViewContextInterface
     /**
      * Get request class form DI container
      *
-     * @return \yii\web\Request
+     * @param $name
+     * @return object
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function get($name)
+    protected function get(string $name)
     {
         return Yii::$container->get($name);
     }
@@ -163,8 +166,10 @@ class ViewController extends Controller implements ViewContextInterface
      *
      * @param array $video
      * @return void
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function registerXRobotsTag(array $video)
+    protected function registerXRobotsTag(array $video): void
     {
         $response = $this->get(Response::class);
 
