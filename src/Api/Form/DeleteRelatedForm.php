@@ -4,7 +4,7 @@ namespace SK\VideoModule\Api\Form;
 use yii\base\Model;
 
 /**
- * DeleteRelatedForm Форма для добавления скриншотов вручную.
+ * DeleteRelatedForm Форма для удаления похожих видео.
  */
 class DeleteRelatedForm extends Model
 {
