@@ -1,10 +1,10 @@
 <?php
+
 namespace SK\VideoModule\Api\Controller;
 
 use SK\VideoModule\Rotator\UserBehaviorHandler;
 use SK\VideoModule\Rotator\UserBehaviorStatistic;
 use SK\VideoModule\Service\Rotator;
-use Yii;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\VerbFilter;
 use yii\rest\Controller;
@@ -36,15 +36,14 @@ class RotatorController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Processing statistics about the page viewed
      *
+     * @param Request $request
+     * @param UserBehaviorHandler $statsHandler
      * @return mixed
      */
-    public function actionStats()
+    public function actionStats(Request $request, UserBehaviorHandler $statsHandler)
     {
-        $request = $this->get(Request::class);
-        $statsHandler = $this->get(UserBehaviorHandler::class);
-
         $stats = new UserBehaviorStatistic;
         $stats->categoriesClicked = $request->post('categoriesClicked', []);
         $stats->videosViewed = $request->post('videosViewed', []);
@@ -55,6 +54,11 @@ class RotatorController extends Controller
         return '';
     }
 
+    /**
+     * Reset zero crt thumbs action
+     *
+     * @return array[]|string
+     */
     public function actionResetZeroCtr()
     {
         try {
@@ -70,16 +74,5 @@ class RotatorController extends Controller
         }
 
         return '';
-    }
-
-    /**
-     * Короткий метод для получения данных с контейнера DI
-     *
-     * @param string $item
-     * @return void
-     */
-    protected function get($item)
-    {
-        return Yii::$container->get($item);
     }
 }
