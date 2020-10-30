@@ -12,28 +12,7 @@ class Search
     {
         $this->params = [
             'index' => Elastic::index(),
-            'body' => [
-                'size' => 24,
-                'from' => 0,
-                'query' => [
-                    'bool' => [
-                        'filter' => [
-                            'range' => [
-                                'published_at' => [
-                                    "lte" => 'now/d'
-                                ]
-                            ]
-                        ],
-                        'must' => [
-                            'multi_match' => [
-                                'query' => '',
-                                'fields' => ['categories', 'title', 'description'],
-                                'type' => 'cross_fields',
-                            ]
-                        ],
-                    ]
-                ]
-            ]
+            'body' => \Yii::$app->params['elasticsearch']['search']
         ];
     }
 
