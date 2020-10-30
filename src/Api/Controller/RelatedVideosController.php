@@ -1,18 +1,18 @@
 <?php
+
 namespace SK\VideoModule\Api\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\filters\Cors;
-use yii\rest\Controller;
-use yii\filters\PageCache;
+use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Api\Form\DeleteRelatedForm;
 use SK\VideoModule\Model\Video;
-use yii\web\NotFoundHttpException;
-use yii\filters\auth\HttpBearerAuth;
 use SK\VideoModule\Model\VideosRelatedMap;
 use SK\VideoModule\Provider\RelatedProvider;
-use SK\VideoModule\Api\Form\DeleteRelatedForm;
-use RS\Component\Core\Settings\SettingsInterface;
+use Yii;
+use yii\filters\auth\HttpBearerAuth;
+use yii\filters\PageCache;
+use yii\rest\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
 
 /**
  * VideoController
@@ -55,7 +55,7 @@ class RelatedVideosController extends Controller
      * @param int $id
      * @return void
      */
-    public function actionIndex($id)
+    public function actionIndex(int $id)
     {
         $responseData['result']['related'] = [];
 
@@ -116,15 +116,17 @@ class RelatedVideosController extends Controller
     /**
      * Удаляет похожие посты.
      *
+     * @param int $id
+     * @param Request $request
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id, Request $request)
     {
         $responseData['result']['deletedRelated'] = [];
-        $deletedIds = [];
 
         try {
-            $video = $this->findVideoById($id);
+            $video = $this->findById($id);
         } catch (NotFoundHttpException $e) {
             $responseData['result']['deletedRelated']['errors'][] = $e->getMessage();
 
@@ -137,18 +139,18 @@ class RelatedVideosController extends Controller
             VideosRelatedMap::deleteAll(['related_id' => $form->related_ids]);
         }
 
-        return  $responseData['result']['deletedRelated'] = $form->related_ids;
+        return $responseData['result']['deletedRelated'] = $form->related_ids;
     }
 
     /**
      * Finds the Video model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
-     * @return Video the loaded model
+     * @param int $id
+     * @return array|Video|\yii\db\ActiveRecord
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findById($id)
+    protected function findById(int $id)
     {
         $video = Video::find()
             ->alias('v')
