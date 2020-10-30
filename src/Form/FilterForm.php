@@ -31,11 +31,11 @@ class FilterForm extends Model
             [['orientation', 'source'], 'string'],
             ['orientation', 'filter', 'skipOnEmpty' => true, 'filter' => function ($value) {
                 $values = StringHelper::explode($value, $delimiter = '-', true, true);
-                
+
                 \array_walk($values, function (&$value) {
                     $value = \str_ireplace(['straight', 'lesbian', 'shemale', 'gay'], [1, 2, 3, 4], $value);
                 });
-                
+
                 return $values;
             }],
 
@@ -44,10 +44,13 @@ class FilterForm extends Model
             ['t', 'in', 'range' => ['daily', 'weekly', 'monthly', 'yearly', 'all-time']],
             ['t', 'default', 'value' => 'all-time'],
 
+            ['o', 'in', 'range' => ['ctr', 'date', 'views', 'likes']],
+            ['o', 'default', 'value' => 'ctr'],
+
             [['isHd'], 'boolean'],
         ];
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -55,7 +58,7 @@ class FilterForm extends Model
 	{
 		return '';
     }
-    
+
     /**
      * Check form is valid
      *

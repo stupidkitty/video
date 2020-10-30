@@ -44,7 +44,7 @@ class CategoryController extends Controller implements ViewContextInterface
             ],
             'pageCache' => [
                 'class' => PageCache::class,
-                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index', 'ctr', 'list-all'],
                 'duration' => 600,
                 'dependency' => [
@@ -54,7 +54,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    \implode(':', \array_values($this->getRequest()->get())),
+                    \implode(':', \array_values($this->get(Request::class)->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -81,17 +81,39 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * Показывает список видео роликов текущей категории.
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $id
+     * @param string $slug
+     * @param int $page
+     * @param string $o
+     * @param string $t
      * @return mixed
+     * @throws NotFoundHttpException
      */
-    public function actionIndex($id = 0, $slug = '', $page = 1, $o = 'date', $t = 'all-time')
+    public function actionIndex(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $id = 0,
+        string $slug = '',
+        int $page = 1,
+        string $o = 'date',
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
-        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
 
-        if ('ctr' === $o) {
+        $filterForm = new FilterForm([
+            't' => $t,
+            'o' => $o
+        ]);
+        $filterForm->load($request->get());
+        $filterForm->isValid();
+
+        if ('ctr' === $filterForm->o) {
             $dataProvider = new RotateVideoProvider([
                 'pagination' => [
                     'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
@@ -106,7 +128,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'datetimeLimit' => $t,
             ]);
         } else {
-            $query = $this->buildInitialQuery($category, $t);
+            $query = $this->buildInitialQuery($category, $filterForm);
 
             $dataProvider = new ActiveDataProvider([
                 'query' => $query,
@@ -125,7 +147,7 @@ class CategoryController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
@@ -156,20 +178,33 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * Показывает список видео роликов текущей категории осортированных по дате добавления.
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $id
+     * @param string $slug
+     * @param int $page
+     * @param string $t
      * @return mixed
+     * @throws NotFoundHttpException
      */
-    public function actionDate($id = 0, $slug = '', $page = 1, $t = 'all-time')
+    public function actionDate(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $id = 0,
+        string $slug = '',
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
-        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
 
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($category, $filterForm);
@@ -194,7 +229,7 @@ class CategoryController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
@@ -226,20 +261,33 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * Показывает список видео роликов текущей категории осортированных по просмортрам.
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $id
+     * @param string $slug
+     * @param int $page
+     * @param string $t
      * @return mixed
+     * @throws NotFoundHttpException
      */
-    public function actionViews($id = 0, $slug = '', $page = 1, $t = 'all-time')
+    public function actionViews(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $id = 0,
+        string $slug = '',
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
-        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
 
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($category, $filterForm);
@@ -279,7 +327,7 @@ class CategoryController extends Controller implements ViewContextInterface
         }
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         return $this->render('category_videos', [
@@ -296,20 +344,33 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * Показывает список видео роликов текущей категории осортированных по лайкам.
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $id
+     * @param string $slug
+     * @param int $page
+     * @param string $t
      * @return mixed
+     * @throws NotFoundHttpException
      */
-    public function actionLikes($id = 0, $slug = '', $page = 1, $t = 'all-time')
+    public function actionLikes(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $id = 0,
+        string $slug = '',
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $page = (int) $page;
-        $settings = Yii::$container->get(SettingsInterface::class);
-
-        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
 
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $query = $this->buildInitialQuery($category, $filterForm);
@@ -334,7 +395,7 @@ class CategoryController extends Controller implements ViewContextInterface
         $pagination = $dataProvider->getPagination();
 
         if ($page > 1 && empty($videos)) {
-            Yii::$app->response->statusCode = 404;
+            $response->statusCode = 404;
         }
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
@@ -366,24 +427,33 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * List videos in category ordered by ctr
      *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
      * @param int $id
      * @param string $slug
      * @param int $page
      * @param string $t
-     * @param Response $response
-     * @param SettingsInterface $settings
      * @return mixed
      * @throws NotFoundHttpException
      */
-    public function actionCtr(int $id = 0, string $slug = '', int $page = 1, string $t = 'all-time', Response $response, SettingsInterface $settings)
+    public function actionCtr(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $id = 0,
+        string $slug = '',
+        int $page = 1,
+        string $t = 'all-time'
+    )
     {
-        $identify = (0 !== (int) $id) ? (int) $id : $slug;
+        $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
 
         $filterForm = new FilterForm([
             't' => $t,
         ]);
-        $filterForm->load($this->getRequest()->get());
+        $filterForm->load($request->get());
         $filterForm->isValid();
 
         $dataProvider = new RotateVideoProvider([
@@ -501,7 +571,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * Find category by primary key or by slug
      *
      * @param int|string $identify
-     * @return array|Category|\yii\db\ActiveRecord
+     * @return array
      * @throws NotFoundHttpException
      */
     public function findByIdentify($identify)
@@ -526,7 +596,12 @@ class CategoryController extends Controller implements ViewContextInterface
         return $category;
     }
 
-    protected function buildInitialQuery($category, $filterForm)
+    /**
+     * @param $category
+     * @param $filterForm
+     * @return \SK\VideoModule\Query\VideoQuery
+     */
+    protected function buildInitialQuery(array $category, FilterForm $filterForm)
     {
         $query = Video::find()
             ->asThumbs()
@@ -550,7 +625,10 @@ class CategoryController extends Controller implements ViewContextInterface
         return $query;
     }
 
-    protected function buildSort()
+    /**
+     * @return Sort
+     */
+    protected function buildSort(): Sort
     {
         return new Sort([
             'sortParam' => 'o',
@@ -588,21 +666,26 @@ class CategoryController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function isMobile()
+    protected function isMobile(): bool
     {
-        $deviceDetect = Yii::$container->get('device.detect');
+        $deviceDetect = $this->get('device.detect');
 
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 
     /**
-     * Get request class form DI container
+     * Get instance by tag name form DI container
      *
-     * @return \yii\web\Request
+     * @param $name
+     * @return object
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function getRequest()
+    protected function get(string $name)
     {
-        return Yii::$container->get(Request::class);
+        return Yii::$container->get($name);
     }
 }
