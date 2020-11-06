@@ -31,6 +31,15 @@ class Elastic
     }
 
     /**
+     * Check Index
+     * @return bool
+     */
+    public static function existsCategoriesIndex()
+    {
+        return self::client()->indices()->exists(['index' => self::indexCategories()]);
+    }
+
+    /**
      * @return array mapping Index
      */
     public static function mapping()
@@ -45,6 +54,15 @@ class Elastic
     public static function index()
     {
         return \Yii::$app->params['elasticsearch']['indexName'];
+    }
+
+    /**
+     * Index Categories name
+     * @return string|null
+     */
+    public static function indexCategories()
+    {
+        return \Yii::$app->params['elasticsearch']['indexName'] . '_categories';
     }
 
     /**
@@ -82,6 +100,17 @@ class Elastic
     }
 
     /**
+     * Drop Index
+     */
+    public static function deleteCategoriesIndex()
+    {
+        $deleteParams = [
+            'index' => self::indexCategories()
+        ];
+        self::client()->indices()->delete($deleteParams);
+    }
+
+    /**
      * Save document to Index
      * @return array|callable
      */
@@ -108,15 +137,75 @@ class Elastic
 
         $categories = [];
         foreach ($video->getCategories()->all() as $category) {
-            array_push($categories, $category->title);
+            array_push($categories, $category->category_id);
         }
 
         $this->attributes = [
-            'categories' => $categories,
-            'title' => $video->title,
-            'description' => $video->description,
+            'category_ids' => $categories,
+            'description' => $video->description . ' ' . $video->title,
             'published_at' => $video->published_at
         ];
+    }
+
+    public static function createCategoriesIndex()
+    {
+        $params = [
+            'index' => self::indexCategories(),
+            'body' => [
+                'mappings' => [
+                    '_source' => ['enabled' => true],
+                    'properties' => [
+                        'title' => ['type' => 'text', 'analyzer' => 'default',],
+                    ]
+                ],
+                'settings' => [
+                    'analysis' => [
+                        'filter' => [
+                            "russian_stop" => [
+                                "type" => "stop",
+                                "stopwords" => "_russian_"
+                            ],
+                            'ru_stemmer' => [
+                                'type' => 'stemmer',
+                                'language' => 'russian'
+                            ],
+                            'synonym_filter_categories' => [
+                                'type' => 'synonym',
+                                "lenient" => false,
+                                'synonyms_path' => 'synonyms/adult_roots.txt',
+                            ]
+                        ],
+                        'analyzer' => [
+                            'default' => [
+                                'char_filter' => [
+                                    'html_strip'
+                                ],
+                                'tokenizer' => 'standard',
+                                'filter' => [
+                                    'lowercase',
+                                    'ru_stemmer',
+                                    'synonym_filter_categories',
+                                    'russian_stop',
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+            ]
+        ];
+
+        self::client()->indices()->create($params);
+    }
+
+    public static function saveCategory($category)
+    {
+        $params = [
+            'index' => self::indexCategories(),
+            'id' => $category->category_id,
+            'body' => ['title' => $category->title]
+        ];
+
+        return self::client()->index($params);
     }
 
     /**
@@ -137,8 +226,8 @@ class Elastic
      * Search query
      * @return Search
      */
-    public static function find()
+    public static function find($searchQuery)
     {
-        return new Search();
+        return new Search($searchQuery);
     }
 }

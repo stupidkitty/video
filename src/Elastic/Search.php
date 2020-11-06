@@ -8,12 +8,15 @@ class Search
 {
     private $params;
 
-    public function __construct()
+    public function __construct($searchQuery)
     {
+        $this->searchQuery = $searchQuery;
         $this->params = [
             'index' => Elastic::index(),
             'body' => \Yii::$app->params['elasticsearch']['search']
         ];
+        $this->params['body']['query']['bool']['should']['match']['description'] = $searchQuery;
+        $this->setCategoryQuery();
     }
 
     /**
@@ -48,7 +51,7 @@ class Search
      */
     public function setPage(int $page)
     {
-        $this->params['body']['from'] = $this->params['body']['size'] * ($page-1);
+        $this->params['body']['from'] = $this->params['body']['size'] * ($page - 1);
         return $this;
     }
 
@@ -84,14 +87,29 @@ class Search
         return $this;
     }
 
-    /**
-     * @param string $searchQuery
-     * @return Search
-     */
-    public function setSearchQuery(string $searchQuery): Search
+
+    public function setCategoryQuery()
     {
-        $this->params['body']['query']['bool']['must']['multi_match']['query'] = $searchQuery;
-        return $this;
+        $params = [
+            'index' => Elastic::indexCategories(),
+            'body' => [
+                "query" => [
+                    "match" => [
+                        "title" => [
+                            "query" => $this->searchQuery,
+                            "fuzziness" => "auto"
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        $res = Elastic::client()->search($params)['hits']['hits'];
+        foreach ($res as $category) {
+            array_push($this->params['body']['query']['bool']['must'],
+                ['term' => ['category_ids' => $category['_id'] ] ]);
+            print ($category['_source']['title']) . " <br>";
+
+        }
     }
 
 }

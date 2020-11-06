@@ -32,10 +32,9 @@ class ElasticController extends SearchController
         if ($filterForm->load($request->get()) && $filterForm->isValid()) {
             $pageSize = (int) $settings->get('items_per_page', 24, 'videos');
 
-            $elasticSearchRes = Elastic::find()
+            $elasticSearchRes = Elastic::find($filterForm->getQuery())
                 ->setPage($page)
                 ->setPageSize($pageSize)
-                ->setSearchQuery($filterForm->getQuery())
                 ->asArrayIds();
 
             if (!$elasticSearchRes) {
