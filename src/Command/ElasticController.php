@@ -28,7 +28,6 @@ class ElasticController extends Controller
         Elastic::createCategoriesIndex();
 
         $categories = Category::find()->all();
-        print count($categories);
         $one = [];
         $two = [];
         $more = [];
@@ -49,7 +48,7 @@ class ElasticController extends Controller
         array_push($categories, ...$two);
         array_push($categories, ...$more);
 
-        $antiDoubles = ['секс', 'sex'];
+        $antiDoubles = ['секс', 'sex', "член", "члена", "молодыми", "молодые", "зрелые", 'в', 'на', 'за', "со", "с"];
         foreach ($categories as $category) {
             $title = str_replace(',', ' ', $category->title); //удаление запятой
             $titleLowerCase = mb_convert_case($title, MB_CASE_LOWER, "UTF-8"); // lowercase
@@ -66,7 +65,6 @@ class ElasticController extends Controller
             $category->title = implode(' ', $titleArr);
             Elastic::saveCategory($category);
         }
-        print count($categories);
 
         $videos = Video::find()->where([
             'status' => VideoInterface::STATUS_ACTIVE

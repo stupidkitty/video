@@ -25,6 +25,11 @@ class Search
     public function asArrayIds()
     {
         $res = Elastic::client()->search($this->params)['hits'];
+        while ($res['total']['value'] < 60) {
+            array_pop($this->params['body']['query']['bool']['must']);
+            $res = Elastic::client()->search($this->params)['hits'];
+        }
+
         if (!$res['total']['value']) return false;
 
         $ids = [];
@@ -107,7 +112,6 @@ class Search
         foreach ($res as $category) {
             array_push($this->params['body']['query']['bool']['must'],
                 ['term' => ['category_ids' => $category['_id'] ] ]);
-            print ($category['_source']['title']) . " <br>";
 
         }
     }

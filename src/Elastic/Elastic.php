@@ -172,7 +172,7 @@ class Elastic
                             'synonym_filter_categories' => [
                                 'type' => 'synonym',
                                 "lenient" => false,
-                                'synonyms_path' => 'synonyms/adult_roots.txt',
+                                'synonyms_path' => 'synonyms/adult_category_roots.txt',
                             ]
                         ],
                         'analyzer' => [
