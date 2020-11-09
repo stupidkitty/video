@@ -4,15 +4,16 @@
 namespace SK\VideoModule\Elastic;
 
 
-class Search
+class Search extends Elastic
 {
     private $params;
+    private $searchQuery;
 
     public function __construct($searchQuery)
     {
         $this->searchQuery = $searchQuery;
         $this->params = [
-            'index' => Elastic::index(),
+            'index' => VideoIndex::index(),
             'body' => \Yii::$app->params['elasticsearch']['search']
         ];
         $this->params['body']['query']['bool']['should']['match']['description'] = $searchQuery;
@@ -20,14 +21,23 @@ class Search
     }
 
     /**
+     * Return query result like map ids => array(id), count => int
+     *
      * @return array|false
      */
     public function asArrayIds()
     {
+        if (empty($this->params['body']['query']['bool']['must'])) {
+            $this->params['body']['query'] = ["match" => ["description" => $this->searchQuery]];
+        }
+
         $res = Elastic::client()->search($this->params)['hits'];
-        while ($res['total']['value'] < 60) {
-            array_pop($this->params['body']['query']['bool']['must']);
-            $res = Elastic::client()->search($this->params)['hits'];
+
+        if (isset($this->params['body']['query']['bool']['must'])) {
+            while ($res['total']['value'] < 60) {
+                array_pop($this->params['body']['query']['bool']['must']);
+                $res = Elastic::client()->search($this->params)['hits'];
+            }
         }
 
         if (!$res['total']['value']) return false;
@@ -36,7 +46,9 @@ class Search
         foreach ($res['hits'] as $item) {
             array_push($ids, $item['_id']);
         }
-        return ['ids' => $ids, 'count' => intval($res['total']['value'])];
+
+        $count = intval($res['total']['value']);
+        return ['ids' => $ids, 'count' => $count];
     }
 
     /**
@@ -92,11 +104,27 @@ class Search
         return $this;
     }
 
-
+    /**
+     * Set to elastic query categories filter
+     */
     public function setCategoryQuery()
     {
+        foreach ($this->searchCategories() as $category) {
+            array_push($this->params['body']['query']['bool']['must'],
+                ['term' => ['category_ids' => $category['_id']]]);
+
+        }
+    }
+
+    /**
+     * Search categories for current elastic query
+     *
+     * @return mixed
+     */
+    private function searchCategories()
+    {
         $params = [
-            'index' => Elastic::indexCategories(),
+            'index' => CategoryIndex::index(),
             'body' => [
                 "query" => [
                     "match" => [
@@ -108,12 +136,8 @@ class Search
                 ]
             ]
         ];
-        $res = Elastic::client()->search($params)['hits']['hits'];
-        foreach ($res as $category) {
-            array_push($this->params['body']['query']['bool']['must'],
-                ['term' => ['category_ids' => $category['_id'] ] ]);
 
-        }
+        return self::client()->search($params)['hits']['hits'];
     }
 
 }

@@ -3,7 +3,7 @@
 namespace SK\VideoModule\Controller;
 
 use RS\Component\Core\Settings\SettingsInterface;
-use SK\VideoModule\Elastic\Elastic;
+use SK\VideoModule\Elastic\VideoIndex;
 use SK\VideoModule\Form\SearchForm;
 use SK\VideoModule\Model\Video;
 use yii\data\Pagination;
@@ -32,7 +32,7 @@ class ElasticController extends SearchController
         if ($filterForm->load($request->get()) && $filterForm->isValid()) {
             $pageSize = (int) $settings->get('items_per_page', 24, 'videos');
 
-            $elasticSearchRes = Elastic::find($filterForm->getQuery())
+            $elasticSearchRes = VideoIndex::find($filterForm->getQuery())
                 ->setPage($page)
                 ->setPageSize($pageSize)
                 ->asArrayIds();

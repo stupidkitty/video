@@ -1,7 +1,9 @@
 <?php
+
 namespace SK\VideoModule\Api\Controller;
 
 use SK\VideoModule\Elastic\Elastic;
+use SK\VideoModule\Elastic\VideoIndex;
 use Yii;
 use yii\web\User;
 use yii\web\Request;
@@ -39,7 +41,7 @@ class VideoController extends Controller
             ],
             'pageCache' => [
                 'class' => PageCache::class,
-                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'enabled' => (bool)Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
                 'only' => ['view'],
                 'duration' => 3200,
                 'variations' => [
@@ -59,7 +61,7 @@ class VideoController extends Controller
                 $request = Yii::$container->get(Request::class);
 
                 Yii::$app->trigger('video-show', new VideoShow([
-                    'id' => (int) $request->get('id', 0),
+                    'id' => (int)$request->get('id', 0),
                     'slug' => $request->get('slug', ''),
                 ]));
             });
@@ -92,7 +94,7 @@ class VideoController extends Controller
         try {
             $video = $this->findById($id);
         } catch (\NotFoundHttpException $e) {
-            $responseData['result']['video']['id'] = (int) $id;
+            $responseData['result']['video']['id'] = (int)$id;
             $responseData['result']['video']['errors'][] = $e->getMessage();
 
             return $responseData;
@@ -208,7 +210,7 @@ class VideoController extends Controller
                 $transaction->commit();
 
                 // Elasticsearch вставить новый док
-                $search = new Elastic();
+                $search = new VideoIndex();
                 $search->fill($video);
                 $search->save();
 
@@ -251,8 +253,8 @@ class VideoController extends Controller
 
         if ($video->save()) {
             // Elasticsearch обновление дока
-            Elastic::deleteDoc($id);
-            $search = new Elastic();
+            VideoIndex::deleteDoc($id);
+            $search = new VideoIndex();
             $search->fill($video);
             $search->save();
 
@@ -275,6 +277,7 @@ class VideoController extends Controller
      * Gets info about auto postig. Max date post and count future posts.
      *
      * @return mixed
+     * @throws NotFoundHttpException
      */
     public function actionDelete($id)
     {
@@ -283,7 +286,7 @@ class VideoController extends Controller
 
         if ($videoService->delete($video)) {
             // Elasticsearch delete doc
-            Elastic::deleteDoc($id);
+            VideoIndex::deleteDoc($id);
             return '';
         }
 
@@ -305,7 +308,7 @@ class VideoController extends Controller
      */
     public function actionLike($id)
     {
-        $video_id = (int) $id;
+        $video_id = (int)$id;
 
         Video::updateAllCounters(['likes' => 1], ['video_id' => $video_id]);
 
@@ -319,7 +322,7 @@ class VideoController extends Controller
      */
     public function actionDislike($id)
     {
-        $video_id = (int) $id;
+        $video_id = (int)$id;
 
         Video::updateAllCounters(['dislikes' => 1], ['video_id' => $video_id]);
 
@@ -339,7 +342,7 @@ class VideoController extends Controller
         $video = Video::find()
             ->alias('v')
             ->withViewRelations()
-            ->whereIdOrSlug((int) $id)
+            ->whereIdOrSlug((int)$id)
             ->one();
 
         if (null === $video) {
