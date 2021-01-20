@@ -1,17 +1,17 @@
 <?php
+
 namespace SK\VideoModule\Controller;
 
-use Yii;
-use yii\helpers\Url;
-use yii\web\Request;
-use yii\web\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Video;
-use yii\data\ActiveDataProvider;
-use yii\base\ViewContextInterface;
-use SK\VideoModule\Form\SearchForm;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Form\SearchForm;
+use SK\VideoModule\Model\Video;
+use Yii;
+use yii\base\ViewContextInterface;
+use yii\data\ActiveDataProvider;
+use yii\filters\PageCache;
+use yii\web\Controller;
+use yii\web\Request;
 use yii\web\Response;
 
 /**
@@ -33,7 +33,7 @@ class SearchController extends Controller implements ViewContextInterface
             ],
             'pageCache' => [
                 'class' => PageCache::class,
-                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
                 'duration' => 3600,
                 'dependency' => [
@@ -42,7 +42,7 @@ class SearchController extends Controller implements ViewContextInterface
                 ],
                 'variations' => [
                     Yii::$app->language,
-                    \implode(':', \array_values($this->getRequest()->get())),
+                    \implode(':', \array_values($this->get(Request::class)->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -61,25 +61,22 @@ class SearchController extends Controller implements ViewContextInterface
     }
 
     /**
-     * Lists categorized Videos models.
+     * Search action.
      *
-     * @param int $page
-     * @param string $q
      * @param Request $request
      * @param Response $response
      * @param SettingsInterface $settings
+     * @param int $page
      * @return mixed
      */
-    public function actionIndex(int $page = 1, string $q = '', Request $request, Response $response, SettingsInterface $settings)
+    public function actionIndex(Request $request, Response $response, SettingsInterface $settings, int $page = 1)
     {
         // задрочка для чпу, форма доложна быть методом POST --begin
         /*if ($request->isPost && '' !== $request->post('q', '')) {
             $request->setQueryParams(['q' => $request->post('q', ''), 'page' => $page]);
             $request->resolve();
-
             $this->redirect(Url::toRoute(['search/index', 'q' =>  $request->post('q')]), 301);
         }
-
         if ('' !== $q) {
             $request->setQueryParams(['q' => $q, 'page' => $page]);
         }*/
@@ -140,21 +137,26 @@ class SearchController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function isMobile()
+    protected function isMobile(): bool
     {
-        $deviceDetect = Yii::$container->get('device.detect');
+        $deviceDetect = $this->get('device.detect');
 
         return $deviceDetect->isMobile() || $deviceDetect->isTablet();
     }
 
     /**
-     * Get request class form DI container
+     * Get instance by tag name form DI container
      *
-     * @return \yii\web\Request
+     * @param $name
+     * @return object
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    protected function getRequest()
+    protected function get(string $name)
     {
-        return Yii::$container->get(Request::class);
+        return Yii::$container->get($name);
     }
 }
