@@ -264,12 +264,12 @@ class AjaxController extends Controller
     /**
      * Get instance by tag name form DI container
      *
-     * @param $name
+     * @param string $name
      * @return object
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    protected function get(string $name)
+    protected function get(string $name): object
     {
         return Yii::$container->get($name);
     }
