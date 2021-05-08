@@ -36,10 +36,10 @@ class SearchController extends Controller implements ViewContextInterface
                 'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
                 'duration' => 3600,
-                'dependency' => [
+                /*'dependency' => [
                     'class' => 'yii\caching\DbDependency',
                     'sql' => 'SELECT 1',
-                ],
+                ],*/
                 'variations' => [
                     Yii::$app->language,
                     \implode(':', \array_values($this->get(Request::class)->get())),
@@ -75,8 +75,10 @@ class SearchController extends Controller implements ViewContextInterface
         /*if ($request->isPost && '' !== $request->post('q', '')) {
             $request->setQueryParams(['q' => $request->post('q', ''), 'page' => $page]);
             $request->resolve();
+
             $this->redirect(Url::toRoute(['search/index', 'q' =>  $request->post('q')]), 301);
         }
+
         if ('' !== $q) {
             $request->setQueryParams(['q' => $q, 'page' => $page]);
         }*/
@@ -144,18 +146,18 @@ class SearchController extends Controller implements ViewContextInterface
     {
         $deviceDetect = $this->get('device.detect');
 
-        return $deviceDetect->isMobile() || $deviceDetect->isTablet();
+        return $deviceDetect->isMobile();
     }
 
     /**
      * Get instance by tag name form DI container
      *
-     * @param $name
+     * @param string $name
      * @return object
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    protected function get(string $name)
+    protected function get(string $name): object
     {
         return Yii::$container->get($name);
     }

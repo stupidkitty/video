@@ -40,10 +40,10 @@ class VideosController extends Controller implements ViewContextInterface
                 'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
                 'duration' => 600,
-                'dependency' => [
+                /*'dependency' => [
                     'class' => 'yii\caching\DbDependency',
                     'sql' => 'SELECT MAX(`published_at`) FROM `videos` WHERE `published_at` <= NOW()',
-                ],
+                ],*/
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
@@ -424,18 +424,18 @@ class VideosController extends Controller implements ViewContextInterface
     {
         $deviceDetect = $this->get('device.detect');
 
-        return $deviceDetect->isMobile() || $deviceDetect->isTablet();
+        return $deviceDetect->isMobile();
     }
 
     /**
      * Get instance by tag name form DI container
      *
-     * @param $name
+     * @param string $name
      * @return object
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    protected function get(string $name)
+    protected function get(string $name): object
     {
         return Yii::$container->get($name);
     }

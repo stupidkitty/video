@@ -47,10 +47,10 @@ class CategoryController extends Controller implements ViewContextInterface
                 'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index', 'ctr', 'list-all'],
                 'duration' => 600,
-                'dependency' => [
+                /*'dependency' => [
                     'class' => 'yii\caching\DbDependency',
                     'sql' => 'SELECT MAX(`published_at`) FROM `videos` WHERE `published_at` <= NOW()',
-                ],
+                ],*/
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
@@ -524,12 +524,108 @@ class CategoryController extends Controller implements ViewContextInterface
     }
 
     /**
+     * List videos in category ordered by ctr
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param SettingsInterface $settings
+     * @param int $id
+     * @param string $slug
+     * @param int $page
+     * @param string $t
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionPopular(
+        Request $request,
+        Response $response,
+        SettingsInterface $settings,
+        int $id = 0,
+        string $slug = '',
+        int $page = 1,
+        string $t = 'all-time'
+    ): string
+    {
+        $identify = (0 !== $id) ? $id : $slug;
+        $category = $this->findByIdentify($identify);
+
+        $filterForm = new FilterForm([
+            't' => $t,
+            'o' => 'ctr_likes_idx'
+        ]);
+        $filterForm->load($request->get());
+        $filterForm->isValid();
+
+        $dataProvider = new RotateVideoProvider([
+            'filterForm' => $filterForm,
+            'pagination' => [
+                'defaultPageSize' => $settings->get('items_per_page', 24, 'videos'),
+                'pageSize' => $settings->get('items_per_page', 24, 'videos'),
+                'forcePageParam' => false,
+                'validatePage' => false,
+            ],
+            'sort' => [
+                'sortParam' => 'o',
+                'attributes' => [
+                    'ctr_likes_idx' => [ // top rated
+                        'asc' => ['vs.ctr_likes_idx' => SORT_DESC],
+                        'desc' => ['vs.ctr_likes_idx' => SORT_DESC],
+                        'default' => SORT_DESC,
+                    ],
+                ],
+                'defaultOrder' => [
+                    'ctr_likes_idx' => [ // top rated
+                        'vs.ctr_likes_idx' => SORT_DESC,
+                    ],
+                ],
+            ],
+            'category_id' => $category['category_id'],
+            'testPerPagePercent' => (int) $settings->get('test_items_percent', 15, 'videos'),
+            'testVideosStartPosition' => (int) $settings->get('test_items_start', 3, 'videos'),
+        ]);
+
+        $dataProvider->prepare();
+
+        $videos = $dataProvider->getModels();
+        $pagination = $dataProvider->getPagination();
+
+        if ($page > 1 && empty($videos)) {
+            $response->statusCode = 404;
+        }
+
+        if ($settings->get('internal_register_activity', true, 'videos')) {
+            $this->on(
+                self::EVENT_AFTER_ACTION,
+                [
+                    VideoSubscriber::class,
+                    'onShowCategoryThumbs'
+                ],
+                [
+                    'category_id' => $category['category_id'],
+                    'videos_ids' => \array_column($videos, 'video_id'),
+                    'page' => $page,
+                ]
+            );
+        }
+
+        return $this->render('category_videos', [
+            'page' => $page,
+            'sort' => $this->action->id,
+            'settings' => $settings,
+            'category' => $category,
+            'videos' => $videos,
+            'pagination' => $pagination,
+            'filterForm' => $filterForm,
+        ]);
+    }
+
+    /**
      * List all categories
      *
      * @param SettingsInterface $settings
-     * @return mixed
+     * @return string
      */
-    public function actionAllCategories(SettingsInterface $settings) // Переименовать этот метод в AllCategories (template too)
+    public function actionAllCategories(SettingsInterface $settings): string // Переименовать этот метод в AllCategories (template too)
     {
         $sort = new Sort([
             'attributes' => [
@@ -578,7 +674,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * @return array
      * @throws NotFoundHttpException
      */
-    public function findByIdentify($identify)
+    public function findByIdentify($identify): array
     {
         $query = Category::find()
             ->asArray();
@@ -601,11 +697,11 @@ class CategoryController extends Controller implements ViewContextInterface
     }
 
     /**
-     * @param $category
-     * @param $filterForm
+     * @param array $category
+     * @param FilterForm $filterForm
      * @return \SK\VideoModule\Query\VideoQuery
      */
-    protected function buildInitialQuery(array $category, FilterForm $filterForm)
+    protected function buildInitialQuery(array $category, FilterForm $filterForm): \SK\VideoModule\Query\VideoQuery
     {
         $query = Video::find()
             ->asThumbs()
@@ -677,18 +773,18 @@ class CategoryController extends Controller implements ViewContextInterface
     {
         $deviceDetect = $this->get('device.detect');
 
-        return $deviceDetect->isMobile() || $deviceDetect->isTablet();
+        return $deviceDetect->isMobile();
     }
 
     /**
      * Get instance by tag name form DI container
      *
-     * @param $name
+     * @param string $name
      * @return object
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    protected function get(string $name)
+    protected function get(string $name): object
     {
         return Yii::$container->get($name);
     }
