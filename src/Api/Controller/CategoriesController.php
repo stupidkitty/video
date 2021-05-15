@@ -1,16 +1,15 @@
 <?php
+
 namespace SK\VideoModule\Api\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\rest\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Category;
-use yii\web\NotFoundHttpException;
-use yii\filters\auth\HttpBearerAuth;
-use SK\VideoModule\Api\Form\VideoForm;
 use RS\Component\Core\Settings\SettingsInterface;
-use SK\VideoModule\Service\Video as VideoService;
+use SK\VideoModule\Model\Category;
+use Yii;
+use yii\filters\auth\HttpBearerAuth;
+use yii\filters\PageCache;
+use yii\rest\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
 
 /**
  * VideoController
@@ -45,11 +44,11 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * List categories action
      *
-     * @return mixed
+     * @return array
      */
-    public function actionIndex()
+    public function actionIndex(): array
     {
         $responseData = [];
 
@@ -81,17 +80,18 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Shows one category
      *
-     * @return mixed
+     * @param $id
+     * @return array
      */
-    public function actionView($id)
+    public function actionView($id): array
     {
         $responseData = [];
 
         try {
             $category = $this->findById($id);
-        } catch (\NotFoundHttpException $e) {
+        } catch (NotFoundHttpException $e) {
             $responseData['result']['category']['id'] = (int) $id;
             $responseData['result']['category']['errors'][] = $e->getMessage();
 
@@ -123,9 +123,9 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Create a new category
      *
-     * @return mixed
+     * @return void
      */
     public function actionCreate()
     {
@@ -211,9 +211,9 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Update the category
      *
-     * @return mixed
+     * @return void
      */
     public function actionUpdate($id)
     {
@@ -239,9 +239,9 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Delete the category
      *
-     * @return mixed
+     * @return void
      */
     public function actionDelete($id)
     {
@@ -271,10 +271,10 @@ class CategoriesController extends Controller
      * @return Category the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findById($id)
+    protected function findById(int $id): Category
     {
         $category = Category::find()
-            ->where(['category_id' => (int) $id, 'enabled' => 1])
+            ->where(['category_id' => $id, 'enabled' => 1])
             ->one();
 
         if (null === $category) {
