@@ -80,17 +80,19 @@ class VideoController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Gets info about video
      *
-     * @return mixed
+     * @param $id
+     * @return array
+     * @throws \Exception
      */
-    public function actionView($id)
+    public function actionView($id): array
     {
         $responseData = [];
 
         try {
             $video = $this->findById($id);
-        } catch (\NotFoundHttpException $e) {
+        } catch (NotFoundHttpException $e) {
             $responseData['result']['video']['id'] = (int) $id;
             $responseData['result']['video']['errors'][] = $e->getMessage();
 
@@ -147,18 +149,18 @@ class VideoController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Create video
      *
-     * @return mixed
+     * @param Request $request
+     * @param User $user
+     * @return array[]|string[]
      */
-    public function actionCreate()
+    public function actionCreate(Request $request, User $user)
     {
-        $request = Yii::$container->get(Request::class);
         $form = new VideoForm;
 
         if ($form->load($request->post()) && $form->isValid()) {
             $db = Yii::$app->db;
-            $user = Yii::$container->get(User::class);
 
             $transaction = $db->beginTransaction();
 
@@ -231,11 +233,15 @@ class VideoController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Update the video
      *
-     * @return mixed
+     * @param int $id
+     * @return array|array[]
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id): array
     {
         $video = $this->findById($id);
         $request = Yii::$container->get(Request::class);
@@ -259,11 +265,12 @@ class VideoController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Delete video
      *
-     * @return mixed
+     * @return array[]|string
+     * @throws NotFoundHttpException
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id)
     {
         $video = $this->findById($id);
         $videoService = new VideoService;
@@ -286,11 +293,12 @@ class VideoController extends Controller
     /**
      * Лайк видео
      *
+     * @param int $id
      * @return string
      */
-    public function actionLike($id)
+    public function actionLike(int $id): string
     {
-        $video_id = (int) $id;
+        $video_id = $id;
 
         Video::updateAllCounters(['likes' => 1], ['video_id' => $video_id]);
 
@@ -300,11 +308,12 @@ class VideoController extends Controller
     /**
      * Дизлайк видео
      *
+     * @param int $id
      * @return string
      */
-    public function actionDislike($id)
+    public function actionDislike(int $id): string
     {
-        $video_id = (int) $id;
+        $video_id = $id;
 
         Video::updateAllCounters(['dislikes' => 1], ['video_id' => $video_id]);
 
@@ -319,12 +328,12 @@ class VideoController extends Controller
      * @return Video the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findById($id)
+    protected function findById(int $id): Video
     {
         $video = Video::find()
             ->alias('v')
             ->withViewRelations()
-            ->whereIdOrSlug((int) $id)
+            ->whereIdOrSlug($id)
             ->one();
 
         if (null === $video) {
