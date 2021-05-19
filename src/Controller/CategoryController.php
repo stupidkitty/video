@@ -10,10 +10,14 @@ use SK\VideoModule\Model\Category;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Provider\RotateVideoProvider;
+use SK\VideoModule\Query\VideoQuery;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\base\ViewContextInterface;
+use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\data\Sort;
+use yii\di\NotInstantiableException;
 use yii\filters\PageCache;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -47,10 +51,11 @@ class CategoryController extends Controller implements ViewContextInterface
                 'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index', 'ctr', 'list-all'],
                 'duration' => 600,
-                /*'dependency' => [
-                    'class' => 'yii\caching\DbDependency',
-                    'sql' => 'SELECT MAX(`published_at`) FROM `videos` WHERE `published_at` <= NOW()',
-                ],*/
+                'dependency' => [
+                    new TagDependency([
+                        'tags' => 'categories',
+                    ]),
+                ],
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
@@ -89,7 +94,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * @param int $page
      * @param string $o
      * @param string $t
-     * @return mixed
+     * @return string
      * @throws NotFoundHttpException
      */
     public function actionIndex(
@@ -101,7 +106,7 @@ class CategoryController extends Controller implements ViewContextInterface
         int $page = 1,
         string $o = 'date',
         string $t = 'all-time'
-    )
+    ): string
     {
         $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
@@ -185,7 +190,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * @param string $slug
      * @param int $page
      * @param string $t
-     * @return mixed
+     * @return string
      * @throws NotFoundHttpException
      */
     public function actionDate(
@@ -196,7 +201,7 @@ class CategoryController extends Controller implements ViewContextInterface
         string $slug = '',
         int $page = 1,
         string $t = 'all-time'
-    )
+    ): string
     {
         $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
@@ -269,7 +274,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * @param string $slug
      * @param int $page
      * @param string $t
-     * @return mixed
+     * @return string
      * @throws NotFoundHttpException
      */
     public function actionViews(
@@ -280,7 +285,7 @@ class CategoryController extends Controller implements ViewContextInterface
         string $slug = '',
         int $page = 1,
         string $t = 'all-time'
-    )
+    ): string
     {
         $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
@@ -353,7 +358,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * @param string $slug
      * @param int $page
      * @param string $t
-     * @return mixed
+     * @return string
      * @throws NotFoundHttpException
      */
     public function actionLikes(
@@ -364,7 +369,7 @@ class CategoryController extends Controller implements ViewContextInterface
         string $slug = '',
         int $page = 1,
         string $t = 'all-time'
-    )
+    ): string
     {
         $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
@@ -437,7 +442,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * @param string $slug
      * @param int $page
      * @param string $t
-     * @return mixed
+     * @return string
      * @throws NotFoundHttpException
      */
     public function actionCtr(
@@ -448,7 +453,7 @@ class CategoryController extends Controller implements ViewContextInterface
         string $slug = '',
         int $page = 1,
         string $t = 'all-time'
-    )
+    ): string
     {
         $identify = (0 !== $id) ? $id : $slug;
         $category = $this->findByIdentify($identify);
@@ -699,9 +704,9 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * @param array $category
      * @param FilterForm $filterForm
-     * @return \SK\VideoModule\Query\VideoQuery
+     * @return VideoQuery
      */
-    protected function buildInitialQuery(array $category, FilterForm $filterForm): \SK\VideoModule\Query\VideoQuery
+    protected function buildInitialQuery(array $category, FilterForm $filterForm): VideoQuery
     {
         $query = Video::find()
             ->asThumbs()
@@ -766,8 +771,8 @@ class CategoryController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function isMobile(): bool
     {
@@ -781,8 +786,8 @@ class CategoryController extends Controller implements ViewContextInterface
      *
      * @param string $name
      * @return object
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function get(string $name): object
     {
