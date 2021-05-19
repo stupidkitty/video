@@ -2,6 +2,7 @@
 namespace SK\VideoModule\Service;
 
 use Yii;
+use yii\caching\TagDependency;
 use yii\db\Expression;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
@@ -192,9 +193,14 @@ class Rotator
             return;
         }
 
-        VideosCategories::updateAll($this->getResetFields(), '`shows_before_reset` >= :limit AND `is_tested` = 1', [
+        $numChangedRows = VideosCategories::updateAll($this->getResetFields(), '`shows_before_reset` >= :limit AND `is_tested` = 1', [
             ':limit' => $showsLimit
         ]);
+
+        // Сбросим кеш страниц категорий
+        if ($numChangedRows > 0) {
+            TagDependency::invalidate(Yii::$app->cache, 'videos:categories');
+        }
     }
 
     /**
