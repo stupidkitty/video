@@ -52,9 +52,8 @@ class CategoryController extends Controller implements ViewContextInterface
                 //'only' => ['index', 'ctr', 'list-all'],
                 'duration' => 600,
                 'dependency' => [
-                    new TagDependency([
-                        'tags' => 'categories',
-                    ]),
+                    'class' => TagDependency::class,
+                    'tags' => 'videos:categories',
                 ],
                 'variations' => [
                     Yii::$app->language,
@@ -67,6 +66,39 @@ class CategoryController extends Controller implements ViewContextInterface
     }
 
     /**
+     * Get instance by tag name form DI container
+     *
+     * @param string $name
+     * @return object
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
+     */
+    protected function get(string $name): object
+    {
+        return Yii::$container->get($name);
+    }
+
+    /**
+     * Заметка.Можно считать клики в категорию по входу в первую страницу,
+     * но в таком случае придется делать запрос на поиск по слагу.
+     * Попробовать решить этот момент.
+     */
+
+    /**
+     * Detect user is mobile device
+     *
+     * @return boolean
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
+     */
+    protected function isMobile(): bool
+    {
+        $deviceDetect = $this->get('device.detect');
+
+        return $deviceDetect->isMobile();
+    }
+
+    /**
      * Переопределяет дефолтный путь шаблонов модуля.
      * Путь задается в конфиге модуля, в компонентах приложения.
      *
@@ -76,12 +108,6 @@ class CategoryController extends Controller implements ViewContextInterface
     {
         return $this->module->getViewPath();
     }
-
-    /**
-     * Заметка.Можно считать клики в категорию по входу в первую страницу,
-     * но в таком случае придется делать запрос на поиск по слагу.
-     * Попробовать решить этот момент.
-     */
 
     /**
      * Показывает список видео роликов текущей категории.
@@ -178,6 +204,101 @@ class CategoryController extends Controller implements ViewContextInterface
             'videos' => $videos,
             'pagination' => $pagination,
         ]);
+    }
+
+    /**
+     * Find category by primary key or by slug
+     *
+     * @param int|string $identify
+     * @return array
+     * @throws NotFoundHttpException
+     */
+    public function findByIdentify($identify): array
+    {
+        $query = Category::find()
+            ->asArray();
+
+        if (\is_integer($identify)) {
+            $query->where(['category_id' => $identify]);
+        } else {
+            $query->where(['slug' => $identify]);
+        }
+
+        $category = $query
+            ->andWhere(['enabled' => 1])
+            ->one();
+
+        if (null === $category) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        return $category;
+    }
+
+    /**
+     * @return Sort
+     */
+    protected function buildSort(): Sort
+    {
+        return new Sort([
+            'sortParam' => 'o',
+            'attributes' => [
+                'date' => [
+                    'asc' => ['v.published_at' => SORT_DESC],
+                    'desc' => ['v.published_at' => SORT_DESC],
+                    'default' => SORT_DESC,
+                ],
+                'mv' => [
+                    'asc' => ['v.views' => SORT_DESC],
+                    'desc' => ['v.views' => SORT_DESC],
+                    'default' => SORT_DESC,
+                ],
+                'tr' => [
+                    'asc' => ['v.likes' => SORT_DESC],
+                    'desc' => ['v.likes' => SORT_DESC],
+                    'default' => SORT_DESC,
+                ],
+                'ctr' => [ // top rated
+                    'asc' => ['vs.ctr' => SORT_DESC],
+                    'desc' => ['vs.ctr' => SORT_DESC],
+                    'default' => SORT_DESC,
+                ],
+            ],
+            'defaultOrder' => [
+                'date' => [
+                    'v.published_at' => SORT_DESC,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @param array $category
+     * @param FilterForm $filterForm
+     * @return VideoQuery
+     */
+    protected function buildInitialQuery(array $category, FilterForm $filterForm): VideoQuery
+    {
+        $query = Video::find()
+            ->asThumbs()
+            ->innerJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
+            ->andwhere(['vcm.category_id' => $category['category_id']]);
+
+        if ('all-time' === $filterForm->t) {
+            $query->untilNow();
+        } else {
+            $query->rangedUntilNow($filterForm->t);
+        }
+
+        $query
+            ->onlyActive()
+            ->andFilterWhere(['v.orientation' => $filterForm->orientation])
+            ->andFilterWhere(['>=', 'v.duration', $filterForm->durationMin])
+            ->andFilterWhere(['<=', 'v.duration', $filterForm->durationMax])
+            ->andFilterWhere(['v.is_hd' => $filterForm->isHd])
+            ->asArray();
+
+        return $query;
     }
 
     /**
@@ -670,127 +791,5 @@ class CategoryController extends Controller implements ViewContextInterface
             'settings' => $settings,
             'sort' => $sort,
         ]);
-    }
-
-    /**
-     * Find category by primary key or by slug
-     *
-     * @param int|string $identify
-     * @return array
-     * @throws NotFoundHttpException
-     */
-    public function findByIdentify($identify): array
-    {
-        $query = Category::find()
-            ->asArray();
-
-        if (\is_integer($identify)) {
-            $query->where(['category_id' => $identify]);
-        } else {
-            $query->where(['slug' => $identify]);
-        }
-
-        $category = $query
-            ->andWhere(['enabled' => 1])
-            ->one();
-
-        if (null === $category) {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
-
-        return $category;
-    }
-
-    /**
-     * @param array $category
-     * @param FilterForm $filterForm
-     * @return VideoQuery
-     */
-    protected function buildInitialQuery(array $category, FilterForm $filterForm): VideoQuery
-    {
-        $query = Video::find()
-            ->asThumbs()
-            ->innerJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
-            ->andwhere(['vcm.category_id' => $category['category_id']]);
-
-        if ('all-time' === $filterForm->t) {
-            $query->untilNow();
-        } else {
-            $query->rangedUntilNow($filterForm->t);
-        }
-
-        $query
-            ->onlyActive()
-            ->andFilterWhere(['v.orientation' => $filterForm->orientation])
-            ->andFilterWhere(['>=', 'v.duration', $filterForm->durationMin])
-            ->andFilterWhere(['<=', 'v.duration', $filterForm->durationMax])
-            ->andFilterWhere(['v.is_hd' => $filterForm->isHd])
-            ->asArray();
-
-        return $query;
-    }
-
-    /**
-     * @return Sort
-     */
-    protected function buildSort(): Sort
-    {
-        return new Sort([
-            'sortParam' => 'o',
-            'attributes' => [
-                'date' => [
-                    'asc' => ['v.published_at' => SORT_DESC],
-                    'desc' => ['v.published_at' => SORT_DESC],
-                    'default' => SORT_DESC,
-                ],
-                'mv' => [
-                    'asc' => ['v.views' => SORT_DESC],
-                    'desc' => ['v.views' => SORT_DESC],
-                    'default' => SORT_DESC,
-                ],
-                'tr' => [
-                    'asc' => ['v.likes' => SORT_DESC],
-                    'desc' => ['v.likes' => SORT_DESC],
-                    'default' => SORT_DESC,
-                ],
-                'ctr' => [ // top rated
-                    'asc' => ['vs.ctr' => SORT_DESC],
-                    'desc' => ['vs.ctr' => SORT_DESC],
-                    'default' => SORT_DESC,
-                ],
-            ],
-            'defaultOrder' => [
-                'date' => [
-                    'v.published_at' => SORT_DESC,
-                ],
-            ],
-        ]);
-    }
-
-    /**
-     * Detect user is mobile device
-     *
-     * @return boolean
-     * @throws InvalidConfigException
-     * @throws NotInstantiableException
-     */
-    protected function isMobile(): bool
-    {
-        $deviceDetect = $this->get('device.detect');
-
-        return $deviceDetect->isMobile();
-    }
-
-    /**
-     * Get instance by tag name form DI container
-     *
-     * @param string $name
-     * @return object
-     * @throws InvalidConfigException
-     * @throws NotInstantiableException
-     */
-    protected function get(string $name): object
-    {
-        return Yii::$container->get($name);
     }
 }

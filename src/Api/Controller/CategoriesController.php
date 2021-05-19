@@ -5,6 +5,7 @@ namespace SK\VideoModule\Api\Controller;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Model\Category;
 use Yii;
+use yii\caching\TagDependency;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\PageCache;
 use yii\rest\Controller;
@@ -32,7 +33,7 @@ class CategoriesController extends Controller
                 'only' => ['index', 'view'],
                 'duration' => 3200,
                 'dependency' => [
-                    'class' => 'yii\caching\TagDependency',
+                    'class' => TagDependency::class,
                     'tags' => 'videos:categories',
                 ],
                 'variations' => [
@@ -120,6 +121,27 @@ class CategoriesController extends Controller
         $responseData['result']['category'] = $categoryData;
 
         return $responseData;
+    }
+
+    /**
+     * Finds the Category model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     *
+     * @param integer $id
+     * @return Category the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findById(int $id): Category
+    {
+        $category = Category::find()
+            ->where(['category_id' => $id, 'enabled' => 1])
+            ->one();
+
+        if (null === $category) {
+            throw new NotFoundHttpException('The requested category does not exist.');
+        }
+
+        return $category;
     }
 
     /**
@@ -261,26 +283,5 @@ class CategoriesController extends Controller
                 'errors' => $video->getErrorSummary(true),
             ],
         ];*/
-    }
-
-    /**
-     * Finds the Category model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     *
-     * @param integer $id
-     * @return Category the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findById(int $id): Category
-    {
-        $category = Category::find()
-            ->where(['category_id' => $id, 'enabled' => 1])
-            ->one();
-
-        if (null === $category) {
-            throw new NotFoundHttpException('The requested category does not exist.');
-        }
-
-        return $category;
     }
 }

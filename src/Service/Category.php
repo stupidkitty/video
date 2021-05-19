@@ -1,23 +1,26 @@
 <?php
+
 namespace SK\VideoModule\Service;
 
-use Yii;
+use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Model\Category as CategoryModel;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
-
-use SK\VideoModule\Provider\RotateVideoProvider;
-use RS\Component\Core\Settings\SettingsInterface;
-use SK\VideoModule\Model\Category as CategoryModel;
+use Yii;
+use yii\base\InvalidConfigException;
+use yii\caching\TagDependency;
+use yii\db\Exception;
 
 class Category
 {
     /**
      * Подсчитавыет количество активных видео в категориях
      *
-     * @return void
+     * @return int
+     * @throws Exception
      */
-    public function countVideos()
+    public function countVideos(): int
     {
         $sql = "
             UPDATE `videos_categories` as `vc`
@@ -37,13 +40,14 @@ class Category
 
     /**
      * SET @total_clicks = (SELECT SUM(`clicks`) FROM `videos_categories_stats` WHERE `date` >= (NOW() - INTERVAL 2 DAY));
-     *
      * SELECT `category_id`, (SUM(`clicks`) / @total_clicks) * 100
      * FROM `videos_categories_stats`
      * WHERE `date` >= (NOW() - INTERVAL 2 DAY)
      * GROUP BY `category_id`;
+     *
+     * @throws Exception
      */
-    public function updatePopularity()
+    public function updatePopularity(): int
     {
         // Для 8-й версии mysql
         /*$sql = "
@@ -127,7 +131,11 @@ class Category
                     //$category->setCoverImage($image);
                     $category->image = $image->filepath;
                     $category->updated_at = \gmdate('Y-m-d H:i:s');
-                    $category->save();
+
+                    if ($category->save()) {
+                        // Инвалидируем кеш страниц, как только тумбы сменятся.
+                        TagDependency::invalidate(Yii::$app->cache, 'videos:categories');
+                    }
                 }
 
                 // Записать, что данная тумба уже используется.
@@ -140,6 +148,7 @@ class Category
      * Удаляет старую статистику по кликам в категорию.
      *
      * @return void
+     * @throws InvalidConfigException
      */
     public function clearOldStats()
     {

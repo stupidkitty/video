@@ -1,9 +1,10 @@
 <?php
+
 namespace SK\VideoModule\Widget;
 
+use SK\VideoModule\Model\Category;
 use Yii;
 use yii\base\Widget;
-use SK\VideoModule\Model\Category;
 use yii\caching\TagDependency;
 
 class Categories extends Widget
@@ -69,7 +70,8 @@ class Categories extends Widget
     /**
      * Initializes the widget
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
 
         $this->cache = Yii::$app->cache;
@@ -93,7 +95,7 @@ class Categories extends Widget
     {
         $cacheKey = $this->buildCacheKey();
 
-        $html = $this->isCacheEnabled() ?  $this->cache->get($cacheKey) : false;
+        $html = $this->isCacheEnabled() ? $this->cache->get($cacheKey) : false;
 
         if (false === $html) {
             $categories = $this->getItems();
@@ -108,11 +110,31 @@ class Categories extends Widget
             ]);
 
             if ($this->isCacheEnabled()) {
-                $this->cache->set($cacheKey, $html, $this->cacheDuration, new TagDependency(['tags' => 'categories']));
+                $this->cache->set($cacheKey, $html, $this->cacheDuration, new TagDependency(['tags' => 'videos:categories']));
             }
         }
 
         return $html;
+    }
+
+    /**
+     * Создает ключ для кеша.
+     *
+     * @return string
+     */
+    private function buildCacheKey(): string
+    {
+        return "{$this->defaultCacheKey}:{$this->order}:{$this->template}:{$this->active_id}";
+    }
+
+    /**
+     * Включен\выключен кеш виджета.
+     *
+     * @return boolean
+     */
+    private function isCacheEnabled(): bool
+    {
+        return (bool) $this->enableCache;
     }
 
     private function getItems()
@@ -159,16 +181,6 @@ class Categories extends Widget
     }
 
     /**
-     * Включен\выключен кеш виджета.
-     *
-     * @return boolean
-     */
-    private function isCacheEnabled(): bool
-    {
-        return (bool) $this->enableCache;
-    }
-
-    /**
      * Группировать или нет категории по первой букве.
      *
      * @return boolean
@@ -176,15 +188,5 @@ class Categories extends Widget
     private function isGroupByFirstLetter(): bool
     {
         return (bool) $this->groupByFirstLetter;
-    }
-
-    /**
-     * Создает ключ для кеша.
-     *
-     * @return string
-     */
-    private function buildCacheKey(): string
-    {
-        return "{$this->defaultCacheKey}:{$this->order}:{$this->template}:{$this->active_id}";
     }
 }
