@@ -3,8 +3,8 @@ namespace SK\VideoModule\Widget;
 
 use Yii;
 use yii\base\Widget;
-
 use SK\VideoModule\Model\Category;
+use yii\caching\TagDependency;
 
 class Categories extends Widget
 {
@@ -108,7 +108,7 @@ class Categories extends Widget
             ]);
 
             if ($this->isCacheEnabled()) {
-                $this->cache->set($cacheKey, $html, $this->cacheDuration);
+                $this->cache->set($cacheKey, $html, $this->cacheDuration, new TagDependency(['tags' => 'categories']));
             }
         }
 
@@ -117,6 +117,8 @@ class Categories extends Widget
 
     private function getItems()
     {
+        $order = null;
+
         if ('title' === $this->order) {
             $order = ['title' => SORT_ASC];
         } elseif ('position' === $this->order) {
@@ -134,11 +136,10 @@ class Categories extends Widget
             ->asArray();
 
         if (null !== $this->limit) {
-            $query->limit((int) $this->limit);
+            $query->limit($this->limit);
         }
 
         if ($this->isGroupByFirstLetter()) {
-            $lastLetter = '';
             $categories = [];
 
             foreach ($query->all() as $category) {
@@ -149,7 +150,6 @@ class Categories extends Widget
                 }
 
                 $categories[$currentLetter][] = $category;
-                $lastLetter = $currentLetter;
             }
 
             return $categories;
@@ -163,7 +163,7 @@ class Categories extends Widget
      *
      * @return boolean
      */
-    private function isCacheEnabled()
+    private function isCacheEnabled(): bool
     {
         return (bool) $this->enableCache;
     }
@@ -173,7 +173,7 @@ class Categories extends Widget
      *
      * @return boolean
      */
-    private function isGroupByFirstLetter()
+    private function isGroupByFirstLetter(): bool
     {
         return (bool) $this->groupByFirstLetter;
     }
@@ -183,7 +183,7 @@ class Categories extends Widget
      *
      * @return string
      */
-    private function buildCacheKey()
+    private function buildCacheKey(): string
     {
         return "{$this->defaultCacheKey}:{$this->order}:{$this->template}:{$this->active_id}";
     }
