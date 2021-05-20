@@ -1,20 +1,29 @@
 <?php
+
 namespace SK\VideoModule\Admin\Controller;
 
-use Yii;
-use yii\base\Event;
-use yii\web\Request;
-use yii\web\Controller;
-use yii\base\DynamicModel;
-use yii\filters\VerbFilter;
-use yii2tech\csvgrid\CsvGrid;
-use yii\filters\AccessControl;
-use yii\data\ActiveDataProvider;
-use SK\VideoModule\Model\Category;
-use yii\web\NotFoundHttpException;
 use SK\VideoModule\Admin\Form\CategoryForm;
 use SK\VideoModule\EventSubscriber\CategorySubscriber;
+use SK\VideoModule\Model\Category;
 use SK\VideoModule\Service\Category as CategoryService;
+use Throwable;
+use Yii;
+use yii\base\DynamicModel;
+use yii\base\Event;
+use yii\base\InvalidConfigException;
+use yii\data\ActiveDataProvider;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\db\StaleObjectException;
+use yii\di\NotInstantiableException;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
+use yii\web\Response;
+use yii2tech\csvgrid\CsvGrid;
 
 /**
  * CategoriesController implements the CRUD actions for Category model.
@@ -24,17 +33,17 @@ class CategoriesController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
-               'class' => AccessControl::class,
-               'rules' => [
-                   [
-                       'allow' => true,
-                       'roles' => ['@'],
-                   ],
-               ],
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
             ],
             'verbs' => [
                 'class' => VerbFilter::class,
@@ -49,8 +58,9 @@ class CategoriesController extends Controller
 
     /**
      * @inheritdoc
+     * @throws BadRequestHttpException
      */
-    public function beforeAction($action)
+    public function beforeAction($action): bool
     {
         if (in_array($action->id, ['save-order', 'recalculate-videos'])) {
             $this->enableCsrfValidation = false;
@@ -67,19 +77,19 @@ class CategoriesController extends Controller
      * Displays a single Category model.
      *
      * @param integer $id
-     *
-     * @return mixed
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \Exception
      */
-    public function actionView($id)
+    public function actionView(int $id): string
     {
         $categories = Category::find()
             ->orderBy(['position' => SORT_ASC])
             ->all();
 
-
         $category = $this->findById($id);
 
-        $clicksStats = (new \yii\db\Query)
+        $clicksStats = (new Query)
             ->select('`date`, SUM(`clicks`) as `clicks`')
             ->from('videos_categories_stats')
             ->where(['category_id' => $id])
@@ -90,7 +100,7 @@ class CategoriesController extends Controller
         $currentDate = new \DateTime('now', new \DateTimeZone('utc'));
         $stats = [];
 
-        for ($i = 0; $i < 30; $i ++) {
+        for ($i = 0; $i < 30; $i++) {
             $currentDay = $currentDate->format('Y-m-d');
 
             $clicks = (isset($clicksStats[$currentDay])) ? (int) $clicksStats[$currentDay]['clicks'] : 0;
@@ -115,7 +125,7 @@ class CategoriesController extends Controller
      * Create new Category model.
      * If update is successful, the browser will be redirected to the 'create' page.
      *
-     * @return mixed
+     * @return Response|string
      */
     public function actionCreate()
     {
@@ -129,7 +139,7 @@ class CategoriesController extends Controller
             if ($category->save()) {
                 Yii::$app->session->setFlash('success', Yii::t('videos', 'Категория "<b>{title}</b>" создана', ['title' => $category->title]));
 
-                $this->redirect(['create']);
+                return $this->redirect(['create']);
             } else {
                 Yii::$app->session->setFlash('error', 'Ошибка сохранения');
             }
@@ -149,11 +159,11 @@ class CategoriesController extends Controller
      * Updates an existing Category model.
      * If update is successful, the browser will be redirected to the 'view' page.
      *
-     * @param integer $id
-     *
-     * @return mixed
+     * @param int $id
+     * @return Response|string
+     * @throws NotFoundHttpException
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id)
     {
         $category = $this->findById($id);
 
@@ -167,7 +177,7 @@ class CategoriesController extends Controller
             if ($category->save()) {
                 Yii::$app->session->setFlash('success', 'Новые данные для категории сохранены');
 
-                $this->redirect(['update', 'id' => $id]);
+                return $this->redirect(['update', 'id' => $id]);
             } else {
                 Yii::$app->session->setFlash('error', 'Ошибка сохранения');
             }
@@ -188,18 +198,22 @@ class CategoriesController extends Controller
      * Deletes an existing Category model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      *
-     * @param integer $id
-     *
-     * @return mixed
+     * @param int $id
+     * @return Response
+     * @throws NotFoundHttpException
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id): Response
     {
         $category = $this->findById($id);
 
-        if ($category->delete()) {
-            Yii::$app->session->setFlash('success', Yii::t('videos', 'Категория "<b>{title}</b>" успешно удалена', ['title' => $category->getTitle()]));
-        } else {
-            Yii::$app->session->setFlash('error', Yii::t('videos', 'Удалить категорию "<b>{title}</b>" не удалось', ['title' => $category->getTitle()]));
+        try {
+            if ($category->delete()) {
+                Yii::$app->session->setFlash('success', Yii::t('videos', 'Категория "<b>{title}</b>" успешно удалена', ['title' => $category->getTitle()]));
+            } else {
+                Yii::$app->session->setFlash('error', Yii::t('videos', 'Удалить категорию "<b>{title}</b>" не удалось', ['title' => $category->getTitle()]));
+            }
+        } catch (StaleObjectException | Throwable $e) {
+            Yii::$app->session->setFlash('error', Yii::t('videos', $e->getMessage()));
         }
 
         return $this->redirect(['create']);
@@ -208,11 +222,12 @@ class CategoriesController extends Controller
     /**
      * Сохраняет порядок сортировки категорий, установленный пользователем.
      *
-     * @return mixed
+     * @return Response
+     * @throws InvalidConfigException
      */
-    public function actionSaveOrder()
+    public function actionSaveOrder(): Response
     {
-            // Валидация массива идентификаторов категорий.
+        // Валидация массива идентификаторов категорий.
         $validationModel = DynamicModel::validateData(['categories_ids' => $this->getRequest()->post('order')], [
             ['categories_ids', 'each', 'rule' => ['integer']],
             ['categories_ids', 'filter', 'filter' => 'array_filter'],
@@ -233,9 +248,9 @@ class CategoriesController extends Controller
 
         try {
             Category::updateAll([
-                '{{position}}' => new \yii\db\Expression("FIND_IN_SET(`category_id`, :id_list)"),
+                '{{position}}' => new Expression("FIND_IN_SET(`category_id`, :id_list)"),
             ], [
-                '!=', new \yii\db\Expression("FIND_IN_SET(`category_id`, :id_list)"), 0,
+                '!=', new Expression("FIND_IN_SET(`category_id`, :id_list)"), 0,
             ], [
                 ':id_list' => \implode(',', $validationModel->categories_ids),
             ]);
@@ -260,15 +275,16 @@ class CategoriesController extends Controller
     /**
      * Формирует csv для экспорта категорий.
      *
-     * @return send file
+     * @return Response Csv file download
+     * @throws InvalidConfigException
      */
-    public function actionExport()
+    public function actionExport(): Response
     {
         $exporter = new CsvGrid([
             'csvFileConfig' => [
-		        'cellDelimiter' => '|',
-		        'enclosure' => '"',
-		    ],
+                'cellDelimiter' => '|',
+                'enclosure' => '"',
+            ],
             'dataProvider' => new ActiveDataProvider([
                 'query' => Category::find(),
                 'pagination' => [
@@ -277,10 +293,7 @@ class CategoriesController extends Controller
             ]),
             'columns' => [
                 'category_id',
-                [
-                    'attribute' => 'title',
-                    'label' => 'Name (название категории)',
-                ],
+                'attribute' => 'title',
                 'meta_title',
                 'meta_description',
                 'h1',
@@ -292,15 +305,15 @@ class CategoriesController extends Controller
             ],
         ]);
 
-        $exporter->export()->send('categories.csv');
+        return $exporter->export()->send('categories.csv');
     }
 
     /**
      * Пересчитывает активные видео в категориях.
      *
-     * @return json
+     * @return Response
      */
-    public function actionRecalculateVideos()
+    public function actionRecalculateVideos(): Response
     {
         try {
             $categoryService = new CategoryService;
@@ -322,13 +335,11 @@ class CategoriesController extends Controller
     /**
      * Поиск категории по ее идентификатору
      *
-     * @param integer $id Идентификатор категории
-     *
-     * @return mixed
-     *
-     * @throw NotFoundHttpException Если категория не найдена.
+     * @param int $id Идентификатор категории
+     * @return Category
+     * @throws NotFoundHttpException If category not found
      */
-    protected function findById($id)
+    protected function findById(int $id): Category
     {
         $category = Category::findOne($id);
 
@@ -342,10 +353,14 @@ class CategoriesController extends Controller
     /**
      * Get request class form DI container
      *
-     * @return \yii\web\Request
+     * @return Request
      */
-    protected function getRequest()
+    protected function getRequest(): Request
     {
-        return Yii::$container->get(Request::class);
+        try {
+            return Yii::$container->get(Request::class);
+        } catch (NotInstantiableException | InvalidConfigException $e) {
+            return new Request();
+        }
     }
 }
