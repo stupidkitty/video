@@ -31,7 +31,7 @@ class CategoriesImportForm extends Model
     protected $imported_rows_num = 0;
 
     /**
-     * Options for selection of csv fileds
+     * Options for selection of csv fields
      *
      * @var string[]
      */
@@ -53,7 +53,7 @@ class CategoriesImportForm extends Model
     /**
      * @return string[]
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->options;
     }
@@ -82,7 +82,7 @@ class CategoriesImportForm extends Model
     /**
      * @inheritdoc
      */
-    public function formName()
+    public function formName(): string
     {
         return '';
     }
@@ -90,7 +90,7 @@ class CategoriesImportForm extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['delimiter', 'fields'], 'required'],
@@ -106,9 +106,11 @@ class CategoriesImportForm extends Model
     }
 
     /**
-     * @inheritdoc
+     * Validate form
+     *
+     * @return bool
      */
-    public function isValid()
+    public function isValid(): bool
     {
         $this->csv_file = UploadedFile::getInstance($this, 'csv_file');
 
@@ -118,9 +120,9 @@ class CategoriesImportForm extends Model
     /**
      * Get user options for csv handler
      *
-     * @return void
+     * @return CategoryCsvDto
      */
-    public function getData()
+    public function getData(): CategoryCsvDto
     {
         $dto = new CategoryCsvDto;
 

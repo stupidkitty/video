@@ -60,7 +60,7 @@ class CategoryCsvHandler
     /**
      * Get the value of failedItems
      *
-     * @return array
+     * @return FailedItemsCollection
      */
     public function getFailedItems(): FailedItemsCollection
     {
