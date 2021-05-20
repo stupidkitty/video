@@ -1,20 +1,22 @@
 <?php
+
 namespace SK\VideoModule\Admin\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\web\Controller;
-use yii\web\UploadedFile;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use SK\VideoModule\Model\Video;
-use yii\data\ActiveDataProvider;
 use RS\Component\User\Model\User;
-use yii\web\NotFoundHttpException;
-use SK\VideoModule\Model\ImportFeed;
-use SK\VideoModule\Csv\CategoryCsvHandler;
-use SK\VideoModule\Admin\Form\VideosImport;
 use SK\VideoModule\Admin\Form\CategoriesImportForm;
+use SK\VideoModule\Admin\Form\VideosImport;
+use SK\VideoModule\Csv\CategoryCsvHandler;
+use SK\VideoModule\Model\ImportFeed;
+use SK\VideoModule\Model\Video;
+use Yii;
+use yii\data\ActiveDataProvider;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
+use yii\web\Response;
+use yii\web\UploadedFile;
 
 /**
  * ImportController
@@ -24,17 +26,17 @@ class ImportController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
-               'class' => AccessControl::class,
-               'rules' => [
-                   [
-                       'allow' => true,
-                       'roles' => ['@'],
-                   ],
-               ],
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
             ],
             'verbs' => [
                 'class' => VerbFilter::class,
@@ -48,11 +50,12 @@ class ImportController extends Controller
     /**
      * Импорт роликов через файл или текстовую форму
      *
-     * @return mixed
+     * @param Request $request
+     * @param int $preset
+     * @return string
      */
-    public function actionVideos($preset = 0)
+    public function actionVideos(Request $request, int $preset = 0): string
     {
-        $request = $this->get(Request::class);
         $importFeed = ImportFeed::find()
             ->where(['feed_id' => $preset])
             ->one();
@@ -97,12 +100,12 @@ class ImportController extends Controller
     /**
      * Импорт категорий через файл или текстовую форму.
      *
-     * @return mixed
+     * @param Request $request
+     * @param CategoryCsvHandler $csvHandler
+     * @return string
      */
-    public function actionCategories()
+    public function actionCategories(Request $request, CategoryCsvHandler $csvHandler): string
     {
-        $request = $this->get(Request::class);
-        $csvHandler = $this->get(CategoryCsvHandler::class);
         $form = new CategoriesImportForm;
         $isProcessed = false;
 
@@ -122,9 +125,9 @@ class ImportController extends Controller
     /**
      * Lists all ImportFeed models.
      *
-     * @return mixed
+     * @return string
      */
-    public function actionListFeeds()
+    public function actionListFeeds(): string
     {
         $query = ImportFeed::find();
 
@@ -145,11 +148,10 @@ class ImportController extends Controller
      * Creates a new ImportFeed model.
      * If creation is successful, the browser will be redirected to the 'videos' page.
      *
-     * @return mixed
+     * @return Response|string
      */
-    public function actionAddFeed()
+    public function actionAddFeed(Request $request)
     {
-        $request = $this->get(Request::class);
         $feed = new ImportFeed();
 
         if ($feed->load($request->post()) && $feed->save()) {
@@ -164,11 +166,13 @@ class ImportController extends Controller
     /**
      * Редактирование существующего фида импорта
      *
-     * @return mixed
+     * @param Request $request
+     * @param int $id
+     * @return Response|string
+     * @throws NotFoundHttpException
      */
-    public function actionUpdateFeed($id)
+    public function actionUpdateFeed(Request $request, int $id)
     {
-        $request = $this->get(Request::class);
         $feed = $this->findById($id);
 
         if ($feed->load($request->post()) && $feed->save()) {
@@ -183,9 +187,11 @@ class ImportController extends Controller
     /**
      * Удаление фида импорта
      *
-     * @return mixed
+     * @param int $id
+     * @return Response
+     * @throws NotFoundHttpException
      */
-    public function actionDeleteFeed($id)
+    public function actionDeleteFeed(int $id): Response
     {
         $feed = $this->findById($id);
 
@@ -197,12 +203,15 @@ class ImportController extends Controller
 
         return $this->redirect(['list-feeds']);
     }
+
     /**
      * Удаление фида импорта
      *
+     * @param int $id
      * @return mixed
+     * @throws NotFoundHttpException
      */
-    public function findById($id)
+    public function findById(int $id)
     {
         $feed = ImportFeed::findById($id);
 
@@ -211,15 +220,5 @@ class ImportController extends Controller
         }
 
         return $feed;
-    }
-
-    /**
-     * Get request class form DI container
-     *
-     * @return \yii\web\Request
-     */
-    protected function get($name)
-    {
-        return Yii::$container->get($name);
     }
 }
