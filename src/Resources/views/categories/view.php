@@ -1,6 +1,5 @@
 <?php
 
-use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -15,86 +14,90 @@ $this->params['breadcrumbs'][] = Yii::t('videos', 'info');
 
 ?>
 
-<div class="row">
+    <div class="row">
 
-	<div class="col-md-4">
-		<?= $this->render('_left_sidebar', [
-			'categories' => $categories,
-			'active_id' => isset($category)? $category->getId() : 0,
-		]) ?>
-	</div>
+        <div class="col-md-4">
+            <?= $this->render('_left_sidebar', [
+                'categories' => $categories,
+                'active_id' => isset($category) ? $category->getId() : 0,
+            ]) ?>
+        </div>
 
-	<div class="col-md-8">
-		<div class="box box-info">
-			<div class="box-header with-border">
-				<i class="fa fa-info-circle"></i><h3 class="box-title">Информация: <?= $category->title ?></h3>
-				<div class="box-tools pull-right">
-					<div class="btn-group">
-						<?= Html::a('<i class="glyphicon glyphicon-import" style="color:#ad00ff;"></i> ' . Yii::t('videos', 'import'), ['import/categories'], ['class' => 'btn btn-default btn-sm', 'title' => 'Импорт категорий']) ?>
-						<?= Html::a('<i class="fa fa-fw fa-plus text-green"></i>' . Yii::t('videos', 'add'), ['create'], ['class' => 'btn btn-default btn-sm', 'title' => 'Добавить категорию']) ?>
-						<?= Html::a('<i class="fa fa-fw fa-edit text-blue"></i>' . Yii::t('videos', 'edit'), ['update', 'id' => $category->getId()], ['class' => 'btn btn-default btn-sm', 'title' => 'Редактировать категории']) ?>
-						<?= Html::a('<i class="fa fa-fw fa-trash-o text-red"></i>' . Yii::t('videos', 'delete'), ['delete', 'id' => $category->getId()], [
-				            'class' => 'btn btn-default btn-sm',
-				            'title' => 'Удалить категорию',
-				            'data' => [
-				                'confirm' => 'Действительно хотите удалить эту категорию?',
-				                'method' => 'post',
-				            ],
-				        ]) ?>
-					</div>
-				</div>
+        <div class="col-md-8">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <i class="fa fa-info-circle"></i>
+                    <h3 class="box-title">Информация: <?= $category->title ?></h3>
+                    <div class="box-tools pull-right">
+                        <div class="btn-group">
+                            <?= Html::a('<i class="glyphicon glyphicon-import" style="color:#ad00ff;"></i> ' . Yii::t('videos', 'import'), ['/admin/videos/import-categories'], ['class' => 'btn btn-default btn-sm', 'title' => 'Импорт категорий']) ?>
+                            <?= Html::a('<i class="fa fa-fw fa-plus text-green"></i>' . Yii::t('videos', 'add'), ['create'], ['class' => 'btn btn-default btn-sm', 'title' => 'Добавить категорию']) ?>
+                            <?= Html::a('<i class="fa fa-fw fa-edit text-blue"></i>' . Yii::t('videos', 'edit'), ['update', 'id' => $category->getId()], ['class' => 'btn btn-default btn-sm', 'title' => 'Редактировать категории']) ?>
+                            <?= Html::a('<i class="fa fa-fw fa-trash-o text-red"></i>' . Yii::t('videos', 'delete'), ['delete', 'id' => $category->getId()], [
+                                'class' => 'btn btn-default btn-sm',
+                                'title' => 'Удалить категорию',
+                                'data' => [
+                                    'confirm' => 'Действительно хотите удалить эту категорию?',
+                                    'method' => 'post',
+                                ],
+                            ]) ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-body pad">
+
+                    <?= DetailView::widget([
+                        'model' => $category,
+                        'attributes' => [
+                            'category_id',
+                            'title',
+                            'slug',
+                            'h1',
+                            'image:image',
+                            'meta_title',
+                            'meta_description',
+                            'description:ntext',
+                            'seotext:ntext',
+                            'param1:ntext',
+                            'param2:ntext',
+                            'param3:ntext',
+                            'videos_num',
+                            'on_index',
+                            'enabled',
+                            'last_period_clicks',
+                            'position',
+                            'created_at',
+                            'updated_at',
+                        ],
+                    ]) ?>
+
+                </div>
+
             </div>
 
-            <div class="box-body pad">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <i class="fa fa-area-chart"></i>
+                    <h3 class="box-title">Активность в категории за последниe 30 дней</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                    class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
 
-			    <?= DetailView::widget([
-			        'model' => $category,
-			        'attributes' => [
-			            'category_id',
-                        'title',
-			            'slug',
-			            'h1',
-			            'image:image',
-			            'meta_title',
-			            'meta_description',
-			            'description:ntext',
-			            'seotext:ntext',
-			            'param1:ntext',
-			            'param2:ntext',
-			            'param3:ntext',
-			            'videos_num',
-			            'on_index',
-			            'enabled',
-			            'last_period_clicks',
-			            'position',
-			            'created_at',
-			            'updated_at',
-			        ],
-			    ]) ?>
+                <div class="box-body pad">
+                    <div style="position:relative">
+                        <canvas id="line-chart" width="320" height="160"></canvas>
+                    </div>
+                </div>
 
-			</div>
-
-		</div>
-
-        <div class="box box-default">
-			<div class="box-header with-border">
-				<i class="fa fa-area-chart"></i><h3 class="box-title">Активность в категории за последниe 30 дней</h3>
-                <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
-                 </div>
             </div>
 
-            <div class="box-body pad">
-                <div style="position:relative">
-                    <canvas id="line-chart" width="320" height="160"></canvas>
-			    </div>
-			</div>
-
-		</div>
-
-	</div>
-</div>
+        </div>
+    </div>
 
 <?php
 
@@ -170,6 +173,5 @@ $script = <<< 'JAVASCRIPT'
         options: options
     });
 JAVASCRIPT;
-
 
 $this->registerJS($script);

@@ -20,9 +20,7 @@
     "jbroadway/urlify": "^1.1",
     "league/flysystem": "^1.0",
     "yii2tech/csv-grid": "*",
-    "alikdex/csv-parser": "^1.0",
     "symfony/event-dispatcher": "^5.0",
-    "illuminate/support": "^7",
     "league/csv": "^9.0"
   },
   "autoload": {

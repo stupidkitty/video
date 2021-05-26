@@ -3,7 +3,6 @@
 namespace SK\VideoModule\Admin\Controller;
 
 use RS\Component\User\Model\User;
-use SK\VideoModule\Admin\Form\CategoriesImportForm;
 use SK\VideoModule\Admin\Form\VideosImport;
 use SK\VideoModule\Csv\CategoryCsvHandler;
 use SK\VideoModule\Model\ImportFeed;
@@ -94,31 +93,6 @@ class ImportController extends Controller
             'userListOptions' => $userListOptions,
             'statusListOptions' => $statusListOptions,
             'presetListOptions' => $presetListOptions,
-        ]);
-    }
-
-    /**
-     * Импорт категорий через файл или текстовую форму.
-     *
-     * @param Request $request
-     * @param CategoryCsvHandler $csvHandler
-     * @return string
-     */
-    public function actionCategories(Request $request, CategoryCsvHandler $csvHandler): string
-    {
-        $form = new CategoriesImportForm;
-        $isProcessed = false;
-
-        if ($form->load($request->post()) && $form->isValid()) {
-            $handlerConfig = $form->getData();
-            $csvHandler->handle($handlerConfig);
-            $isProcessed = true;
-        }
-
-        return $this->render('categories', [
-            'isProcessed' => $isProcessed,
-            'form' => $form,
-            'failedItems' => $csvHandler->getFailedItems()
         ]);
     }
 

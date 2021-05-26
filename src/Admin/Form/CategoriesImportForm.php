@@ -1,8 +1,9 @@
 <?php
+
 namespace SK\VideoModule\Admin\Form;
 
-use SK\VideoModule\Csv\CategoryCsvDto;
-use SK\VideoModule\Csv\CategoryImportOptions;
+use SK\VideoModule\Category\Import\ImportOptions;
+use SK\VideoModule\Category\Import\Csv\CsvConfig;
 use Yii;
 use yii\base\Model;
 use yii\web\UploadedFile;
@@ -17,6 +18,7 @@ class CategoriesImportForm extends Model
     public $fields;
 
     public $csv_file;
+    public $csv_text;
 
     public $isUpdate;
     public $isEnable;
@@ -65,9 +67,10 @@ class CategoriesImportForm extends Model
     {
         parent::__construct($config);
 
-        $this->delimiter = '|';
+        $this->delimiter = ',';
         $this->enclosure = '"';
         $this->fields = ['skip'];
+        $this->csv_text = '';
         $this->isUpdate = false;
         $this->isEnable = true;
         $this->isSkipFirstLine = true;
@@ -96,12 +99,12 @@ class CategoriesImportForm extends Model
             [['delimiter', 'fields'], 'required'],
             ['fields', 'each', 'rule' => ['in', 'range' => \array_keys($this->options)], 'skipOnEmpty' => false],
 
-            [['delimiter', 'enclosure'], 'string'],
+            [['delimiter', 'enclosure', 'csv_text'], 'string'],
             [['delimiter', 'enclosure'], 'trim'],
 
             [['isUpdate', 'isSkipFirstLine', 'isEnable', 'isReplaceSlug'], 'boolean'],
 
-            [['csv_file'], 'file', 'checkExtensionByMimeType' => false, 'skipOnEmpty' => false, 'extensions' => 'csv', 'maxFiles' => 1, 'mimeTypes' => 'text/plain'],
+            [['csv_file'], 'file', 'checkExtensionByMimeType' => false, 'extensions' => 'csv', 'maxFiles' => 1, 'mimeTypes' => 'text/plain'],
         ];
     }
 
@@ -112,31 +115,77 @@ class CategoriesImportForm extends Model
      */
     public function isValid(): bool
     {
+        return $this->validate();
+    }
+
+    public function beforeValidate(): bool
+    {
         $this->csv_file = UploadedFile::getInstance($this, 'csv_file');
 
-        return $this->validate();
+        return parent::beforeValidate();
     }
 
     /**
      * Get user options for csv handler
      *
-     * @return CategoryCsvDto
+     * @return CsvConfig
      */
-    public function getData(): CategoryCsvDto
+    public function getCsvConfig(): CsvConfig
     {
-        $dto = new CategoryCsvDto;
+        $dto = new CsvConfig();
 
         $dto->delimiter = $this->delimiter;
         $dto->enclosure = $this->enclosure;
-        $dto->fields = $this->fields;
-        $dto->file = new \SplFileInfo($this->csv_file->tempName);
-        $dto->isSkipFirstLine = (bool) $this->isSkipFirstLine;
+        $dto->header = $this->getFields();
+        $dto->file = $this->getCsvFile();
+        $dto->skipHeader = (bool) $this->isSkipFirstLine;
 
-        $dto->options = new CategoryImportOptions;
-        $dto->options->isUpdate = (bool) $this->isUpdate;
-        $dto->options->isEnable = (bool) $this->isEnable;
-        $dto->options->isReplaceSlug = (bool) $this->isReplaceSlug;
+        $options = new ImportOptions();
+        $options->isUpdate = (bool) $this->isUpdate;
+        $options->isEnable = (bool) $this->isEnable;
+        $options->isReplaceSlug = (bool) $this->isReplaceSlug;
+
+        $dto->options = $options;
 
         return $dto;
+    }
+
+    /**
+     * Gets unique fields for custom csv header
+     * Нужно для обработчика цсв, он неумеет в одинаковые названия полей.
+     *
+     * @return string[]
+     */
+    private function getFields(): array
+    {
+        return \array_map(function ($field, $index) {
+            if ($field === 'skip') {
+                return "skip{$index}";
+            }
+
+            return $field;
+        }, $this->fields, \array_keys($this->fields));
+    }
+
+    private function getCsvFile(): ?\SplFileInfo
+    {
+        $file = null;
+
+        if ($this->csv_file !== null) {
+            return new \SplFileInfo($this->csv_file->tempName);
+        } elseif ($this->csv_text !== '') {
+            $filepath = Yii::getAlias('@runtime/uploaded_categories.csv');
+            \file_put_contents($filepath, $this->csv_text);
+
+            \register_shutdown_function(function() use($filepath) {
+                if (\is_file($filepath)) {
+                    \unlink($filepath);
+                }
+            });
+
+            return new \SplFileInfo($filepath);
+        }
+
+        return $file;
     }
 }
