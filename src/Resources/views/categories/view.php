@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = Yii::t('videos', 'info');
                     <h3 class="box-title">Информация: <?= $category->title ?></h3>
                     <div class="box-tools pull-right">
                         <div class="btn-group">
-                            <?= Html::a('<i class="glyphicon glyphicon-import" style="color:#ad00ff;"></i> ' . Yii::t('videos', 'import'), ['/admin/videos/import-categories'], ['class' => 'btn btn-default btn-sm', 'title' => 'Импорт категорий']) ?>
+                            <?= Html::a('<i class="glyphicon glyphicon-import" style="color:#ad00ff;"></i> ' . Yii::t('videos', 'import'), ['import-categories/index', 'preset' => 1], ['class' => 'btn btn-default btn-sm', 'title' => 'Импорт категорий']) ?>
                             <?= Html::a('<i class="fa fa-fw fa-plus text-green"></i>' . Yii::t('videos', 'add'), ['create'], ['class' => 'btn btn-default btn-sm', 'title' => 'Добавить категорию']) ?>
                             <?= Html::a('<i class="fa fa-fw fa-edit text-blue"></i>' . Yii::t('videos', 'edit'), ['update', 'id' => $category->getId()], ['class' => 'btn btn-default btn-sm', 'title' => 'Редактировать категории']) ?>
                             <?= Html::a('<i class="fa fa-fw fa-trash-o text-red"></i>' . Yii::t('videos', 'delete'), ['delete', 'id' => $category->getId()], [

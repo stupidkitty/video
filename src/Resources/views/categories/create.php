@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = Yii::t('videos', 'create');
                 <i class="fa fa-file-o"></i><h3 class="box-title">Добавить новую категорию</h3>
                 <div class="box-tools pull-right">
                     <div class="btn-group">
-                        <?= Html::a('<i class="glyphicon glyphicon-import" style="color:#ad00ff;"></i> ' . Yii::t('videos', 'import'), ['/admin/videos/import-categories'], ['class' => 'btn btn-default btn-sm', 'title' => 'Импорт категорий']) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-import" style="color:#ad00ff;"></i> ' . Yii::t('videos', 'import'), ['import-categories/index', 'preset' => 1], ['class' => 'btn btn-default btn-sm', 'title' => 'Импорт категорий']) ?>
                     </div>
                 </div>
             </div>

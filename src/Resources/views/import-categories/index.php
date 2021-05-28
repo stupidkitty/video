@@ -23,6 +23,31 @@ $this->params['breadcrumbs'][] = 'Категории видео';
         <div class="box-header with-border">
             <i class="glyphicon glyphicon-import text-light-violet"></i>
             <h3 class="box-title">Импорт категорий</h3>
+            <div class="box-tools pull-right">
+              <div class="btn-group">
+                <?= Html::beginForm(['index'],'get', ['name' => 'preset-select']) ?>
+                  Настройки импорта: <?= Html::dropDownList('preset', $preset, $presetListOptions, [
+                        'prompt' => 'Default',
+                        'id' => 'preset',
+                        'class' => 'btn-default btn-sm',
+                ]) ?>
+                <?= Html::endForm() ?>
+              </div>
+              <div class="btn-group">
+                <?= Html::a('<i class="fa fa-plus" style="color:green;"></i>', ['categories-import-feeds/create'], ['class' => 'btn btn-default btn-sm', 'title' => 'Добавить новый фид']) ?>
+                <?php if ($preset > 0): ?>
+                  <?= Html::a('<i class="fa fa-edit" style="color:#337ab7;"></i>', ['categories-import-feeds/update', 'id' => $preset], ['class' => 'btn btn-default btn-sm', 'title' => 'Редактировать фид']) ?>
+                  <?= Html::a('<i class="fa fa-trash-o" style="color:brown;"></i>', ['categories-import-feeds/delete', 'id' => $preset], [
+                          'class' => 'btn btn-default btn-sm',
+                          'title' => 'Удалить фид',
+                          'data' => [
+                                  'confirm' => 'Действительно хотите удалить этот фид?',
+                                  'method' => 'post',
+                          ],
+                  ]) ?>
+                <?php endif; ?>
+              </div>
+            </div>
         </div>
 
         <div class="box-body pad">
@@ -111,9 +136,8 @@ $this->params['breadcrumbs'][] = 'Категории видео';
             <h4 style="margin-top: 30px">Опции вставки\замены</h4>
             <div class="form-group">
                 <label class="checkbox-block"><?= Html::activeCheckbox($form, 'isUpdate', ['label' => false]) ?> <span>Обновить при совпадении id, названия или слага</span></label>
-                <div class="help-block">Если опция не активна, при совпадении идентификатора или названия импортируемая
-                    категория будет игнорироваться.
-                </div>
+              <div class="help-block">Если опция активна, данные существующих категорий будут изменены. В противном случае любые изменения будут игнорироваться.</div>
+
             </div>
 
             <div class="form-group">
@@ -175,6 +199,16 @@ $js = <<< 'JS'
         if (childs_num > 1) {
             fields_container.last().remove();
         }
+    });
+
+    $('#preset').on('change', function(e) {
+      const val = e.target.options[e.target.selectedIndex].value
+
+      if (val === '') {
+        e.target.options[e.target.selectedIndex].value = 0
+      }
+
+      document.forms['preset-select'].submit();
     });
 JS;
 

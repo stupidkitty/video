@@ -4,6 +4,7 @@ namespace SK\VideoModule\Admin\Form;
 
 use SK\VideoModule\Category\Import\ImportOptions;
 use SK\VideoModule\Category\Import\Csv\CsvConfig;
+use SK\VideoModule\Model\CategoryImportFeed;
 use Yii;
 use yii\base\Model;
 use yii\web\UploadedFile;
@@ -63,18 +64,18 @@ class CategoriesImportForm extends Model
     /**
      * @inheritdoc
      */
-    public function __construct($config = [])
+    public function __construct(CategoryImportFeed $feed, $config = [])
     {
         parent::__construct($config);
 
-        $this->delimiter = ',';
-        $this->enclosure = '"';
-        $this->fields = ['skip'];
+        $this->delimiter = $feed->delimiter;
+        $this->enclosure = $feed->enclosure;
+        $this->fields = $feed->fields;
         $this->csv_text = '';
-        $this->isUpdate = false;
-        $this->isEnable = true;
-        $this->isSkipFirstLine = true;
-        $this->isReplaceSlug = false;
+        $this->isSkipFirstLine = $feed->skip_first_line;
+        $this->isUpdate = $feed->update_exists;
+        $this->isEnable = $feed->activate;
+        $this->isReplaceSlug = $feed->update_slug;
 
         // Отключить логи
         if (Yii::$app->hasModule('log') && \is_object(Yii::$app->log->targets['file'])) {
