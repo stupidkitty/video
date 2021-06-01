@@ -24,15 +24,43 @@ class RelatedProvider
         $this->settings = Yii::$container->get(SettingsInterface::class);
     }
 
-    public function getFromTable($video_id)
+    /**
+     * Gets related videos
+     *
+     * @param int $id Video id
+     * @return array Related videos
+     */
+    public function getModels(int $id): array
     {
         $requiredRelatedNum = $this->settings->get('related_number', static::RELATED_NUMBER, 'videos');
 
-            //SELECT `v`.* FROM `videos_related_map` AS `r` LEFT JOIN `videos` AS `v` ON `v`.`video_id` = `r`.`related_id` WHERE `r`.`video_id`=10
+        $related = $this->getFromTable($id);
+
+        $relatedNum = \count($related);
+
+        if ($relatedNum < $requiredRelatedNum) {
+            $this->findAndSaveRelatedIds($id);
+            $related = $this->getFromTable($id);
+        }
+
+        return $related;
+    }
+
+    /**
+     * Gets related videos, stored in table
+     *
+     * @param int $id Video id
+     * @return array Reloated videos
+     */
+    private function getFromTable(int $id): array
+    {
+        $requiredRelatedNum = $this->settings->get('related_number', static::RELATED_NUMBER, 'videos');
+
+        //SELECT `v`.* FROM `videos_related_map` AS `r` LEFT JOIN `videos` AS `v` ON `v`.`video_id` = `r`.`related_id` WHERE `r`.`video_id`=10
         $videos = Video::find()
             ->asThumbs()
-            ->leftJoin(['r' => VideosRelatedMap::tableName()], 'v.video_id = r.related_id')
-            ->where(['r.video_id' => $video_id])
+            ->innerJoin(['r' => VideosRelatedMap::tableName()], 'v.video_id = r.related_id')
+            ->where(['r.video_id' => $id])
             ->untilNow()
             ->onlyActive()
             ->limit($requiredRelatedNum)
@@ -42,23 +70,13 @@ class RelatedProvider
         return $videos;
     }
 
-    public function getModels($video_id)
-    {
-        $requiredRelatedNum = $this->settings->get('related_number', static::RELATED_NUMBER, 'videos');
-
-        $related = $this->getFromTable($video_id);
-
-        $relatedNum = count($related);
-
-        if (empty($related) || $relatedNum < $requiredRelatedNum) {
-            $this->findAndSaveRelatedIds($video_id);
-            $related = $this->getFromTable($video_id);
-        }
-
-        return $related;
-    }
-
-    public function findAndSaveRelatedIds($video_id)
+    /**
+     * Find related videos
+     *
+     * @param int $id Video id
+     * @throws \yii\db\Exception
+     */
+    private function findAndSaveRelatedIds(int $id): void
     {
         $allowCategories = $this->settings->get('related_allow_categories', false, 'videos');
         $allowDescription = $this->settings->get('related_allow_description', false, 'videos');
@@ -66,7 +84,7 @@ class RelatedProvider
 
         $query = Video::find()
             ->select(['video_id', 'title', 'description'])
-            ->where(['video_id' => $video_id])
+            ->where(['video_id' => $id])
             ->asArray();
 
         if ($allowCategories) {
@@ -90,19 +108,19 @@ class RelatedProvider
         }
 
         $relatedModels = Video::find()
-            ->select(['`v`.`video_id`', 'MATCH (`title`, `description`) AGAINST (:query) AS `relevance`'])
+            ->select(['`v`.`video_id`', 'MATCH (`search_field`) AGAINST (:query) AS `relevance`'])
             ->from (['v' => Video::tableName()]);
 
         if ($allowCategories && !empty($video['categories'])) {
                 // выборка всех идентификаторов категорий поста.
-            $categoriesIds = array_column($video['categories'], 'category_id');
+            $categoriesIds = \array_column($video['categories'], 'category_id');
             $relatedModels
                 ->leftJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
                 ->andWhere(['vcm.category_id' => $categoriesIds]);
         }
 
         $relatedVideos = $relatedModels
-            ->andWhere('MATCH (`title`, `description`) AGAINST (:query)', [':query' => $searchString])
+            ->andWhere('MATCH (`search_field`) AGAINST (:query)', [':query' => $searchString])
             ->andWhere('`v`.`video_id`<>:video_id', [':video_id' => $video['video_id']])
             ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
             ->andWhere(['v.status' => Video::STATUS_ACTIVE])
@@ -112,20 +130,22 @@ class RelatedProvider
             ->asArray()
             ->all();
 
-        if (is_array($relatedVideos)) {
-            $related = [];
-
-            foreach ($relatedVideos as $relatedVideo) {
-                $related[] = [$video['video_id'], $relatedVideo['video_id']];
-            }
-
-            // Удалим старое.
-            VideosRelatedMap::deleteAll(['video_id' => $video['video_id']]);
-
-            // вставим новое
-            Yii::$app->db->createCommand()
-                ->batchInsert(VideosRelatedMap::tableName(), ['video_id', 'related_id'], $related)
-                ->execute();
+        if (\count($relatedVideos) === 0) {
+            return;
         }
+
+        $related = [];
+
+        foreach ($relatedVideos as $relatedVideo) {
+            $related[] = [$video['video_id'], $relatedVideo['video_id']];
+        }
+
+        // Удалим старое.
+        VideosRelatedMap::deleteAll(['video_id' => $video['video_id']]);
+
+        // вставим новое
+        Yii::$app->db->createCommand()
+            ->batchInsert(VideosRelatedMap::tableName(), ['video_id', 'related_id'], $related)
+            ->execute();
     }
 }

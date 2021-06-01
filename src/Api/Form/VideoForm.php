@@ -13,6 +13,7 @@ class VideoForm extends Model
     public $title;
     public $slug;
     public $description;
+    public $search_field;
     public $video_preview;
     public $embed;
     public $template;
@@ -48,7 +49,7 @@ class VideoForm extends Model
         return [
             [['title'], 'required'],
             [['slug', 'title', 'video_preview', 'embed', 'template'], 'string', 'max' => 255],
-            [['description', 'custom1', 'custom2', 'custom3'], 'string'],
+            [['description', 'search_field', 'custom1', 'custom2', 'custom3'], 'string'],
             [['video_id', 'orientation', 'duration', 'status'], 'integer'],
             ['video_id', 'unique', 'targetClass' => Video::class],
             [['on_index', 'is_hd', 'noindex', 'nofollow'], 'boolean'],

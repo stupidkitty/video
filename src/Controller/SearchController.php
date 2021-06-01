@@ -101,8 +101,8 @@ class SearchController extends Controller implements ViewContextInterface
 
         if ($filterForm->load($request->get()) && $filterForm->isValid()) {
             $query
-                ->select('*, MATCH (`title`, `description`) AGAINST (:query) AS `relevance`')
-                ->where('MATCH (`title`, `description`) AGAINST (:query)', [
+                ->select('*, MATCH (`search_field`) AGAINST (:query) AS `relevance`')
+                ->where('MATCH (`search_field`) AGAINST (:query)', [
                     ':query' => $filterForm->getQuery(),
                 ])
                 ->untilNow()
@@ -113,7 +113,7 @@ class SearchController extends Controller implements ViewContextInterface
 
             $dataProvider->setTotalCount($query->cachedCount());
         } else {
-            $query->where('1=0');
+            $query->where('1 = 0');
         }
 
         $videos = $dataProvider->getModels();

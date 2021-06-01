@@ -82,18 +82,18 @@ class VideoController extends Controller
     /**
      * Gets info about video
      *
-     * @param $id
+     * @param int $id
      * @return array
      * @throws \Exception
      */
-    public function actionView($id): array
+    public function actionView(int $id): array
     {
         $responseData = [];
 
         try {
             $video = $this->findById($id);
         } catch (NotFoundHttpException $e) {
-            $responseData['result']['video']['id'] = (int) $id;
+            $responseData['result']['video']['id'] = $id;
             $responseData['result']['video']['errors'][] = $e->getMessage();
 
             return $responseData;
@@ -104,6 +104,7 @@ class VideoController extends Controller
             'slug' => $video->slug,
             'title' => $video->title,
             'description' => $video->description,
+            'searchField' => $video->search_field,
             'orientation' => $video->orientation,
             'duration' => $video->duration,
             'videoPreview' => $video->video_preview,
@@ -157,7 +158,7 @@ class VideoController extends Controller
      */
     public function actionCreate(Request $request, User $user)
     {
-        $form = new VideoForm;
+        $form = new VideoForm();
 
         if ($form->load($request->post()) && $form->isValid()) {
             $db = Yii::$app->db;
@@ -165,13 +166,17 @@ class VideoController extends Controller
             $transaction = $db->beginTransaction();
 
             try {
-                $video = new Video;
-                $videoService = new VideoService;
+                $video = new Video();
+                $videoService = new VideoService();
 
                 $video->setAttributes($form->getAttributes());
                 $video->generateSlug($form->slug);
                 $video->user_id = $user->getId();
                 $video->published_at = $form->published_at;
+
+                if ($video->search_field === null || $video->search_field === '') {
+                    $video->search_field = "{$video->title} {$video->description}";
+                }
 
                 if (!$video->save()) {
                     return [
@@ -233,18 +238,15 @@ class VideoController extends Controller
     }
 
     /**
-     * Update the video
-     *
+     * @param Request $request
      * @param int $id
      * @return array|array[]
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
-    public function actionUpdate(int $id): array
+    public function actionUpdate(Request $request, int $id): array
     {
         $video = $this->findById($id);
-        $request = Yii::$container->get(Request::class);
 
         $video->load(['Video' => $request->getBodyParams()]);
 
@@ -270,16 +272,16 @@ class VideoController extends Controller
      * @return array[]|string
      * @throws NotFoundHttpException
      */
-    public function actionDelete(int $id)
+    public function actionDelete(Response $response, int $id)
     {
         $video = $this->findById($id);
-        $videoService = new VideoService;
+        $videoService = new VideoService();
 
         if ($videoService->delete($video)) {
             return '';
         }
 
-        Yii::$app->getResponse()->setStatusCode(422);
+        $response->setStatusCode(422);
 
         return [
             'error' => [
@@ -324,7 +326,7 @@ class VideoController extends Controller
      * Finds the Video model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
+     * @param int $id
      * @return Video the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
