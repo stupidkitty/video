@@ -4,6 +4,7 @@ namespace SK\VideoModule\Controller;
 
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
 use SK\VideoModule\Form\FilterForm;
 use SK\VideoModule\Model\Category;
@@ -18,7 +19,6 @@ use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\data\Sort;
 use yii\di\NotInstantiableException;
-use yii\filters\PageCache;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;

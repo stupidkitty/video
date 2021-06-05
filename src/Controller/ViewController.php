@@ -4,12 +4,12 @@ namespace SK\VideoModule\Controller;
 
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\Event\VideoShow;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
 use SK\VideoModule\Model\Video;
 use Yii;
 use yii\base\ViewContextInterface;
-use yii\filters\PageCache;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;

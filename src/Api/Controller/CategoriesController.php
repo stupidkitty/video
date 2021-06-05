@@ -7,7 +7,7 @@ use SK\VideoModule\Model\Category;
 use Yii;
 use yii\caching\TagDependency;
 use yii\filters\auth\HttpBearerAuth;
-use yii\filters\PageCache;
+use SK\VideoModule\Cache\PageCache;
 use yii\rest\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;

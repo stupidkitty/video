@@ -1,22 +1,22 @@
 <?php
+
 namespace SK\VideoModule\Api\Controller;
 
-use Yii;
-use yii\web\User;
-use yii\web\Request;
-use yii\filters\Cors;
-use yii\web\Response;
-use yii\rest\Controller;
-use yii\filters\PageCache;
+use RS\Component\Core\Settings\SettingsInterface;
+use SK\VideoModule\Api\Form\VideoForm;
+use SK\VideoModule\Cache\PageCache;
+use SK\VideoModule\Event\VideoShow;
+use SK\VideoModule\EventSubscriber\VideoSubscriber;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
-use yii\web\NotFoundHttpException;
-use SK\VideoModule\Event\VideoShow;
-use yii\filters\auth\HttpBearerAuth;
-use SK\VideoModule\Api\Form\VideoForm;
-use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Service\Video as VideoService;
-use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use Yii;
+use yii\filters\auth\HttpBearerAuth;
+use yii\rest\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
+use yii\web\Response;
+use yii\web\User;
 
 /**
  * VideoController

@@ -1,17 +1,18 @@
 <?php
+
 namespace SK\VideoModule\Api\Controller;
 
-use Yii;
-use yii\web\Request;
-use yii\rest\Controller;
-use yii\filters\PageCache;
-use SK\VideoModule\Model\Video;
-use yii\web\NotFoundHttpException;
-use SK\VideoModule\Model\Screenshot;
-use yii\filters\auth\HttpBearerAuth;
-use SK\VideoModule\Api\Form\ScreenshotsForm;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Api\Form\DeleteScreenshotsForm;
+use SK\VideoModule\Api\Form\ScreenshotsForm;
+use SK\VideoModule\Cache\PageCache;
+use SK\VideoModule\Model\Screenshot;
+use SK\VideoModule\Model\Video;
+use Yii;
+use yii\filters\auth\HttpBearerAuth;
+use yii\rest\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Request;
 
 /**
  * ScreenshotsController
@@ -113,7 +114,7 @@ class ScreenshotsController extends Controller
             }
         }
 
-        return  $responseData['result']['createdScreenshots'] = $createdScreenshots;
+        return $responseData['result']['createdScreenshots'] = $createdScreenshots;
     }
 
     /**
@@ -148,7 +149,7 @@ class ScreenshotsController extends Controller
             }
         }
 
-        return  $responseData['result']['deletedScreenshots'] = $deletedIds;
+        return $responseData['result']['deletedScreenshots'] = $deletedIds;
     }
 
     /**
