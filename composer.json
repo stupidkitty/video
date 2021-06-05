@@ -1,6 +1,7 @@
 {
   "name": "stupidkitty/video",
   "description": "Video module. Yii2",
+  "version": "3.0",
   "type": "yii2-extension",
   "keywords": [
     "yii2",
