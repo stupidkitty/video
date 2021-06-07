@@ -1,13 +1,14 @@
 <?php
+
 namespace SK\VideoModule\Provider;
 
-use Yii;
-use yii\db\QueryInterface;
-use yii\data\BaseDataProvider;
-use SK\VideoModule\Model\Video;
-use yii\db\ActiveQueryInterface;
 use SK\VideoModule\Form\FilterForm;
+use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
+use Yii;
+use yii\data\BaseDataProvider;
+use yii\db\ActiveQueryInterface;
+use yii\db\QueryInterface;
 
 class RotateVideoProvider extends BaseDataProvider
 {
@@ -31,6 +32,7 @@ class RotateVideoProvider extends BaseDataProvider
     /**
      * Initializes the DB connection component.
      * This method will initialize the [[db]] property to make sure it refers to a valid DB connection.
+     *
      * @throws InvalidConfigException if [[db]] is invalid.
      */
     public $testPerPagePercent = 15;
@@ -42,7 +44,6 @@ class RotateVideoProvider extends BaseDataProvider
     private $cache;
 
     /**
-     *
      * SELECT `v`.*
      * FROM `videos` as `v`
      * INNER JOIN `videos_categories_map` AS `vcm` ON (`v`.`video_id` = `vcm`.`video_id`)
@@ -61,7 +62,7 @@ class RotateVideoProvider extends BaseDataProvider
 
         $this->query = Video::find()
             ->asThumbs()
-            ->addSelect(['vs.is_tested', 'vs.ctr'])
+            ->addSelect(['vs.is_tested', 'vs.ctr', 'vs.ctr_likes_idx'])
             ->innerJoin(['vs' => VideosCategories::tableName()], 'v.video_id = vs.video_id');
 
         if ('all-time' === $this->filterForm->t) {
@@ -76,12 +77,11 @@ class RotateVideoProvider extends BaseDataProvider
             ->andFilterWhere(['>=', 'v.duration', $this->filterForm->durationMin])
             ->andFilterWhere(['<=', 'v.duration', $this->filterForm->durationMax])
             ->andFilterWhere(['v.is_hd' => $this->filterForm->isHd])
-            ->orderBy(['ctr' => SORT_DESC])
+            ->orderBy(['ctr_likes_idx' => SORT_DESC])
             ->asArray();
 
         $this->cache = Yii::$app->cache;
     }
-
 
     /**
      * @inheritdoc
@@ -120,11 +120,11 @@ class RotateVideoProvider extends BaseDataProvider
         // если прошедших тест нет, выводим все по порядку.
         if (0 === $totalTestedCount) {
             return $query
-               ->andWhere(['vs.category_id' => $this->category_id])
-               ->andWhere(['vs.is_tested' => 0])
-               ->offset($pagination->getOffset())
-               ->limit($pagination->getLimit())
-               ->all();
+                ->andWhere(['vs.category_id' => $this->category_id])
+                ->andWhere(['vs.is_tested' => 0])
+                ->offset($pagination->getOffset())
+                ->limit($pagination->getLimit())
+                ->all();
         }
 
         /** @var integer сколько тестовых всего */
@@ -135,12 +135,12 @@ class RotateVideoProvider extends BaseDataProvider
             return $query
                 ->andWhere(['vs.category_id' => $this->category_id])
                 ->andWhere(['vs.is_tested' => 1])
-               ->offset($pagination->getOffset())
-               ->limit($pagination->getLimit())
-               ->all();
+                ->offset($pagination->getOffset())
+                ->limit($pagination->getLimit())
+                ->all();
         }
 
-       /** @var integer сколько тестовых на одну страницу по умолчанию */
+        /** @var integer сколько тестовых на одну страницу по умолчанию */
         $testPerPage = ceil($perPage * $testPerPagePercent / 100);
 
         /** @var integer сколько завершивших тест на одну страницу по умолчанию */

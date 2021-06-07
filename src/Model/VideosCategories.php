@@ -43,7 +43,7 @@ class VideosCategories extends ActiveRecord
                 'integer'
             ],
             [['is_tested'], 'boolean'],
-            ['ctr', 'number'],
+            [['ctr', 'ctr_likes_idx'], 'number'],
             ['tested_at', 'datetime', 'format' => 'php: Y-m-d H:i:s'],
             ['tested_at', 'default', 'value' => null],
         ];

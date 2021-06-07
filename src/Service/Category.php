@@ -8,9 +8,6 @@ use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
 use Yii;
-use yii\base\InvalidConfigException;
-use yii\caching\TagDependency;
-use yii\db\Exception;
 
 class Category
 {
@@ -40,6 +37,7 @@ class Category
 
     /**
      * SET @total_clicks = (SELECT SUM(`clicks`) FROM `videos_categories_stats` WHERE `date` >= (NOW() - INTERVAL 2 DAY));
+     *
      * SELECT `category_id`, (SUM(`clicks`) / @total_clicks) * 100
      * FROM `videos_categories_stats`
      * WHERE `date` >= (NOW() - INTERVAL 2 DAY)
@@ -110,7 +108,7 @@ class Category
                 ->andWhere(['vs.category_id' => $category->category_id])
                 ->untilNow()
                 ->onlyActive()
-                ->orderBy(['vs.is_tested' => SORT_DESC, 'vs.ctr' => SORT_DESC])
+                ->orderBy(['vs.is_tested' => SORT_DESC, 'vs.ctr_likes_idx' => SORT_DESC])
                 ->limit((int) $settings->get('items_per_page', 24, 'videos'))
                 ->all();
             $imagesIds = \array_column($videos, 'image_id');
