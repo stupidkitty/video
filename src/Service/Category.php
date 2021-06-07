@@ -8,6 +8,7 @@ use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
 use Yii;
+use yii\caching\TagDependency;
 
 class Category
 {

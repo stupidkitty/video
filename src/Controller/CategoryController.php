@@ -12,6 +12,7 @@ use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Provider\RotateVideoProvider;
 use Yii;
 use yii\base\ViewContextInterface;
+use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\data\Sort;
 use yii\filters\PageCache;
