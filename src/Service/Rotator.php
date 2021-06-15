@@ -199,7 +199,7 @@ class Rotator
 
         // Сбросим кеш страниц категорий
         if ($numChangedRows > 0) {
-            TagDependency::invalidate(Yii::$app->cache, 'videos:categories');
+            //TagDependency::invalidate(Yii::$app->cache, 'videos:categories');
         }
     }
 

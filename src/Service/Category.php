@@ -134,7 +134,7 @@ class Category
 
                     if ($category->save()) {
                         // Инвалидируем кеш страниц, как только тумбы сменятся.
-                        TagDependency::invalidate(Yii::$app->cache, 'videos:categories');
+                        //TagDependency::invalidate(Yii::$app->cache, 'videos:categories');
                     }
                 }
 
