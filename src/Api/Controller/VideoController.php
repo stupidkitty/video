@@ -2,7 +2,9 @@
 
 namespace SK\VideoModule\Api\Controller;
 
+use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Api\Form\VideoForm;
+use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\Event\VideoShow;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
 use SK\VideoModule\Model\Image;
