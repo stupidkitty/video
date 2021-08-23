@@ -2,17 +2,18 @@
 
 namespace SK\VideoModule\Api\Controller;
 
-use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Api\Form\VideoForm;
-use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\Event\VideoShow;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Service\Video as VideoService;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\di\NotInstantiableException;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;
 use yii\web\Response;
@@ -26,7 +27,7 @@ class VideoController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             /*'corsFilter' => [
@@ -49,7 +50,12 @@ class VideoController extends Controller
         ];
     }
 
-    public function beforeAction($action)
+    /**
+     * @throws NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action): bool
     {
         if ('view' === $action->id) {
             $response = Yii::$container->get(Response::class);
@@ -70,17 +76,17 @@ class VideoController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
+     * Gets videos
      *
-     * @return mixed
+     * @return array
      */
-    public function actionIndex()
+    public function actionIndex(): array
     {
         return [];
     }
 
     /**
-     * Gets info about video
+     * Gets video data
      *
      * @param int $id
      * @return array
@@ -121,6 +127,7 @@ class VideoController extends Controller
             'custom1' => $video->custom1,
             'custom2' => $video->custom2,
             'custom3' => $video->custom3,
+            'maxCtr' => $video->max_ctr,
             'poster' => null,
             'categories' => [],
         ];
@@ -156,7 +163,7 @@ class VideoController extends Controller
      * @param User $user
      * @return array[]|string[]
      */
-    public function actionCreate(Request $request, User $user)
+    public function actionCreate(Request $request, User $user): array
     {
         $form = new VideoForm();
 
@@ -242,7 +249,7 @@ class VideoController extends Controller
      * @param int $id
      * @return array|array[]
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function actionUpdate(Request $request, int $id): array
     {

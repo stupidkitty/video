@@ -1,9 +1,14 @@
 <?php
+
 namespace SK\VideoModule\Model;
 
 use RS\Component\User\Model\User;
 use SK\VideoModule\Query\VideoQuery;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 
 /**
  * This is the model class for table "videos".
@@ -27,10 +32,10 @@ use yii\db\ActiveRecord;
  * @property integer $views
  * @property string $template
  * @property integer $status
+ * @property float $max_ctr
  * @property string $published_at
  * @property string $created_at
  * @property string $updated_at
- *
  * @property VideosCategories[] $videosCategories
  * @property Category[] $categories
  * @property Image[] $images
@@ -42,20 +47,21 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-    public static function tableName()
+    public static function tableName(): string
     {
-        return 'videos';
+        return '{{%videos}}';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['slug', 'title', 'description', 'search_field', 'video_preview', 'embed', 'template', 'custom1', 'custom2', 'custom3'], 'string'],
             [['video_id', 'image_id', 'user_id', 'orientation', 'duration', 'likes', 'dislikes', 'comments_num', 'views', 'status'], 'integer'],
             [['is_hd', 'on_index', 'noindex', 'nofollow'], 'boolean'],
+            [['max_ctr'], 'number'],
             [['published_at', 'created_at', 'updated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['is_hd', 'noindex', 'nofollow'], 'default', 'value' => 0],
             ['on_index', 'default', 'value' => 1],
@@ -64,7 +70,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
         ];
     }
 
-    public static function find()
+    public static function find(): VideoQuery
     {
         return new VideoQuery(\get_called_class());
     }
@@ -72,7 +78,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->video_id;
     }
@@ -80,7 +86,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -96,7 +102,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-    public function getSlug()
+    public function getSlug(): ?string
     {
         return $this->slug;
     }
@@ -110,9 +116,9 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUser()
+    public function getUser(): ActiveQuery
     {
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
     }
@@ -120,15 +126,15 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @return boolean
      */
-    public function hasPoster()
+    public function hasPoster(): bool
     {
         return null !== $this->poster;
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPoster()
+    public function getPoster(): ActiveQuery
     {
         return $this->hasOne(Image::class, ['image_id' => 'image_id']);
     }
@@ -144,15 +150,15 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @return boolean
      */
-    public function hasImages()
+    public function hasImages(): bool
     {
         return !empty($this->images);
     }
 
     /**
-     * @return \yii\db\ActiveQuery[]
+     * @return ActiveQuery
      */
-    public function getImages()
+    public function getImages(): ActiveQuery
     {
         return $this->hasMany(Image::class, ['video_id' => 'video_id']);
     }
@@ -166,7 +172,8 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     }
 
     /**
-     * @inheritdoc
+     * @throws StaleObjectException
+     * @throws Exception
      */
     public function removeImage(ImageInterface $image)
     {
@@ -176,29 +183,27 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @return boolean
      */
-    public function hasScreenshots()
+    public function hasScreenshots(): bool
     {
         return !empty($this->screenshots);
     }
 
     /**
-     * @return \yii\db\ActiveQuery[]
+     * @return ActiveQuery
      */
-    public function getScreenshots()
+    public function getScreenshots(): ActiveQuery
     {
         return $this->hasMany(Screenshot::class, ['video_id' => 'video_id']);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function addScreenshot(Screenshot $screenshot)
     {
         $this->link('screenshots', $screenshot);
     }
 
     /**
-     * @inheritdoc
+     * @throws StaleObjectException
+     * @throws Exception
      */
     public function removeScreenshot(Screenshot $screenshot)
     {
@@ -208,15 +213,16 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @return boolean
      */
-    public function hasCategories()
+    public function hasCategories(): bool
     {
         return !empty($this->categories);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
+     * @throws InvalidConfigException
      */
-    public function getCategories()
+    public function getCategories(): ActiveQuery
     {
         return $this->hasMany(Category::class, ['category_id' => 'category_id'])
             ->viaTable(VideosCategories::tableName(), ['video_id' => 'video_id']);
@@ -225,21 +231,22 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     /**
      * @inheritdoc
      */
-    public function addCategory(Category $category)
+    public function addCategory(Category $category): bool
     {
         $exists = VideosCategories::find()
             ->where(['video_id' => $this->video_id, 'category_id' => $category->category_id])
             ->exists();
 
         if (!$exists) {
-            return $this->link('categories', $category);
+            $this->link('categories', $category);
         }
 
         return true;
     }
 
     /**
-     * @inheritdoc
+     * @throws StaleObjectException
+     * @throws Exception
      */
     public function removeCategory(Category $category)
     {
@@ -251,7 +258,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
      *
      * @return string
      */
-    public function getDurationAsTime()
+    public function getDurationAsTime(): string
     {
         return \ltrim(\gmdate('H:i:s', $this->duration), '0:');
     }
@@ -261,7 +268,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
      *
      * @return array
      */
-    public static function getStatuses()
+    public static function getStatuses(): array
     {
         return [
             self::STATUS_DISABLED => 'Отключено',
