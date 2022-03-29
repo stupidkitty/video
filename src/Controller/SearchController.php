@@ -105,7 +105,7 @@ class SearchController extends Controller implements ViewContextInterface
                 ->where('MATCH (`search_field`) AGAINST (:query)', [
                     ':query' => $filterForm->getQuery(),
                 ])
-                ->untilNow()
+                //->untilNow()
                 ->onlyActive()
                 ->andFilterWhere(['orientation' => $filterForm->orientation])
                 ->orderBy(['relevance' => SORT_DESC])

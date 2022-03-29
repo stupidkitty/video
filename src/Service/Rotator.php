@@ -119,7 +119,7 @@ class Rotator
         $sql = "SELECT `category_id`, COUNT(*) - SUM(`is_tested`) as `tested_diff`
                 FROM `videos_categories_map` as `vcm`
                 LEFT JOIN `videos` as `v` ON (`vcm`.`video_id`=`v`.`video_id`)
-                WHERE `v`.`published_at`<= NOW() AND `v`.`status` = 10
+                WHERE `v`.`status` = 10
                 GROUP BY `category_id`
                 HAVING `tested_diff` < :testSpotsNum"; // = 0
 
@@ -138,7 +138,7 @@ class Rotator
                 ->where(['rs.category_id' => $category['category_id']])
                 ->andWhere(['rs.is_tested' => 1])
                 ->andWhere(['>', 'rs.ctr', 0])
-                ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
+                //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
                 ->andWhere(['v.status' => 10])
                 ->orderBy(['rs.ctr' => SORT_DESC])
                 ->limit($untouchablesThumbsNum)
@@ -152,7 +152,7 @@ class Rotator
                 ->where(['rs.category_id' => $category['category_id']])
                 ->andWhere(['rs.is_tested' => 1])
                 ->andFilterWhere(['NOT IN', 'rs.video_id', $untouchablesThumbs])
-                ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
+                //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
                 ->andWhere(['v.status' => 10])
                 ->orderBy(['rs.tested_at' => SORT_DESC])
                 ->limit($resetLimit)

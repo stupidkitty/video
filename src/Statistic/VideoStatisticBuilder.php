@@ -107,7 +107,7 @@ class VideoStatisticBuilder
     {
         $num = Video::find()
             ->alias('v')
-            ->where(['>=', 'v.published_at', new Expression('NOW()')])
+            //->where(['>=', 'v.published_at', new Expression('NOW()')])
             ->onlyActive()
             ->count();
 

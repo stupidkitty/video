@@ -397,9 +397,7 @@ class VideosController extends Controller implements ViewContextInterface
             ->asThumbs()
             ->asArray();
 
-        if ('all-time' === $filterForm->t) {
-            $query->untilNow();
-        } else {
+        if ('all-time' !== $filterForm->t) {
             $query->rangedUntilNow($filterForm->t);
         }
 

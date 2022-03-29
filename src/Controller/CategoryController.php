@@ -284,9 +284,7 @@ class CategoryController extends Controller implements ViewContextInterface
             ->innerJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
             ->andwhere(['vcm.category_id' => $category['category_id']]);
 
-        if ('all-time' === $filterForm->t) {
-            $query->untilNow();
-        } else {
+        if ('all-time' !== $filterForm->t) {
             $query->rangedUntilNow($filterForm->t);
         }
 

@@ -92,9 +92,7 @@ class Videos extends Widget
         $query = Video::find()
             ->asThumbs();
 
-        if ('all-time' === $this->timeAgoLimit) {
-            $query->untilNow();
-        } else {
+        if ('all-time' !== $this->timeAgoLimit) {
             $query->rangedUntilNow($this->timeAgoLimit);
         }
 

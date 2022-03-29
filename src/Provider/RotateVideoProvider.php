@@ -64,9 +64,7 @@ class RotateVideoProvider extends BaseDataProvider
             ->addSelect(['vs.is_tested', 'vs.ctr'])
             ->innerJoin(['vs' => VideosCategories::tableName()], 'v.video_id = vs.video_id');
 
-        if ('all-time' === $this->filterForm->t) {
-            $this->query->untilNow();
-        } else {
+        if ('all-time' !== $this->filterForm->t) {
             $this->query->rangedUntilNow($this->filterForm->t);
         }
 
@@ -285,9 +283,7 @@ class RotateVideoProvider extends BaseDataProvider
             ->innerJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
             ->andWhere(['vcm.category_id' => $this->category_id]);
 
-        if ('all-time' === $this->filterForm->t) {
-            $query->untilNow();
-        } else {
+        if ('all-time' !== $this->filterForm->t) {
             $query->rangedUntilNow($this->filterForm->t);
         }
 
@@ -315,9 +311,7 @@ class RotateVideoProvider extends BaseDataProvider
             ->andWhere(['vs.category_id' => $this->category_id])
             ->andWhere(['vs.is_tested' => 1]);
 
-        if ('all-time' === $this->filterForm->t) {
-            $query->untilNow();
-        } else {
+        if ('all-time' !== $this->filterForm->t) {
             $query->rangedUntilNow($this->filterForm->t);
         }
 

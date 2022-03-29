@@ -61,7 +61,7 @@ class RelatedProvider
             ->asThumbs()
             ->innerJoin(['r' => VideosRelatedMap::tableName()], 'v.video_id = r.related_id')
             ->where(['r.video_id' => $id])
-            ->untilNow()
+            //->untilNow()
             ->onlyActive()
             ->limit($requiredRelatedNum)
             ->asArray()
@@ -122,7 +122,7 @@ class RelatedProvider
         $relatedVideos = $relatedModels
             ->andWhere('MATCH (`search_field`) AGAINST (:query)', [':query' => $searchString])
             ->andWhere('`v`.`video_id`<>:video_id', [':video_id' => $video['video_id']])
-            ->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
+            //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
             ->andWhere(['v.status' => Video::STATUS_ACTIVE])
             ->groupBy('v.video_id')
             ->orderBy(['relevance' => SORT_DESC])

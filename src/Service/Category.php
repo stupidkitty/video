@@ -28,7 +28,7 @@ class Category
                 SELECT `category_id`, COUNT(*) as `videos_num`
                 FROM `videos_categories_map`
                 LEFT JOIN `videos` ON `videos`.`video_id` = `videos_categories_map`.`video_id`
-                WHERE `videos`.`published_at` < NOW() AND `videos`.`status` = 10
+                WHERE `videos`.`status` = 10
                 GROUP BY `category_id`
             ) as `vcm` ON `vc`.`category_id`=`vcm`.`category_id`
             SET `vc`.`videos_num` = IFNULL(`vcm`.`videos_num`, 0)
@@ -108,7 +108,7 @@ class Category
                 ->select(['v.video_id', 'v.image_id'])
                 ->innerJoin(['vs' => VideosCategories::tableName()], 'v.video_id = vs.video_id')
                 ->andWhere(['vs.category_id' => $category->category_id])
-                ->untilNow()
+                //->untilNow()
                 ->onlyActive()
                 ->orderBy(['vs.is_tested' => SORT_DESC, 'vs.ctr' => SORT_DESC])
                 ->limit((int) $settings->get('items_per_page', 24, 'videos'))
