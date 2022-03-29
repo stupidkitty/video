@@ -1,4 +1,5 @@
 <?php
+
 namespace SK\VideoModule;
 
 use Yii;

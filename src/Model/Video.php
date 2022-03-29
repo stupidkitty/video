@@ -39,6 +39,7 @@ use yii\db\StaleObjectException;
  * @property VideosCategories[] $videosCategories
  * @property Category[] $categories
  * @property Image[] $images
+ * @property Image $poster
  */
 class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
 {
@@ -251,6 +252,40 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     public function removeCategory(Category $category)
     {
         $this->unlink('categories', $category, true);
+    }
+
+    /**
+     * Обвноляет список категорий удаляя лишние и добавляя новые
+     *
+     * @param int[] $newCategoriesIds
+     * @throws Exception
+     */
+    public function updateCategoriesByIds(array $newCategoriesIds)
+    {
+        $oldCategoriesIds = \array_column($this->categories, 'category_id');
+
+        $removeCategoriesIds = \array_diff($oldCategoriesIds, $newCategoriesIds);
+        $addCategoriesIds = \array_diff($newCategoriesIds, $oldCategoriesIds);
+
+        if (!empty($removeCategoriesIds)) {
+            $removeCategories = Category::find()
+                ->where(['category_id' => $removeCategoriesIds])
+                ->all();
+
+            foreach ($removeCategories as $removeCategory) {
+                $this->removeCategory($removeCategory);
+            }
+        }
+
+        if (!empty($addCategoriesIds)) {
+            $addCategories = Category::find()
+                ->where(['category_id' => $addCategoriesIds])
+                ->all();
+
+            foreach ($addCategories as $addCategory) {
+                $this->addCategory($addCategory);
+            }
+        }
     }
 
     /**

@@ -4,12 +4,16 @@ namespace SK\VideoModule\Api\Controller;
 
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Api\Form\VideoForm;
+use SK\VideoModule\Api\Request\GetVideosFilter;
+use SK\VideoModule\Api\Request\UpdateVideosDto;
 use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\Event\VideoShow;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
+use SK\VideoModule\Fetcher\VideoFetcher;
 use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Service\Video as VideoService;
+use SK\VideoModule\Video\UseCase\BatchUpdateVideos;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\di\NotInstantiableException;
@@ -80,11 +84,22 @@ class VideoController extends Controller
     /**
      * Gets videos
      *
+     * @param Request $request
+     * @param VideoFetcher $fetcher
      * @return array
      */
-    public function actionIndex(): array
+    public function actionIndex(Request $request, VideoFetcher $fetcher): array
     {
-        return [];
+        $dto = GetVideosFilter::createFromRequest($request);
+
+        $result = $fetcher->fetch($dto);
+
+        return [
+            'result' => [
+                'videos' => $result['items'] ?? [],
+                'total' => $result['total'] ?? 0
+            ]
+        ];
     }
 
     /**
@@ -176,7 +191,6 @@ class VideoController extends Controller
 
             try {
                 $video = new Video();
-                $videoService = new VideoService();
 
                 $video->setAttributes($form->getAttributes());
                 $video->generateSlug($form->slug);
@@ -218,14 +232,14 @@ class VideoController extends Controller
                 }
 
                 // Добавление категорий
-                $videoService->updateCategoriesByIds($video, $form->categories_ids);
+                $video->updateCategoriesByIds($form->categories_ids);
 
                 $transaction->commit();
 
                 return [
                     'message' => "Video \"{$video->title}\" created",
                 ];
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $transaction->rollBack();
 
                 return [
@@ -248,14 +262,20 @@ class VideoController extends Controller
 
     /**
      * @param Request $request
-     * @param int $id
+     * @param BatchUpdateVideos $updateVideos
      * @return array|array[]
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
      */
-    public function actionUpdate(Request $request, int $id): array
+    public function actionUpdate(Request $request, BatchUpdateVideos $updateVideos): array
     {
-        $video = $this->findById($id);
+        $dto = UpdateVideosDto::createFromRequest($request);
+
+        $updatedVideos = $updateVideos->update($dto);
+
+        return [
+            'videos' => $updatedVideos
+        ];
+
+        /*$video = $this->findById($id);
 
         $video->load(['Video' => $request->getBodyParams()]);
 
@@ -272,7 +292,7 @@ class VideoController extends Controller
                     'errors' => $video->getErrorSummary(true),
                 ],
             ];
-        }
+        }*/
     }
 
     /**
