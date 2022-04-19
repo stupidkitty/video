@@ -2,7 +2,7 @@
 namespace SK\VideoModule\CronJob;
 
 use SK\VideoModule\Service\Category as CategoryService;
-use SK\CronModule\Handler\HandlerInterface;
+use App\Infrastructure\Cron\HandlerInterface;
 
 class AssignCoverImages implements HandlerInterface
 {

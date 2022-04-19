@@ -13,9 +13,9 @@ class UserBehaviorHandler
      *
      * @var SettingsInterface
      */
-    protected $settings;
+    private SettingsInterface $settings;
 
-    protected $isCrawler = false;
+    private $isCrawler = false;
 
     public function __construct(SettingsInterface $settings)
     {
@@ -33,8 +33,8 @@ class UserBehaviorHandler
      */
     public function handle(UserBehaviorStatistic $statistic)
     {
-        if ($this->isCrawler/* || $this->settings->get('internal_register_activity', true, 'videos')*/) {
-            return '';
+        if ($this->isCrawler) {
+            return;
         }
 
         // Обработка кликов по в категории.

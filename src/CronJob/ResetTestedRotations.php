@@ -2,7 +2,7 @@
 namespace SK\VideoModule\CronJob;
 
 use SK\VideoModule\Service\Rotator;
-use SK\CronModule\Handler\HandlerInterface;
+use App\Infrastructure\Cron\HandlerInterface;
 
 class ResetTestedRotations implements HandlerInterface
 {

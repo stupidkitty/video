@@ -43,6 +43,7 @@ class CategoryController extends Controller implements ViewContextInterface
                     'views' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
                     'likes' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
                     'ctr' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
+                    'popular' => ['id', 'slug', 'page', 't', 'orientation', 'durationMin', 'durationMax', 'isHd', 'source'],
                     'all-categories' => ['sort', 'orientation'],
                 ],
             ],

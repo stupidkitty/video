@@ -14,7 +14,7 @@ class DeleteRelatedForm extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['video_id', 'required'],
@@ -29,8 +29,8 @@ class DeleteRelatedForm extends Model
     /**
      * @inheritdoc
      */
-	public function formName()
-	{
+	public function formName(): string
+    {
 		return '';
 	}
 
@@ -40,7 +40,7 @@ class DeleteRelatedForm extends Model
      *
      * @return boolean
      */
-    public function isValid()
+    public function isValid(): bool
     {
         return $this->validate();
     }

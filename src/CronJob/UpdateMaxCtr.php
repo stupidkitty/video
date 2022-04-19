@@ -2,7 +2,7 @@
 namespace SK\VideoModule\CronJob;
 
 use SK\VideoModule\Service\Video as VideoService;
-use SK\CronModule\Handler\HandlerInterface;
+use App\Infrastructure\Cron\HandlerInterface;
 
 class UpdateMaxCtr implements HandlerInterface
 {

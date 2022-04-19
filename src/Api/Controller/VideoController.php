@@ -274,25 +274,6 @@ class VideoController extends Controller
         return [
             'videos' => $updatedVideos
         ];
-
-        /*$video = $this->findById($id);
-
-        $video->load(['Video' => $request->getBodyParams()]);
-
-        if ($video->save()) {
-            return [
-                'message' => Yii::t('videos', 'Video "{title}" has been updated', ['title' => $video->title]),
-            ];
-
-        } else {
-            return [
-                'error' => [
-                    'code' => 422,
-                    'message' => Yii::t('videos', 'Video "{title}" update fail', ['title' => $video->title]),
-                    'errors' => $video->getErrorSummary(true),
-                ],
-            ];
-        }*/
     }
 
     /**

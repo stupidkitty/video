@@ -9,6 +9,7 @@ use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosRelatedMap;
 use SK\VideoModule\Provider\RelatedProvider;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\NotFoundHttpException;
@@ -22,7 +23,7 @@ class RelatedVideosController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             /*'corsFilter' => [
@@ -53,102 +54,98 @@ class RelatedVideosController extends Controller
      * Получает список похожих видео у конкретного видео.
      *
      * @param int $id
-     * @return void
+     * @return array
      */
-    public function actionIndex($id)
+    public function actionIndex(int $id): array
     {
         $responseData['result']['related'] = [];
 
         try {
             $video = $this->findById($id);
-        } catch (NotFoundHttpException $e) {
+
+            $relatedProvider = new RelatedProvider;
+
+            $videos = $relatedProvider->getModels($video->video_id);
+
+            $relatedVideos = \array_map(function ($video) {
+                $videoData = [
+                    'id' => (int) $video['video_id'],
+                    'imageId' => (int) $video['image_id'],
+                    'slug' => $video['slug'],
+                    'title' => $video['title'],
+                    'orientation' => (int) $video['orientation'],
+                    'videoPreview' => $video['video_preview'],
+                    'duration' => (int) $video['duration'],
+                    'likes' => (int) $video['likes'],
+                    'dislikes' => (int) $video['dislikes'],
+                    'commentsNum' => (int) $video['comments_num'],
+                    'isHd' => (int) $video['is_hd'],
+                    'views' => (int) $video['views'],
+                    'publishedAt' => $video['published_at'],
+                ];
+
+                if (!empty($video['poster'])) {
+                    $videoData['poster'] = [
+                        'id' => (int) $video['poster']['image_id'],
+                        'path' => $video['poster']['filepath'],
+                        'sourceUrl' => $video['poster']['source_url'],
+                    ];
+                }
+
+                if (!empty($video['categories'])) {
+                    $videoData['categories'] = \array_map(function ($category) {
+                        return [
+                            'id' => (int) $category['category_id'],
+                            'slug' => $category['slug'],
+                            'title' => $category['title'],
+                            'h1' => $category['h1'],
+                        ];
+                    }, $video['categories']);
+                }
+
+                return $videoData;
+            }, $videos);
+
+            $responseData['result']['relatedVideos'] = $relatedVideos;
+
+            return $responseData;
+        } catch (\Throwable $e) {
             return $responseData;
         }
-
-        $relatedProvider = new RelatedProvider;
-
-        $videos = $relatedProvider->getModels($video->video_id);
-
-        $relatedVideos = \array_map(function ($video) {
-            $videoData = [
-                'id' => (int) $video['video_id'],
-                'imageId' => (int) $video['image_id'],
-                'slug' => $video['slug'],
-                'title' => $video['title'],
-                'orientation' => (int) $video['orientation'],
-                'videoPreview' => $video['video_preview'],
-                'duration' => (int) $video['duration'],
-                'likes' => (int) $video['likes'],
-                'dislikes' => (int) $video['dislikes'],
-                'commentsNum' => (int) $video['comments_num'],
-                'isHd' => (int) $video['is_hd'],
-                'views' => (int) $video['views'],
-                'publishedAt' => $video['published_at'],
-            ];
-
-            if (!empty($video['poster'])) {
-                $videoData['poster'] = [
-                    'id' => (int) $video['poster']['image_id'],
-                    'path' => $video['poster']['filepath'],
-                    'sourceUrl' => $video['poster']['source_url'],
-                ];
-            }
-
-            if (!empty($video['categories'])) {
-                $videoData['categories'] = \array_map(function ($category) {
-                    return [
-                        'id' => (int) $category['category_id'],
-                        'slug' => $category['slug'],
-                        'title' => $category['title'],
-                        'h1' => $category['h1'],
-                    ];
-                }, $video['categories']);
-            }
-
-            return $videoData;
-        }, $videos);
-
-        $responseData['result']['relatedVideos'] = $relatedVideos;
-
-        return $responseData;
     }
 
     /**
      * Удаляет похожие посты.
      *
-     * @return mixed
+     * @param Request $request
+     * @param int $id
+     * @return array
+     * @throws InvalidConfigException
      */
-    public function actionDelete($id)
+    public function actionDelete(Request $request, int $id = 0): array
     {
-        $responseData['result']['deletedRelated'] = [];
-        $deletedIds = [];
-
-        try {
-            $video = $this->findVideoById($id);
-        } catch (NotFoundHttpException $e) {
-            $responseData['result']['deletedRelated']['errors'][] = $e->getMessage();
-
-            return $responseData;
-        }
-
-        $form = new DeleteRelatedForm;
+        $form = new DeleteRelatedForm();
 
         if ($form->load($request->getBodyParams()) && $form->isValid()) {
             VideosRelatedMap::deleteAll(['related_id' => $form->related_ids]);
         }
 
-        return $responseData['result']['deletedRelated'] = $form->related_ids;
+        return [
+                'result' => [
+                    'deletedRelated' => $form->related_ids
+                ]
+        ];
     }
 
     /**
      * Finds the Video model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
-     * @param integer $id
+     * @param int $id
      * @return Video the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findById($id)
+    protected function findById(int $id): Video
     {
         $video = Video::find()
             ->alias('v')

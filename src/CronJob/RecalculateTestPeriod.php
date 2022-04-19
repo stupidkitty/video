@@ -3,7 +3,7 @@ namespace SK\VideoModule\CronJob;
 
 use RS\Component\Core\Settings\SettingsInterface;
 use RS\Module\VisitorModule\Model\Visitor;
-use SK\CronModule\Handler\HandlerInterface;
+use App\Infrastructure\Cron\HandlerInterface;
 use Yii;
 use yii\db\Expression;
 

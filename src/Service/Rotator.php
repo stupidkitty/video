@@ -1,12 +1,12 @@
 <?php
+
 namespace SK\VideoModule\Service;
 
-use Yii;
-use yii\caching\TagDependency;
-use yii\db\Expression;
+use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
-use RS\Component\Core\Settings\SettingsInterface;
+use Yii;
+use yii\db\Expression;
 
 class Rotator
 {
@@ -20,7 +20,7 @@ class Rotator
      */
     const RECALCULATE_CTR_PERIOD = 2000;
 
-     /**
+    /**
      * @var int default thumbs per page;
      */
     const ITEMS_PER_PAGE = 24;
@@ -41,19 +41,17 @@ class Rotator
 
         $test_item_period = (int) $settings->get('test_item_period', static::TEST_ITEM_PERIOD, 'videos');
 
-            // Завершим тестовый период у тумб, если набралась необходимая статистика.
-        $query = VideosCategories::find()
-            ->select(['category_id', 'video_id', 'is_tested', 'tested_at'])
-            ->where(['is_tested' => 0])
-            ->andWhere(['>=', 'total_shows', $test_item_period]);
+        // Завершим тестовый период у тумб, если набралась необходимая статистика.
+        $db = VideosCategories::getDb();
 
-        foreach ($query->batch(50) as $rows) {
-            foreach ($rows as $row) {
-                $row->is_tested = 1;
-                $row->tested_at = \gmdate('Y-m-d H:i:s');
-                $row->save();
-            }
-        }
+        $sql = "UPDATE `videos_categories_map`
+                SET `is_tested` = 1, `tested_at` = NOW()
+                WHERE `is_tested` = 0 AND `total_shows` >= :test_item_period";
+
+        $db
+            ->createCommand($sql)
+            ->bindValue(':test_item_period', $test_item_period)
+            ->execute();
     }
 
     /**
@@ -66,37 +64,42 @@ class Rotator
     public function shiftHistoryCheckpoint(): void
     {
         $settings = Yii::$container->get(SettingsInterface::class);
-
         $recalculate_ctr_period = $settings->get('recalculate_ctr_period', static::RECALCULATE_CTR_PERIOD, 'videos');
         $showsCheckpointValue = (int) ceil($recalculate_ctr_period / 10);
 
-        $thumbStats = VideosCategories::find()
+        $statsQuery = VideosCategories::find()
             ->select(['video_id', 'category_id', 'current_shows', 'current_clicks', 'current_index'])
             ->where(['>=', 'current_shows', $showsCheckpointValue])
-            ->asArray()
-            ->all();
+            ->asArray();
 
-        if (empty($thumbStats)) {
-            return;
-        }
+        foreach ($statsQuery->batch() as $thumbStats) {
+            $db = VideosCategories::getDb();
 
-        foreach ($thumbStats as $thumbStat) {
-            $currentIndex = (int) $thumbStat['current_index'];
-            $checkPointNumber = $currentIndex % 10;
+            $transaction = $db->beginTransaction();
+            try {
+                foreach ($thumbStats as $thumbStat) {
+                    $currentIndex = (int) $thumbStat['current_index'];
+                    $checkPointNumber = $currentIndex % 10;
 
-            VideosCategories::updateAll(
-                [
-                    'current_shows' => 0,
-                    'current_clicks' => 0,
-                    'current_index' => $currentIndex + 1,
-                    "shows{$checkPointNumber}" => (int) $thumbStat['current_shows'],
-                    "clicks{$checkPointNumber}" => (int) $thumbStat['current_clicks'],
-                ],
-                [
-                    'video_id' => $thumbStat['video_id'],
-                    'category_id' => $thumbStat['category_id'],
-                ]
-            );
+                    VideosCategories::updateAll(
+                        [
+                            'current_shows' => 0,
+                            'current_clicks' => 0,
+                            'current_index' => $currentIndex + 1,
+                            "shows{$checkPointNumber}" => (int) $thumbStat['current_shows'],
+                            "clicks{$checkPointNumber}" => (int) $thumbStat['current_clicks'],
+                        ],
+                        [
+                            'video_id' => $thumbStat['video_id'],
+                            'category_id' => $thumbStat['category_id'],
+                        ]
+                    );
+                }
+
+                $transaction->commit();
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+            }
         }
     }
 
@@ -198,9 +201,9 @@ class Rotator
         ]);
 
         // Сбросим кеш страниц категорий
-        if ($numChangedRows > 0) {
+        //if ($numChangedRows > 0) {
             //TagDependency::invalidate(Yii::$app->cache, 'videos:categories');
-        }
+        //}
     }
 
     /**
