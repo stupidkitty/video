@@ -7,7 +7,12 @@ use SK\VideoModule\EventSubscriber\VideoSubscriber;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\VideosCategories;
 use Yii;
+use yii\base\Action;
+use yii\base\InvalidConfigException;
+use yii\db\Exception;
+use yii\di\NotInstantiableException;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\Request;
 use yii\web\Response;
@@ -20,7 +25,7 @@ class AjaxController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'verbs' => [
@@ -38,11 +43,11 @@ class AjaxController extends Controller
     }
 
     /**
-     * @param \yii\base\Action $action
+     * @param Action $action
      * @return bool
-     * @throws \yii\web\BadRequestHttpException
+     * @throws BadRequestHttpException
      */
-    public function beforeAction($action)
+    public function beforeAction($action): bool
     {
         $this->enableCsrfValidation = false;
 
@@ -54,7 +59,7 @@ class AjaxController extends Controller
      * @param SettingsInterface $settings
      * @return Response
      */
-    public function actionGetVideo(int $id, SettingsInterface $settings)
+    public function actionGetVideo(int $id, SettingsInterface $settings): Response
     {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: POST, GET');
@@ -64,7 +69,7 @@ class AjaxController extends Controller
             ->alias('v')
             ->withViewRelations()
             ->whereIdOrSlug($id)
-            ->untilNow()
+            //->untilNow()
             ->onlyActive()
             ->asArray()
             ->one();
@@ -93,12 +98,12 @@ class AjaxController extends Controller
      * @param Request $request
      * @param Response $response
      * @param SettingsInterface $settings
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\db\Exception
-     * @throws \yii\di\NotInstantiableException
+     * @return string
+     * @throws InvalidConfigException
+     * @throws Exception
+     * @throws NotInstantiableException
      */
-    public function actionCategoryClick(Request $request, Response $response, SettingsInterface $settings)
+    public function actionCategoryClick(Request $request, Response $response, SettingsInterface $settings): string
     {
         $crawlerDetect = $this->get('crawler.detect');
 
@@ -143,11 +148,11 @@ class AjaxController extends Controller
      * @param Request $request
      * @param Response $response
      * @param SettingsInterface $settings
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @return string
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
-    public function actionVideoClick(Request $request, Response $response, SettingsInterface $settings)
+    public function actionVideoClick(Request $request, Response $response, SettingsInterface $settings): string
     {
         $crawlerDetect = $this->get('crawler.detect');
 
@@ -184,11 +189,11 @@ class AjaxController extends Controller
      * @param Request $request
      * @param Response $response
      * @param SettingsInterface $settings
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @return string
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
-    public function actionThumbsLog(Request $request, Response $response, SettingsInterface $settings)
+    public function actionThumbsLog(Request $request, Response $response, SettingsInterface $settings): string
     {
         $crawlerDetect = $this->get('crawler.detect');
 
@@ -224,7 +229,7 @@ class AjaxController extends Controller
      * @param Response $response
      * @return string
      */
-    public function actionLike(Request $request, Response $response)
+    public function actionLike(Request $request, Response $response): string
     {
         $video_id = (int) $request->post('id', 0);
 
@@ -246,7 +251,7 @@ class AjaxController extends Controller
      * @param Response $response
      * @return string
      */
-    public function actionDislike(Request $request, Response $response)
+    public function actionDislike(Request $request, Response $response): string
     {
         $video_id = (int) $request->post('id', 0);
 
@@ -266,8 +271,8 @@ class AjaxController extends Controller
      *
      * @param string $name
      * @return object
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function get(string $name): object
     {

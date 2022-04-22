@@ -110,7 +110,7 @@ class Categories extends Widget
             ]);
 
             if ($this->isCacheEnabled()) {
-                $this->cache->set($cacheKey, $html, $this->cacheDuration, new TagDependency(['tags' => 'videos:categories']));
+                $this->cache->set($cacheKey, $html, $this->cacheDuration/*, new TagDependency(['tags' => 'videos:categories'])*/);
             }
         }
 

@@ -4,6 +4,7 @@ namespace SK\VideoModule\Model;
 
 use RS\Component\User\Model\User;
 use SK\VideoModule\Query\VideoQuery;
+use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -140,9 +141,6 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
         return $this->hasOne(Image::class, ['image_id' => 'image_id']);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function setPoster(ImageInterface $image)
     {
         $this->link('poster', $image);
@@ -229,9 +227,6 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
             ->viaTable(VideosCategories::tableName(), ['video_id' => 'video_id']);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function addCategory(Category $category): bool
     {
         $exists = VideosCategories::find()
@@ -311,5 +306,21 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
             self::STATUS_MODERATE => 'На модерации',
             self::STATUS_DELETED => 'Удалено',
         ];
+    }
+
+    /**
+     * Getting the video ID by its slug
+     *
+     * @param string $slug
+     * @return int|null
+     * @throws InvalidConfigException
+     */
+    public static function getIdBySlug(string $slug): ?int
+    {
+        $cache = Yii::$app->get('cache');
+
+        $data = $cache->getOrSet("video:id-by-slug:{$slug}", fn() => static::find()->select('video_id')->where(['slug' => $slug])->scalar());
+
+        return $data ? (int) $data : null;
     }
 }

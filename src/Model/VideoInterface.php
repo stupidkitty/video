@@ -33,9 +33,6 @@ interface VideoInterface
      */
     public function getPoster();
 
-    /**
-     * @inheritdoc
-     */
     public function setPoster(ImageInterface $image);
 
     /**
@@ -68,18 +65,9 @@ interface VideoInterface
      */
     public function getCategories();
 
-    /**
-     * @inheritdoc
-     */
-     public function addCategory(Category $category);
+    public function addCategory(Category $category);
 
-    /**
-     * @inheritdoc
-     */
-     public function removeCategory(Category $category);
+    public function removeCategory(Category $category);
 
-    /**
-     * @inheritdoc
-     */
-     public static function getStatuses();
+    public static function getStatuses();
 }

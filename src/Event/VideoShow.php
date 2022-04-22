@@ -5,6 +5,6 @@ use yii\base\Event;
 
 class VideoShow extends Event
 {
-    public $id = 0;
-    public $slug = '';
+    public int $id = 0;
+    public string $slug = '';
 }

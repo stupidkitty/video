@@ -7,9 +7,12 @@ use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\Form\FilterForm;
 use SK\VideoModule\Model\Video;
+use SK\VideoModule\Query\VideoQuery;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\base\ViewContextInterface;
 use yii\data\ActiveDataProvider;
+use yii\di\NotInstantiableException;
 use yii\web\Controller;
 use yii\web\Request;
 use yii\web\Response;
@@ -22,7 +25,7 @@ class VideosController extends Controller implements ViewContextInterface
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'queryParams' => [
@@ -74,7 +77,7 @@ class VideosController extends Controller implements ViewContextInterface
      * @param int $page Текущая страница.
      * @param string $o Сортировка выборки
      * @param string $t Ограничение выборки по времени.
-     * @return mixed
+     * @return string
      */
     public function actionIndex(
         Request $request,
@@ -83,7 +86,7 @@ class VideosController extends Controller implements ViewContextInterface
         int $page = 1,
         string $o = 'date',
         string $t = 'all-time'
-    )
+    ): string
     {
         $filterForm = new FilterForm([
             't' => $t,
@@ -218,7 +221,7 @@ class VideosController extends Controller implements ViewContextInterface
      * @param SettingsInterface $settings
      * @param int $page
      * @param string $t
-     * @return mixed
+     * @return string
      */
     public function actionViews(
         Request $request,
@@ -226,7 +229,7 @@ class VideosController extends Controller implements ViewContextInterface
         SettingsInterface $settings,
         int $page = 1,
         string $t = 'all-time'
-    )
+    ): string
     {
         $filterForm = new FilterForm([
             't' => $t,
@@ -277,7 +280,7 @@ class VideosController extends Controller implements ViewContextInterface
      * @param SettingsInterface $settings
      * @param int $page
      * @param string $t
-     * @return mixed
+     * @return string
      */
     public function actionLikes(
         Request $request,
@@ -285,7 +288,7 @@ class VideosController extends Controller implements ViewContextInterface
         SettingsInterface $settings,
         int $page = 1,
         string $t = 'all-time'
-    )
+    ): string
     {
         $filterForm = new FilterForm([
             't' => $t,
@@ -336,7 +339,7 @@ class VideosController extends Controller implements ViewContextInterface
      * @param SettingsInterface $settings
      * @param int $page
      * @param string $t
-     * @return mixed
+     * @return string
      */
     public function actionCtr(
         Request $request,
@@ -344,7 +347,7 @@ class VideosController extends Controller implements ViewContextInterface
         SettingsInterface $settings,
         int $page = 1,
         string $t = 'all-time'
-    )
+    ): string
     {
         $filterForm = new FilterForm([
             't' => $t,
@@ -389,9 +392,9 @@ class VideosController extends Controller implements ViewContextInterface
 
     /**
      * @param FilterForm $filterForm
-     * @return \SK\VideoModule\Query\VideoQuery
+     * @return VideoQuery
      */
-    protected function buildInitialQuery(FilterForm $filterForm)
+    protected function buildInitialQuery(FilterForm $filterForm): VideoQuery
     {
         $query = Video::find()
             ->asThumbs()
@@ -415,8 +418,8 @@ class VideosController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function isMobile(): bool
     {
@@ -430,8 +433,8 @@ class VideosController extends Controller implements ViewContextInterface
      *
      * @param string $name
      * @return object
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function get(string $name): object
     {

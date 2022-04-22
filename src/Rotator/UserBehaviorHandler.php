@@ -2,6 +2,7 @@
 namespace SK\VideoModule\Rotator;
 
 use Yii;
+use yii\db\Exception;
 use yii\db\Expression;
 use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Settings\SettingsInterface;
@@ -30,6 +31,7 @@ class UserBehaviorHandler
      *
      * @param UserBehaviorStatistic $statistic
      * @return void
+     * @throws Exception
      */
     public function handle(UserBehaviorStatistic $statistic)
     {
@@ -62,7 +64,7 @@ class UserBehaviorHandler
     protected function handleVideosClicked(array $data)
     {
         $inCategory = [];
-        $thumbs = [];
+        //$thumbs = [];
         foreach($data as $item) {
             $video = \json_decode(\base64_decode($item), true);
 
@@ -72,10 +74,10 @@ class UserBehaviorHandler
                 ];
             }
 
-            if (isset($video['id']) && isset($video['imageId'])) {
-                $thumbs['image_id'][] = (int) $video['imageId'];
-                $thumbs['video_id'][] = (int) $video['id'];
-            }
+            //if (isset($video['id']) && isset($video['imageId'])) {
+            //    $thumbs['image_id'][] = (int) $video['imageId'];
+            //    $thumbs['video_id'][] = (int) $video['id'];
+            //}
         }
 
         foreach ($inCategory as $key => $videosIds) {
@@ -120,8 +122,9 @@ class UserBehaviorHandler
     /**
      * Обработка кликов в категории. Учет кликов по идам категорий.
      *
-     * @param array $categoriesIds
+     * @param array $data
      * @return void
+     * @throws Exception
      */
     protected function handleCategoriesClicked(array $data)
     {

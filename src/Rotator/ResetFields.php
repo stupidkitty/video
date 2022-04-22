@@ -1,24 +1,21 @@
 <?php
 
-namespace SK\VideoModule\Service;
+namespace SK\VideoModule\Rotator;
 
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Model\Video;
+use SK\VideoModule\Model\VideoInterface;
 use SK\VideoModule\Model\VideosCategories;
-use Yii;
-use yii\db\Expression;
+use yii\db\Exception;
 
-class Rotator
+class ResetFields
 {
+    private SettingsInterface $settings;
+
     /**
      * @var integer Default test item period (test shows).
      */
     const TEST_ITEM_PERIOD = 200;
-
-    /**
-     * @var int default recalculate ctr period (shows);
-     */
-    const RECALCULATE_CTR_PERIOD = 2000;
 
     /**
      * @var int default thumbs per page;
@@ -26,81 +23,13 @@ class Rotator
     const ITEMS_PER_PAGE = 24;
 
     /**
-     * @var int default thumbs per page;
+     * @var int default test thumbs percent
      */
     const TEST_PERCENT = 15;
 
-    /**
-     * Устанавливает флаг "тестировано" у записи
-     *
-     * @return void
-     */
-    public function markAsTestedRows(): void
+    public function __construct(SettingsInterface $settings)
     {
-        $settings = Yii::$container->get(SettingsInterface::class);
-
-        $test_item_period = (int) $settings->get('test_item_period', static::TEST_ITEM_PERIOD, 'videos');
-
-        // Завершим тестовый период у тумб, если набралась необходимая статистика.
-        $db = VideosCategories::getDb();
-
-        $sql = "UPDATE `videos_categories_map`
-                SET `is_tested` = 1, `tested_at` = NOW()
-                WHERE `is_tested` = 0 AND `total_shows` >= :test_item_period";
-
-        $db
-            ->createCommand($sql)
-            ->bindValue(':test_item_period', $test_item_period)
-            ->execute();
-    }
-
-    /**
-     * Метод смещает контрольные точки у тумб. Всего контрольных точек пять.
-     * Значит берем клики периода рекалькуляции цтр и раскидываем равномерно по пяти точкам.
-     * Затем выберем все тумбы, которые достигли необходимого значения, обнулим счетчик и сместим вправо на следующую точку.
-     *
-     * @return void
-     */
-    public function shiftHistoryCheckpoint(): void
-    {
-        $settings = Yii::$container->get(SettingsInterface::class);
-        $recalculate_ctr_period = $settings->get('recalculate_ctr_period', static::RECALCULATE_CTR_PERIOD, 'videos');
-        $showsCheckpointValue = (int) ceil($recalculate_ctr_period / 10);
-
-        $statsQuery = VideosCategories::find()
-            ->select(['video_id', 'category_id', 'current_shows', 'current_clicks', 'current_index'])
-            ->where(['>=', 'current_shows', $showsCheckpointValue])
-            ->asArray();
-
-        foreach ($statsQuery->batch() as $thumbStats) {
-            $db = VideosCategories::getDb();
-
-            $transaction = $db->beginTransaction();
-            try {
-                foreach ($thumbStats as $thumbStat) {
-                    $currentIndex = (int) $thumbStat['current_index'];
-                    $checkPointNumber = $currentIndex % 10;
-
-                    VideosCategories::updateAll(
-                        [
-                            'current_shows' => 0,
-                            'current_clicks' => 0,
-                            'current_index' => $currentIndex + 1,
-                            "shows{$checkPointNumber}" => (int) $thumbStat['current_shows'],
-                            "clicks{$checkPointNumber}" => (int) $thumbStat['current_clicks'],
-                        ],
-                        [
-                            'video_id' => $thumbStat['video_id'],
-                            'category_id' => $thumbStat['category_id'],
-                        ]
-                    );
-                }
-
-                $transaction->commit();
-            } catch (\Throwable $e) {
-                $transaction->rollBack();
-            }
-        }
+        $this->settings = $settings;
     }
 
     /**
@@ -108,26 +37,27 @@ class Rotator
      * Пропускает топовые видео с 1-й страницы.
      *
      * @return void
+     * @throws Exception
      */
     public function resetOldTestedVideos(): void
     {
-        $db = Yii::$app->db;
-        $settings = Yii::$container->get(SettingsInterface::class);
+        $db = VideosCategories::getDb();
 
-        $thumbsPerPage = (int) $settings->get('items_per_page', static::ITEMS_PER_PAGE, 'videos');
-        $testThumbsPercent = (int) $settings->get('test_items_percent', static::TEST_PERCENT, 'videos');
+        $thumbsPerPage = (int) $this->settings->get('items_per_page', static::ITEMS_PER_PAGE, 'videos');
+        $testThumbsPercent = (int) $this->settings->get('test_items_percent', static::TEST_PERCENT, 'videos');
         $testPerPage = (int) ceil(($thumbsPerPage / 100) * $testThumbsPercent);
         $untouchablesThumbsNum = $thumbsPerPage - $testPerPage;
 
         $sql = "SELECT `category_id`, COUNT(*) - SUM(`is_tested`) as `tested_diff`
                 FROM `videos_categories_map` as `vcm`
                 LEFT JOIN `videos` as `v` ON (`vcm`.`video_id`=`v`.`video_id`)
-                WHERE `v`.`status` = 10
+                WHERE `v`.`status` = :status
                 GROUP BY `category_id`
                 HAVING `tested_diff` < :testSpotsNum"; // = 0
 
         $categories = $db->createCommand($sql)
             ->bindValue(':testSpotsNum', $testPerPage)
+            ->bindValue(':status', VideoInterface::STATUS_ACTIVE)
             ->queryAll();
 
         foreach ($categories as $category) {
@@ -142,7 +72,7 @@ class Rotator
                 ->andWhere(['rs.is_tested' => 1])
                 ->andWhere(['>', 'rs.ctr', 0])
                 //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
-                ->andWhere(['v.status' => 10])
+                ->andWhere(['v.status' => VideoInterface::STATUS_ACTIVE])
                 ->orderBy(['rs.ctr' => SORT_DESC])
                 ->limit($untouchablesThumbsNum)
                 ->column();
@@ -156,7 +86,7 @@ class Rotator
                 ->andWhere(['rs.is_tested' => 1])
                 ->andFilterWhere(['NOT IN', 'rs.video_id', $untouchablesThumbs])
                 //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
-                ->andWhere(['v.status' => 10])
+                ->andWhere(['v.status' => VideoInterface::STATUS_ACTIVE])
                 ->orderBy(['rs.tested_at' => SORT_DESC])
                 ->limit($resetLimit)
                 ->column();
@@ -189,14 +119,13 @@ class Rotator
      */
     public function cyclicResetByShows(): void
     {
-        $settings = Yii::$container->get(SettingsInterface::class);
-        $showsLimit = $settings->get('reset_rotation_period', 0, 'videos');
+        $showsLimit = (int) $this->settings->get('reset_rotation_period', 0, 'videos');
 
-        if (empty($showsLimit)) {
+        if (!$showsLimit) {
             return;
         }
 
-        $numChangedRows = VideosCategories::updateAll($this->getResetFields(), '`shows_before_reset` >= :limit AND `is_tested` = 1', [
+        VideosCategories::updateAll($this->getResetFields(), '`shows_before_reset` >= :limit AND `is_tested` = 1', [
             ':limit' => $showsLimit
         ]);
 

@@ -9,6 +9,8 @@ use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\Model\Screenshot;
 use SK\VideoModule\Model\Video;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\StaleObjectException;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\NotFoundHttpException;
@@ -22,7 +24,7 @@ class ScreenshotsController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'authenticator' => [
@@ -34,10 +36,10 @@ class ScreenshotsController extends Controller
                 'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
                 'only' => ['index', 'view'],
                 'duration' => 3200,
-                'dependency' => [
+                /*'dependency' => [
                     'class' => 'yii\caching\TagDependency',
                     'tags' => 'videos:screenshots',
-                ],
+                ],*/
                 'variations' => [
                     Yii::$app->language,
                     \implode(':', \array_values(Yii::$container->get(Request::class)->get())),
@@ -49,9 +51,9 @@ class ScreenshotsController extends Controller
     /**
      * Gets info about auto postig. Max date post and count future posts.
      *
-     * @return mixed
+     * @return array
      */
-    public function actionIndex($id = 0)
+    public function actionIndex($id = 0): array
     {
         $responseData = [];
 
@@ -74,11 +76,13 @@ class ScreenshotsController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
      *
-     * @return mixed
+     *
+     * @param Request $request
+     * @param int $id The target video where the screenshot will be added
+     * @return array
      */
-    public function actionCreate($id)
+    public function actionCreate(Request $request, int $id): array
     {
         $responseData['result']['createdScreenshots'] = [];
         $createdScreenshots = [];
@@ -107,7 +111,7 @@ class ScreenshotsController extends Controller
                 if ($newScreenshotRecord->save()) {
                     $preparedData['id'] = $newScreenshotRecord->screenshot_id;
                 } else {
-                    $preparedData['errors'] = $$newScreenshotRecord->getErrorSummary(true);
+                    $preparedData['errors'] = $newScreenshotRecord->getErrorSummary(true);
                 }
 
                 $createdScreenshots[] = $preparedData;
@@ -118,11 +122,14 @@ class ScreenshotsController extends Controller
     }
 
     /**
-     * Gets info about auto postig. Max date post and count future posts.
-     *
-     * @return mixed
+     * @param Request $request
+     * @param int $id
+     * @return array
+     * @throws \Throwable
+     * @throws InvalidConfigException
+     * @throws StaleObjectException
      */
-    public function actionDelete($id)
+    public function actionDelete(Request $request, int $id): array
     {
         $responseData['result']['deletedScreenshots'] = [];
         $deletedIds = [];
@@ -160,7 +167,7 @@ class ScreenshotsController extends Controller
      * @return Video the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findVideoById($id)
+    protected function findVideoById(int $id): Video
     {
         $video = Video::find()
             ->alias('v')

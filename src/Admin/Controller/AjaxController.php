@@ -1,10 +1,13 @@
 <?php
+
 namespace SK\VideoModule\Admin\Controller;
 
-use SK\VideoModule\Service\Rotator;
+use SK\VideoModule\Rotator\ResetFields;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
+use yii\web\Response;
 
 /**
  * AjaxController содержит различные аякс действия.
@@ -14,7 +17,7 @@ class AjaxController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -37,8 +40,10 @@ class AjaxController extends Controller
 
     /**
      * Отключает csrf для аякса
+     *
+     * @throws BadRequestHttpException
      */
-    public function beforeAction($action)
+    public function beforeAction($action): bool
     {
         $this->enableCsrfValidation = false;
 
@@ -48,13 +53,13 @@ class AjaxController extends Controller
     /**
      * Перезапускает ротацию тестированных тумбы с 0 цтр.
      *
-     * @return mixed
+     * @param ResetFields $resetFields
+     * @return Response
      */
-    public function actionRestartZeroCtr()
+    public function actionRestartZeroCtr(ResetFields $resetFields): Response
     {
         try {
-            $rotator = new Rotator;
-            $rotator->resetZeroCtr();
+            $resetFields->resetZeroCtr();
 
             return $this->asJson([
                 'message' => 'Ротация тестированных тумб с 0 ctr перезапущена',

@@ -2,22 +2,21 @@
 
 namespace SK\VideoModule\CronJob;
 
-use SK\VideoModule\Rotator\MarkAsTestedThumbs;
 use App\Infrastructure\Cron\HandlerInterface;
+use SK\VideoModule\Video\UseCase\StoreCachedCountersIntoDb;
 use yii\base\InvalidConfigException;
-use yii\db\Exception;
 use yii\di\NotInstantiableException;
 
-class MarkTestedThumbs implements HandlerInterface
+class StoreCachedCounters implements HandlerInterface
 {
     /**
+     * @throws \Throwable
      * @throws NotInstantiableException
-     * @throws Exception
      * @throws InvalidConfigException
      */
     public function run(): void
     {
-        $handler = \Yii::$container->get(MarkAsTestedThumbs::class);
-        $handler->handle();
+        $handler = \Yii::$container->get(StoreCachedCountersIntoDb::class);
+        $handler->store();
     }
 }

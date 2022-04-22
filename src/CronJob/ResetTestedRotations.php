@@ -1,14 +1,22 @@
 <?php
 namespace SK\VideoModule\CronJob;
 
-use SK\VideoModule\Service\Rotator;
+use SK\VideoModule\Rotator\ResetFields;
 use App\Infrastructure\Cron\HandlerInterface;
+use yii\base\InvalidConfigException;
+use yii\db\Exception;
+use yii\di\NotInstantiableException;
 
 class ResetTestedRotations implements HandlerInterface
 {
+    /**
+     * @throws Exception
+     * @throws NotInstantiableException
+     * @throws InvalidConfigException
+     */
     public function run(): void
     {
-        $rotator = new Rotator;
-        $rotator->resetOldTestedVideos();
+        $handler = \Yii::$container->get(ResetFields::class);
+        $handler->resetOldTestedVideos();
     }
 }

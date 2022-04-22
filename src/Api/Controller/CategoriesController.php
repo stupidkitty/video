@@ -20,7 +20,7 @@ class CategoriesController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'authenticator' => [
@@ -32,10 +32,10 @@ class CategoriesController extends Controller
                 'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
                 'only' => ['index', 'view'],
                 'duration' => 3200,
-                'dependency' => [
+                /*'dependency' => [
                     'class' => TagDependency::class,
                     'tags' => 'videos:categories',
-                ],
+                ],*/
                 'variations' => [
                     Yii::$app->language,
                     \implode(':', \array_values(Yii::$container->get(Request::class)->get())),

@@ -8,8 +8,10 @@ use SK\VideoModule\Cache\PageCache;
 use SK\VideoModule\Form\SearchForm;
 use SK\VideoModule\Model\Video;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\base\ViewContextInterface;
 use yii\data\ActiveDataProvider;
+use yii\di\NotInstantiableException;
 use yii\web\Controller;
 use yii\web\Request;
 use yii\web\Response;
@@ -22,7 +24,7 @@ class SearchController extends Controller implements ViewContextInterface
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'queryParams' => [
@@ -55,7 +57,7 @@ class SearchController extends Controller implements ViewContextInterface
      *
      * @return string
      */
-    public function getViewPath()
+    public function getViewPath(): string
     {
         return $this->module->getViewPath();
     }
@@ -67,9 +69,9 @@ class SearchController extends Controller implements ViewContextInterface
      * @param Response $response
      * @param SettingsInterface $settings
      * @param int $page
-     * @return mixed
+     * @return string
      */
-    public function actionIndex(Request $request, Response $response, SettingsInterface $settings, int $page = 1)
+    public function actionIndex(Request $request, Response $response, SettingsInterface $settings, int $page = 1): string
     {
         // задрочка для чпу, форма доложна быть методом POST --begin
         /*if ($request->isPost && '' !== $request->post('q', '')) {
@@ -139,8 +141,8 @@ class SearchController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function isMobile(): bool
     {
@@ -154,8 +156,8 @@ class SearchController extends Controller implements ViewContextInterface
      *
      * @param string $name
      * @return object
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function get(string $name): object
     {

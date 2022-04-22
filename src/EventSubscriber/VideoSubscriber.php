@@ -1,7 +1,13 @@
 <?php
+
 namespace SK\VideoModule\EventSubscriber;
 
+use Redis;
+use SK\VideoModule\Event\VideoShow;
+use SK\VideoModule\Video\UseCase\CountersCache;
 use Yii;
+use yii\base\Event;
+use yii\base\InvalidConfigException;
 use yii\web\Request;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
@@ -13,9 +19,9 @@ final class VideoSubscriber
      * Событие при показе одного видео.
      * Регистрирует показ. Также регистрирует клик, если посетитель перешел с категории.
      *
-     * @param \yii\base\Event $event
+     * @param Event $event
      */
-    public static function onView($event)
+    public static function onView(Event $event)
     {
         $request = Yii::$container->get(Request::class);
         $crawlerDetect = Yii::$container->get('crawler.detect');
@@ -72,7 +78,7 @@ final class VideoSubscriber
      * Событие при показе нескольких видео в категории.
      * Регистрирует показ.
      *
-     * @param \yii\base\Event $event
+     * @param Event $event
      */
     public static function onShowCategoryThumbs($event)
     {
@@ -104,23 +110,34 @@ final class VideoSubscriber
                 ON DUPLICATE KEY UPDATE `clicks`=`clicks`+1";
 
             Yii::$app->db->createCommand($sql)
-               ->bindValues([
-                   'category_id' => $event->data['category_id'],
-                   'current_date' => $currentDate,
-                   'current_hour' => $currentHour,
-               ])
-               ->execute();
+                ->bindValues([
+                    'category_id' => $event->data['category_id'],
+                    'current_date' => $currentDate,
+                    'current_hour' => $currentHour,
+                ])
+                ->execute();
         }
     }
 
     /**
      * Регистрирует просмотр видео.
      *
-     * @param \yii\base\Event $event
+     * @param VideoShow $event
      * @return void
+     * @throws InvalidConfigException
      */
-    public static function registerShow($event)
+    public static function registerShow(VideoShow $event)
     {
-        Video::updateAllCounters(['views' => 1], ['or', ['video_id' => $event->id], ['slug' => $event->slug]]);
+        $cacher = Yii::$container->get(CountersCache::class);
+
+        $id = $event->id;
+
+        if ($id === 0 && $event->slug !== '') {
+            $id = Video::getIdBySlug($event->slug);
+        }
+
+        $cacher->view((int) $id);
+
+        //Video::updateAllCounters(['views' => 1], ['or', ['video_id' => $event->id], ['slug' => $event->slug]]);
     }
 }

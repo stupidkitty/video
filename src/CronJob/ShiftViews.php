@@ -1,14 +1,14 @@
 <?php
 namespace SK\VideoModule\CronJob;
 
-use SK\VideoModule\Service\Rotator;
+use SK\VideoModule\Rotator\ShiftHistoryCheckpoint;
 use App\Infrastructure\Cron\HandlerInterface;
 
 class ShiftViews implements HandlerInterface
 {
     public function run(): void
     {
-        $rotator = new Rotator();
-        $rotator->shiftHistoryCheckpoint();
+        $handler = \Yii::$container->get(ShiftHistoryCheckpoint::class);
+        $handler->handle();
     }
 }

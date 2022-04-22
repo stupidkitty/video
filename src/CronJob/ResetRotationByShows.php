@@ -1,7 +1,7 @@
 <?php
 namespace SK\VideoModule\CronJob;
 
-use SK\VideoModule\Service\Rotator;
+use SK\VideoModule\Rotator\ResetFields;
 use App\Infrastructure\Cron\HandlerInterface;
 
 /**
@@ -13,7 +13,7 @@ class ResetRotationByShows implements HandlerInterface
 {
     public function run(): void
     {
-        $rotator = new Rotator;
-        $rotator->cyclicResetByShows();
+        $handler = \Yii::$container->get(ResetFields::class);
+        $handler->cyclicResetByShows();
     }
 }

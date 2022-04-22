@@ -14,6 +14,7 @@ use SK\VideoModule\Model\Image;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Service\Video as VideoService;
 use SK\VideoModule\Video\UseCase\BatchUpdateVideos;
+use SK\VideoModule\Video\UseCase\CountersCache;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\di\NotInstantiableException;
@@ -303,31 +304,31 @@ class VideoController extends Controller
     }
 
     /**
-     * Лайк видео
+     * Like the video
      *
+     * @param CountersCache $countersCache
      * @param int $id
      * @return string
      */
-    public function actionLike(int $id): string
+    public function actionLike(CountersCache $countersCache, int $id): string
     {
-        $video_id = $id;
-
-        Video::updateAllCounters(['likes' => 1], ['video_id' => $video_id]);
+        //Video::updateAllCounters(['likes' => 1], ['video_id' => $id]);
+        $countersCache->like($id);
 
         return '';
     }
 
     /**
-     * Дизлайк видео
+     * Dislike the video
      *
+     * @param CountersCache $countersCache
      * @param int $id
      * @return string
      */
-    public function actionDislike(int $id): string
+    public function actionDislike(CountersCache $countersCache, int $id): string
     {
-        $video_id = $id;
-
-        Video::updateAllCounters(['dislikes' => 1], ['video_id' => $video_id]);
+        //Video::updateAllCounters(['dislikes' => 1], ['video_id' => $id]);
+        $countersCache->dislike($id);
 
         return '';
     }

@@ -1,8 +1,10 @@
 <?php
 namespace SK\VideoModule\Command;
 
+use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use SK\VideoModule\Service\Category;
+use yii\db\Exception;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -11,6 +13,8 @@ class CategoryController extends Controller
 {
     /**
      * Пересчитывает популярность категории.
+     *
+     * @throws Exception
      */
     public function actionUpdatePopularity()
     {
@@ -20,6 +24,8 @@ class CategoryController extends Controller
 
     /**
      * Пересчитывает активные Галереи в категория.
+     *
+     * @throws Exception
      */
     public function actionCountVideos()
     {
@@ -38,6 +44,8 @@ class CategoryController extends Controller
 
     /**
      * Удаляет старую статистику по кликам в категорию
+     *
+     * @throws InvalidConfigException
      */
     public function actionClearOldStats()
     {

@@ -9,7 +9,9 @@ use SK\VideoModule\Event\VideoShow;
 use SK\VideoModule\EventSubscriber\VideoSubscriber;
 use SK\VideoModule\Model\Video;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\base\ViewContextInterface;
+use yii\di\NotInstantiableException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;
@@ -23,7 +25,7 @@ class ViewController extends Controller implements ViewContextInterface
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'queryParams' => [
@@ -76,7 +78,7 @@ class ViewController extends Controller implements ViewContextInterface
      *
      * @return string
      */
-    public function getViewPath()
+    public function getViewPath(): string
     {
         return $this->module->getViewPath();
     }
@@ -87,10 +89,10 @@ class ViewController extends Controller implements ViewContextInterface
      * @param SettingsInterface $settings
      * @param integer $id
      * @param string $slug
-     * @return mixed
+     * @return string
      * @throws NotFoundHttpException
      */
-    public function actionIndex(SettingsInterface $settings, int $id = 0, string $slug = '')
+    public function actionIndex(SettingsInterface $settings, int $id = 0, string $slug = ''): string
     {
         $identify = (0 !== (int) $id) ? (int) $id : $slug;
         $video = $this->findByIdentify($identify);
@@ -100,7 +102,7 @@ class ViewController extends Controller implements ViewContextInterface
         $this->registerXRobotsTag($video);
 
         if ($settings->get('internal_register_activity', true, 'videos')) {
-            $this->on(self::EVENT_AFTER_ACTION, [VideoSubscriber::class, 'onView'], $video);
+            $this->on(static::EVENT_AFTER_ACTION, [VideoSubscriber::class, 'onView'], $video);
         }
 
         return $this->render($template, [
@@ -138,8 +140,8 @@ class ViewController extends Controller implements ViewContextInterface
      * Detect user is mobile device
      *
      * @return boolean
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function isMobile(): bool
     {
@@ -153,8 +155,8 @@ class ViewController extends Controller implements ViewContextInterface
      *
      * @param string $name
      * @return object
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function get(string $name): object
     {
@@ -167,8 +169,8 @@ class ViewController extends Controller implements ViewContextInterface
      *
      * @param array $video
      * @return void
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
      */
     protected function registerXRobotsTag(array $video): void
     {

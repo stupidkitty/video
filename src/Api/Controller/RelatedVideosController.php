@@ -38,10 +38,10 @@ class RelatedVideosController extends Controller
                 'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
                 'only' => ['index'],
                 'duration' => 7200,
-                'dependency' => [
+                /*'dependency' => [
                     'class' => 'yii\caching\TagDependency',
                     'tags' => 'videos:related',
-                ],
+                ],*/
                 'variations' => [
                     Yii::$app->language,
                     \implode(':', \array_values(Yii::$container->get(Request::class)->get())),

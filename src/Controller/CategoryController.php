@@ -32,7 +32,7 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'queryParams' => [
@@ -52,10 +52,10 @@ class CategoryController extends Controller implements ViewContextInterface
                 'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index', 'ctr', 'list-all'],
                 'duration' => 600,
-                'dependency' => [
+                /*'dependency' => [
                     'class' => TagDependency::class,
                     'tags' => 'videos:categories',
-                ],
+                ],*/
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
@@ -105,7 +105,7 @@ class CategoryController extends Controller implements ViewContextInterface
      *
      * @return string
      */
-    public function getViewPath()
+    public function getViewPath(): string
     {
         return $this->module->getViewPath();
     }

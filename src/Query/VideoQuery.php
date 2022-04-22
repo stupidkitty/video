@@ -1,4 +1,5 @@
 <?php
+
 namespace SK\VideoModule\Query;
 
 use yii\db\ActiveQuery;
@@ -8,42 +9,49 @@ use SK\VideoModule\Model\Video;
 
 class VideoQuery extends ActiveQuery
 {
-    public function asThumbs()
+    /**
+     * @return VideoQuery
+     */
+    public function asThumbs(): VideoQuery
     {
         return $this->select([
-                'v.video_id',
-                'v.image_id',
-                'v.slug',
-                'v.title',
-                'v.orientation',
-                'v.video_preview',
-                'v.duration',
-                'v.likes',
-                'v.dislikes',
-                'v.comments_num',
-                'v.is_hd',
-                'v.noindex',
-                'v.nofollow',
-                'v.views',
-                'v.template',
-                'v.published_at'
-            ])
+            'v.video_id',
+            'v.image_id',
+            'v.slug',
+            'v.title',
+            'v.orientation',
+            'v.video_preview',
+            'v.duration',
+            'v.likes',
+            'v.dislikes',
+            'v.comments_num',
+            'v.is_hd',
+            'v.noindex',
+            'v.nofollow',
+            'v.views',
+            'v.template',
+            'v.published_at'
+        ])
             ->alias('v')
-            ->with(['categories' => function ($query) {
-                $query->select(['category_id', 'title', 'slug', 'h1'])
-                    ->where(['enabled' => 1]);
-            }])
-            ->with(['poster' => function ($query) {
-                $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }]);
+            ->with([
+                'categories' => function ($query) {
+                    $query->select(['category_id', 'title', 'slug', 'h1'])
+                        ->where(['enabled' => 1]);
+                }
+            ])
+            ->with([
+                'poster' => function ($query) {
+                    $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
+                }
+            ]);
     }
 
     /**
      * Добавляет к запросу условие "только активные"
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function onlyActive()
+    public function onlyActive(): ActiveQuery
     {
         return $this->andWhere(['v.status' => Video::STATUS_ACTIVE]);
     }
@@ -51,9 +59,9 @@ class VideoQuery extends ActiveQuery
     /**
      * Добавляет к запросу условие "только активные"
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function onlyHd()
+    public function onlyHd(): ActiveQuery
     {
         return $this->andWhere(['v.is_hd' => 1]);
     }
@@ -61,9 +69,9 @@ class VideoQuery extends ActiveQuery
     /**
      * Добавляет к запросу условие "до текущего времени"
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function untilNow()
+    public function untilNow(): ActiveQuery
     {
         return $this->andWhere(['<=', 'v.published_at', new Expression('NOW()')]);
     }
@@ -71,9 +79,10 @@ class VideoQuery extends ActiveQuery
     /**
      * Добавляет к запросу условие "между текущей датой и заданной"
      *
-     * @return \yii\db\ActiveQuery
+     * @param $rangeStart
+     * @return ActiveQuery
      */
-    public function rangedUntilNow($rangeStart)
+    public function rangedUntilNow($rangeStart): ActiveQuery
     {
         $timeagoExpression = $this->getTimeagoExpression($rangeStart);
 
@@ -83,25 +92,30 @@ class VideoQuery extends ActiveQuery
     /**
      * Подключает связанные модели для страницы просмотра видео.
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function withViewRelations()
+    public function withViewRelations(): ActiveQuery
     {
-        return $this->with(['poster' => function ($query) {
+        return $this->with([
+            'poster' => function ($query) {
                 $query->select(['image_id', 'video_id', 'filepath', 'source_url']);
-            }])
-            ->with(['categories' => function ($query) {
-                $query->select(['category_id', 'title', 'slug', 'h1'])
-                    ->where(['enabled' => 1]);
-            }]);
+            }
+        ])
+            ->with([
+                'categories' => function ($query) {
+                    $query->select(['category_id', 'title', 'slug', 'h1'])
+                        ->where(['enabled' => 1]);
+                }
+            ]);
     }
 
     /**
      * Подключает связанные модели для страницы просмотра видео.
      *
-     * @return \yii\db\ActiveQuery
+     * @param $identify
+     * @return ActiveQuery
      */
-    public function whereIdOrSlug($identify)
+    public function whereIdOrSlug($identify): ActiveQuery
     {
         if (is_integer($identify)) {
             return $this->where(['v.video_id' => $identify]);
@@ -113,9 +127,9 @@ class VideoQuery extends ActiveQuery
     /**
      * Кеширует подсчет элементов датасета. Кастыль :(
      *
-     * @return integer
+     * @return int
      */
-    public function cachedCount()
+    public function cachedCount(): int
     {
         $count = $this
             ->cache(300)
@@ -131,10 +145,9 @@ class VideoQuery extends ActiveQuery
      * Значения: daily, weekly, monthly, early, all_time
      *
      * @param string $time Ограничение по времени.
-     *
      * @return string
      */
-    protected function getTimeagoExpression($time)
+    protected function getTimeagoExpression($time): string
     {
         $times = [
             'daily' => '(NOW() - INTERVAL 1 DAY)',

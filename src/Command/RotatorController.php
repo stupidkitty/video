@@ -1,8 +1,11 @@
 <?php
 namespace SK\VideoModule\Command;
 
+use SK\VideoModule\Rotator\MarkAsTestedThumbs;
+use SK\VideoModule\Rotator\ResetFields;
+use SK\VideoModule\Rotator\ShiftHistoryCheckpoint;
 use yii\console\Controller;
-use SK\VideoModule\Service\Rotator;
+use yii\db\Exception;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -21,11 +24,11 @@ class RotatorController extends Controller
      * Помечает тумбы как тестированные в статистике.
      *
      * @return void
+     * @throws Exception
      */
-    public function actionMarkTested()
+    public function actionMarkTested(MarkAsTestedThumbs $handler)
     {
-        $rotator = new Rotator;
-        $rotator->markAsTestedRows();
+        $handler->handle();
     }
 
     /**
@@ -33,21 +36,20 @@ class RotatorController extends Controller
      *
      * @return void
      */
-    public function actionShiftViews()
+    public function actionShiftViews(ShiftHistoryCheckpoint $handler)
     {
-        $rotator = new Rotator;
-        $rotator->shiftHistoryCheckpoint();
+        $handler->handle();
     }
 
     /**
      * Сброс N видео для продолжения ротации если категория отротирована.
      *
      * @return void
+     * @throws Exception
      */
-    public function actionResetTested()
+    public function actionResetTested(ResetFields $handler)
     {
-        $rotator = new Rotator;
-        $rotator->resetOldTestedVideos();
+        $handler->resetOldTestedVideos();
     }
 
     /**
@@ -55,9 +57,8 @@ class RotatorController extends Controller
      *
      * @return void
      */
-    public function actionResetByShows()
+    public function actionResetByShows(ResetFields $handler)
     {
-        $rotator = new Rotator;
-        $rotator->cyclicResetByShows();
+        $handler->cyclicResetByShows();
     }
 }
