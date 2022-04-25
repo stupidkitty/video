@@ -1,8 +1,10 @@
 <?php
+
 namespace SK\VideoModule\Statistic;
 
 use SK\VideoModule\Model\Category;
 use SK\VideoModule\Model\Video;
+use SK\VideoModule\Model\VideoInterface;
 use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Statistic\Report\CategoryRotationReport;
 use SK\VideoModule\Statistic\Report\RotationStatisticReport;
@@ -11,7 +13,7 @@ use yii\db\Expression;
 class RotationStatisticBuilder
 {
 
-    public function build()
+    public function build(): RotationStatisticReport
     {
         $report = new RotationStatisticReport();
 
@@ -25,14 +27,13 @@ class RotationStatisticBuilder
         return $report;
     }
 
-    public function buildCategoriesReport()
+    public function buildCategoriesReport(): array
     {
         $categoriesReports = [];
 
         $categoriesTotalThumbs = $this->calculateCategoriesTotalThumbs();
         $categoriesTestThumbs = $this->calculateCategoriesTestThumbs();
         $categoriesTestedThumbs = $this->calculateCategoriesTestedThumbs();
-        $categoriesAutopostingThumbs = $this->calculateCategoriesAutopostingThumbs();
 
         $categories = Category::find()
             ->select(['category_id', 'title', 'slug'])
@@ -56,13 +57,6 @@ class RotationStatisticBuilder
             $categoryTestedThumbs = isset($categoriesTestedThumbs[$key]) ? (int) $categoriesTestedThumbs[$key] : 0;
             $report->setTestedThumbs($categoryTestedThumbs);
 
-            if (isset($categoriesAutopostingThumbs[$key])) {
-                $report->setAutopostingThumbs((int) $categoriesAutopostingThumbs[$key]);
-                $report->setUntilNowTotalThumbs($categoryTotalThumbs - (int) $categoriesAutopostingThumbs[$key]);
-            } else {
-                $report->setUntilNowTotalThumbs($categoryTotalThumbs);
-            }
-
             $categoriesReports[] = $report;
         }
 
@@ -72,165 +66,126 @@ class RotationStatisticBuilder
     /**
      * Подсчитывает все активные видео в ротации.
      *
-     * @return integer
+     * @return int
      */
-    protected function calculateTotalItems()
+    private function calculateTotalItems(): int
     {
-        $num = VideosCategories::find()
+        return VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает протестированные активные видео в таблице ротации.
      *
-     * @return integer
+     * @return int
      */
-    protected function calculateTestItems()
+    private function calculateTestItems(): int
     {
-        $num = VideosCategories::find()
+        return VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{vs}}.{{is_tested}}' => 0, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{vs}}.{{is_tested}}' => 0, '{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает нетестированные активные тумбы в таблице ротации.
      *
-     * @return integer
+     * @return int
      */
-    protected function calculateTestedItems()
+    private function calculateTestedItems(): int
     {
-        $num = VideosCategories::find()
+        return VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{vs}}.{{is_tested}}' => 1, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{vs}}.{{is_tested}}' => 1, '{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает нетестированные активные тумбы в таблице ротации.
      *
-     * @return integer
+     * @return int
      */
-    protected function calculateTestedZeroCtrItems()
+    private function calculateTestedZeroCtrItems(): int
     {
-        $num = VideosCategories::find()
+        return VideosCategories::find()
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{vs}}.{{is_tested}}' => 1, '{{vs}}.{{ctr}}' => 0, '{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{vs}}.{{is_tested}}' => 1, '{{vs}}.{{ctr}}' => 0, '{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает все активные тумбы в таблице ротации группируя по категориям.
      *
-     * @return integer
+     * @return array
      */
-    protected function calculateCategoriesTotalThumbs()
+    private function calculateCategoriesTotalThumbs(): array
     {
-        $totalThumbs = VideosCategories::find()
+        return VideosCategories::find()
             ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            ->where(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->where(['{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
             ->column();
-
-        return $totalThumbs;
     }
 
     /**
      * Подсчитывает все активные тумбы в таблице ротации группируя по категориям.
      *
-     * @return integer
+     * @return array
      */
-    protected function calculateCategoriesUntilNowThumbs()
+    private function calculateCategoriesUntilNowThumbs(): array
     {
-        $totalThumbs = VideosCategories::find()
+        return VideosCategories::find()
             ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            //->where(['<=', '{{v}}.{{published_at}}', new Expression('NOW()')])
-            ->andWhere(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->andWhere(['{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
             ->column();
-
-        return $totalThumbs;
-    }
-
-    /**
-     * Подсчитывает тумбы в автопостинге группируя по категориям.
-     *
-     * @return integer
-     */
-    protected function calculateCategoriesAutopostingThumbs()
-    {
-        $totalThumbs = VideosCategories::find()
-            ->select(new Expression('COUNT(*) as cnt'))
-            ->alias('vs')
-            ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
-            //->where(['>=', '{{v}}.{{published_at}}', new Expression('NOW()')])
-            ->andWhere(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
-            ->groupBy('{{vs}}.{{category_id}}')
-            ->indexBy('category_id')
-            ->column();
-
-        return $totalThumbs;
     }
 
     /**
      * Подсчитывает нетестированные тумбы в таблице ротации группируя по категориям.
      *
-     * @return integer
+     * @return array
      */
-    protected function calculateCategoriesTestThumbs()
+    private function calculateCategoriesTestThumbs(): array
     {
-        $testedThumbs = VideosCategories::find()
+        return VideosCategories::find()
             ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
             ->where(['{{vs}}.{{is_tested}}' => 0])
-            //->andWhere(['<=', '{{v}}.{{published_at}}', new Expression('NOW()')])
-            ->andWhere(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->andWhere(['{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
             ->column();
-
-        return $testedThumbs;
     }
 
     /**
      * Подсчитывает протестированные тумбы в таблице ротации группируя по категориям.
      *
-     * @return integer
+     * @return array
      */
-    protected function calculateCategoriesTestedThumbs()
+    private function calculateCategoriesTestedThumbs(): array
     {
-        $testedThumbs = VideosCategories::find()
+        return VideosCategories::find()
             ->select(new Expression('COUNT(*) as cnt'))
             ->alias('vs')
             ->innerJoin(['v' => 'videos'], '{{vs}}.{{video_id}}={{v}}.{{video_id}}')
             ->where(['{{vs}}.{{is_tested}}' => 1])
-            //->andWhere(['<=', '{{v}}.{{published_at}}', new Expression('NOW()')])
-            ->andWhere(['{{v}}.{{status}}' => Video::STATUS_ACTIVE])
+            ->andWhere(['{{v}}.{{status}}' => VideoInterface::STATUS_ACTIVE])
             ->groupBy('{{vs}}.{{category_id}}')
             ->indexBy('category_id')
             ->column();
-
-        return $testedThumbs;
     }
 }

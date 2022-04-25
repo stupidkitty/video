@@ -1,6 +1,9 @@
 <?php
+
 namespace SK\VideoModule\Admin\Controller;
 
+use JetBrains\PhpStorm\ArrayShape;
+use yii\db\Expression;
 use yii\web\Controller;
 use yii\filters\AccessControl;
 use SK\VideoModule\Model\Video;
@@ -12,7 +15,7 @@ class StatsController extends Controller
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    #[ArrayShape(['access' => "array"])] public function behaviors(): array
     {
         return [
             'access' => [
@@ -30,13 +33,13 @@ class StatsController extends Controller
     /**
      * Отображает статистику ротации. В том числе по категориям.
      *
-     * @return mixed
+     * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
-        $reportBuilder = new RotationStatisticBuilder;
+        $reportBuilder = new RotationStatisticBuilder();
         $report = $reportBuilder->build();
-        $videoReportBuilder = new VideoStatisticBuilder;
+        $videoReportBuilder = new VideoStatisticBuilder();
         $videoReport = $videoReportBuilder->build();
 
         return $this->render('index', [
@@ -47,21 +50,20 @@ class StatsController extends Controller
 
     /**
      * Рисует график распределения цтр (цтр/кол-во видео)
-     * 
      * Sql:
      * ```
-     * SELECT ROUND(`max_ctr`, 4) as `ctr`, COUNT(*) as `num` FROM `videos` 
+     * SELECT ROUND(`max_ctr`, 4) as `ctr`, COUNT(*) as `num` FROM `videos`
      * WHERE `max_ctr` > 0
      * GROUP BY `ctr`
      * ```
      *
-     * @return mixed
+     * @return string
      */
-    public function actionCtrSpreading()
+    public function actionCtrSpreading(): string
     {
         $query = Video::find();
         $rows = $query
-            ->select(['ctr' => new \yii\db\Expression('ROUND(`max_ctr`, 4)'), 'num' => new \yii\db\Expression('COUNT(*)')])
+            ->select(['ctr' => new Expression('ROUND(`max_ctr`, 4)'), 'num' => new Expression('COUNT(*)')])
             ->where(['>', 'max_ctr', 0])
             ->groupBy('ctr')
             ->asArray()
@@ -69,7 +71,7 @@ class StatsController extends Controller
 
         return $this->render('ctr-spreading', [
             'labels' => array_column($rows, 'ctr'),
-            'values' =>  array_column($rows, 'num'),
-        ]); 
+            'values' => array_column($rows, 'num'),
+        ]);
     }
 }

@@ -112,10 +112,10 @@ class VideoQuery extends ActiveQuery
     /**
      * Подключает связанные модели для страницы просмотра видео.
      *
-     * @param $identify
+     * @param int|string $identify
      * @return ActiveQuery
      */
-    public function whereIdOrSlug($identify): ActiveQuery
+    public function whereIdOrSlug(int|string $identify): ActiveQuery
     {
         if (is_integer($identify)) {
             return $this->where(['v.video_id' => $identify]);

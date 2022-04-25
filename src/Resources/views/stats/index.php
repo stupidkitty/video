@@ -1,12 +1,30 @@
 <?php
 
+use \SK\VideoModule\Statistic\Report\RotationStatisticReport;
+use SK\VideoModule\Statistic\Report\VideoStatisticReport;
 use yii\helpers\Html;
+
+/**
+ * @var RotationStatisticReport $report
+ * @var VideoStatisticReport $videoReport
+ */
 
 $this->title = 'Статистика';
 $this->params['subtitle'] = 'Видео';
 
 $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->params['subtitle'];
+$formatter = Yii::$app->formatter;
+
+$currentTimestamp = \time();
+$lastPublishedTimestamp = $videoReport->getLastPublicationDate()->getTimestamp();
+$maxInterval = 86400 * 2;
+
+$isLastPublicationDateOverdue = false;
+
+if (($currentTimestamp - $maxInterval) > $lastPublishedTimestamp) {
+  $isLastPublicationDateOverdue = true;
+}
 
 ?>
 
@@ -64,22 +82,24 @@ $this->params['breadcrumbs'][] = $this->params['subtitle'];
             <div class="box-body pad">
                 <div class="row">
                     <div class="col-md-4">
-                    	Всего роликов: <b><?= $videoReport->getTotalVideos() ?></b><br><br>
-                        <h5>По статусам</h5>
+                    	Всего постов: <b><?= $videoReport->getTotalVideos() ?></b><br>
+                        Дата крайней публикации: <span<?= $isLastPublicationDateOverdue ? ' class="not-set"' : ''?> style="white-space: nowrap">
+                          <?= $videoReport->getLastPublicationDate() ? $formatter->asDatetime($videoReport->getLastPublicationDate()) : '(none)' ?>
+                        </span>
+                        <h4>По статусам</h4>
                         Активные: <b><?= $videoReport->getActiveVideos() ?></b><br>
                         Выключеные: <b><?= $videoReport->getDisabledVideos() ?></b><br>
                         На модерации: <b><?= $videoReport->getModerateVideos() ?></b><br>
                         На удаление: <b><?= $videoReport->getDeletedVideos() ?></b><br>
-                        В автопостинге: <b><?= $videoReport->getAutopostingVideos() ?></b><br>
         	        </div>
                     <div class="col-md-4">
-                        Всего категорий: <b><?= $videoReport->getTotalCategories() ?></b><br><br>
-                        <h5>По статусам</h5>
+                        Всего категорий: <b><?= $videoReport->getTotalCategories() ?></b><br>
+                        <h4>По статусам</h4>
                         Активные: <b><?= $videoReport->getEnabledCategories() ?></b><br>
                         Выключеные: <b><?= $videoReport->getDisabledCategories() ?></b><br>
         	        </div>
                     <div class="col-md-4">
-                        Всего изображений: <b><?= $videoReport->getTotalImages() ?></b><br><br>
+                        Всего изображений: <b><?= $videoReport->getTotalImages() ?></b><br>
         	        </div>
         	    </div>
         	</div>
@@ -111,20 +131,14 @@ $this->params['breadcrumbs'][] = $this->params['subtitle'];
                 <div class="progress-group">
                     <span class="progress-text"><?= $categoryReport->getTitle() ?></span>
                     <span class="progress-number">
-                        <b><?= $categoryReport->getTestedThumbs() ?></b>
-                        (<span class="text-blue"><?= $categoryReport->getAutopostingThumbs() ?></span>) \
-                        <?= $categoryReport->getUntilNowTotalThumbs() ?>
-                        (<?= $categoryReport->getUntilNowTestedPercent() ?>%)
-                        | Всего активных: <?= $categoryReport->getTotalThumbs() ?>
-                        | В ротации: <?= $categoryReport->getUntilNowTotalThumbs() - $categoryReport->getTestedThumbs() ?>
+                        <?= $categoryReport->getTestedThumbs() ?> (отротировано)
+                        /
+                        <b><?= $categoryReport->getTotalThumbs() ?></b> (всего)
+                        | В ротации: <?= $categoryReport->getTotalThumbs() - $categoryReport->getTestedThumbs() ?>
                     </span>
 
                     <div class="progress">
-                        <div class="progress-bar progress-bar-yellow" style="width: <?= $categoryReport->getUntilNowPercent() ?>%">
-                            <div class="progress-bar progress-bar-green" style="width: <?= $categoryReport->getUntilNowTestedPercent() ?>%">
-                            </div>
-                        </div>
-                        <div class="progress-bar progress-bar-blue" style="width: <?= $categoryReport->getAutopostingPercent() ?>%"></div>
+                        <div class="progress-bar progress-bar-blue" style="width: <?= $categoryReport->getTotalTestPercent() ?>%"></div>
                     </div>
                 </div>
             <?php endforeach ?>

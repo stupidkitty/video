@@ -1,7 +1,10 @@
 <?php
+
 namespace SK\VideoModule\Statistic;
 
-use yii\db\Expression;
+use DateTime;
+use DateTimeInterface;
+use SK\VideoModule\Model\VideoInterface;
 use SK\VideoModule\Model\Video;
 use SK\VideoModule\Model\Category;
 use SK\VideoModule\Model\Image;
@@ -10,7 +13,7 @@ use SK\VideoModule\Statistic\Report\VideoStatisticReport;
 class VideoStatisticBuilder
 {
 
-    public function build()
+    public function build(): VideoStatisticReport
     {
         $report = new VideoStatisticReport();
 
@@ -19,7 +22,7 @@ class VideoStatisticBuilder
         $report->setActiveVideos($this->countActiveVideos());
         $report->setModerateVideos($this->countModerateVideos());
         $report->setDeletedVideos($this->countDeletedVideos());
-        $report->setAutopostingVideos($this->countAutopostingVideos());
+        $report->setLastPublicationDate($this->getLastPublicationDate());
 
         $report->setTotalCategories($this->countTotalCategories());
         $report->setEnabledCategories($this->countEnabledCategories());
@@ -32,113 +35,83 @@ class VideoStatisticBuilder
     /**
      * Подсчитывает все видео в базе.
      *
-     * @return integer
+     * @return int
      */
-    protected function countTotalVideos()
+    private function countTotalVideos(): int
     {
-        $num = Video::find()
+        return Video::find()
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает видео со статусом "disabled".
      *
-     * @return integer
+     * @return int
      */
-    protected function countDisabledVideos()
+    private function countDisabledVideos(): int
     {
-        $num = Video::find()
-            ->where(['status' => Video::STATUS_DISABLED])
+        return Video::find()
+            ->where(['status' => VideoInterface::STATUS_DISABLED])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает видео со статусом "active".
      *
-     * @return integer
+     * @return int
      */
-    protected function countActiveVideos()
+    private function countActiveVideos(): int
     {
-        $num = Video::find()
-            ->where(['status' => Video::STATUS_ACTIVE])
+        return Video::find()
+            ->where(['status' => VideoInterface::STATUS_ACTIVE])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает видео со статусом "moderation".
      *
-     * @return integer
+     * @return int
      */
-    protected function countModerateVideos()
+    private function countModerateVideos(): int
     {
-        $num = Video::find()
-            ->where(['status' => Video::STATUS_MODERATE])
+        return Video::find()
+            ->where(['status' => VideoInterface::STATUS_MODERATE])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает видео со статусом "delete".
      *
-     * @return integer
+     * @return int
      */
-    protected function countDeletedVideos()
+    private function countDeletedVideos(): int
     {
-        $num = Video::find()
-            ->where(['status' => Video::STATUS_DELETED])
+        return Video::find()
+            ->where(['status' => VideoInterface::STATUS_DELETED])
             ->count();
-
-        return $num;
-    }
-
-    /**
-     * Подсчитывает сколько видео находится в автопостинге.
-     *
-     * @return integer
-     */
-    protected function countAutopostingVideos()
-    {
-        $num = Video::find()
-            ->alias('v')
-            //->where(['>=', 'v.published_at', new Expression('NOW()')])
-            ->onlyActive()
-            ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает все категории.
      *
-     * @return integer
+     * @return int
      */
-    protected function countTotalCategories()
+    private function countTotalCategories(): int
     {
-        $num = Category::find()
+        return Category::find()
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает активные категории.
      *
-     * @return integer
+     * @return int
      */
-    protected function countEnabledCategories()
+    private function countEnabledCategories(): int
     {
-        $num = Category::find()
+        return Category::find()
             ->where(['enabled' => 1])
             ->count();
-
-        return $num;
     }
 
     /**
@@ -146,25 +119,33 @@ class VideoStatisticBuilder
      *
      * @return integer
      */
-    protected function countDisabledCategories()
+    private function countDisabledCategories(): int
     {
-        $num = Category::find()
+        return Category::find()
             ->where(['enabled' => 0])
             ->count();
-
-        return $num;
     }
 
     /**
      * Подсчитывает все изображения.
      *
-     * @return integer
+     * @return int
      */
-    protected function countTotalImages()
+    private function countTotalImages(): int
     {
-        $num = Image::find()
+        return Image::find()
             ->count();
+    }
 
-        return $num;
+    /**
+     * @throws \Exception
+     */
+    private function getLastPublicationDate(): ?DateTimeInterface
+    {
+        $date = Video::find()
+            ->where(['status' => VideoInterface::STATUS_ACTIVE])
+            ->max('published_at');
+
+        return $date ? new DateTime($date) : null;
     }
 }

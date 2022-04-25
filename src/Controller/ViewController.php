@@ -2,6 +2,7 @@
 
 namespace SK\VideoModule\Controller;
 
+use JetBrains\PhpStorm\ArrayShape;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Cache\PageCache;
@@ -25,6 +26,7 @@ class ViewController extends Controller implements ViewContextInterface
     /**
      * @inheritdoc
      */
+    #[ArrayShape(['queryParams' => "array", 'pageCache' => "array"])]
     public function behaviors(): array
     {
         return [
@@ -118,7 +120,7 @@ class ViewController extends Controller implements ViewContextInterface
      * @return array
      * @throws NotFoundHttpException
      */
-    protected function findByIdentify($identify): array
+    protected function findByIdentify(int|string $identify): array
     {
         $video = Video::find()
             ->alias('v')

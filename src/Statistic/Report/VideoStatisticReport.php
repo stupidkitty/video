@@ -1,118 +1,137 @@
 <?php
+
 namespace SK\VideoModule\Statistic\Report;
 
 class VideoStatisticReport
 {
-    private $totalVideos = 0;
-    private $disabledVideos = 0;
-    private $activeVideos = 0;
-    private $moderateVideos = 0;
-    private $deletedVideos = 0;
-    private $autopostingVideos = 0;
+    private int $totalVideos = 0;
+    private int $disabledVideos = 0;
+    private int $activeVideos = 0;
+    private int $moderateVideos = 0;
+    private int $deletedVideos = 0;
+    private int $totalCategories = 0;
+    private int $enabledCategories = 0;
+    private int $disabledCategories = 0;
+    private int $totalImages = 0;
+    private ?\DateTimeInterface $lastPublicationDate;
 
-    private $totalCategories = 0;
-    private $enabledCategories = 0;
-    private $disabledCategories = 0;
-
-    private $totalImages = 0;
-
-    public function getTotalVideos()
+    public function getTotalVideos(): int
     {
         return $this->totalVideos;
     }
 
-    public function setTotalVideos($totalVideos)
+    public function setTotalVideos(int $totalVideos): static
     {
-        $this->totalVideos = (int) $totalVideos;
+        $this->totalVideos = $totalVideos;
+
+        return $this;
     }
 
-    public function getDisabledVideos()
+    public function getDisabledVideos(): int
     {
         return $this->disabledVideos;
     }
 
-    public function setDisabledVideos($disabledVideos)
+    public function setDisabledVideos(int $disabledVideos): static
     {
-        $this->disabledVideos = (int) $disabledVideos;
+        $this->disabledVideos = $disabledVideos;
+
+        return $this;
     }
 
-    public function getActiveVideos()
+    public function getActiveVideos(): int
     {
         return $this->activeVideos;
     }
 
-    public function setActiveVideos($activeVideos)
+    public function setActiveVideos(int $activeVideos): static
     {
-        $this->activeVideos = (int) $activeVideos;
+        $this->activeVideos = $activeVideos;
+
+        return $this;
     }
 
-    public function getModerateVideos()
+    public function getModerateVideos(): int
     {
         return $this->moderateVideos;
     }
 
-    public function setModerateVideos($moderateVideos)
+    public function setModerateVideos(int $moderateVideos): static
     {
-        $this->moderateVideos = (int) $moderateVideos;
+        $this->moderateVideos = $moderateVideos;
+
+        return $this;
     }
 
-    public function getDeletedVideos()
+    public function getDeletedVideos(): int
     {
         return $this->deletedVideos;
     }
 
-    public function setDeletedVideos($deletedVideos)
+    public function setDeletedVideos(int $deletedVideos): static
     {
-        $this->deletedVideos = (int) $deletedVideos;
+        $this->deletedVideos = $deletedVideos;
+
+        return $this;
     }
 
-    public function getAutopostingVideos()
-    {
-        return $this->autopostingVideos;
-    }
-
-    public function setAutopostingVideos($autopostingVideos)
-    {
-        $this->autopostingVideos = (int) $autopostingVideos;
-    }
-
-    public function getTotalCategories()
+    public function getTotalCategories(): int
     {
         return $this->totalCategories;
     }
 
-    public function setTotalCategories($totalCategories)
+    public function setTotalCategories(int $totalCategories): static
     {
-        $this->totalCategories = (int) $totalCategories;
+        $this->totalCategories = $totalCategories;
+
+        return $this;
     }
 
-    public function getEnabledCategories()
+    public function getEnabledCategories(): int
     {
         return $this->enabledCategories;
     }
 
-    public function setEnabledCategories($enabledCategories)
+    public function setEnabledCategories(int $enabledCategories): static
     {
-        $this->enabledCategories = (int) $enabledCategories;
+        $this->enabledCategories = $enabledCategories;
+
+        return $this;
     }
 
-    public function getDisabledCategories()
+    public function getDisabledCategories(): int
     {
         return $this->disabledCategories;
     }
 
-    public function setDisabledCategories($disabledCategories)
+    public function setDisabledCategories(int $disabledCategories): static
     {
-        $this->disabledCategories = (int) $disabledCategories;
+        $this->disabledCategories = $disabledCategories;
+
+        return $this;
     }
 
-    public function getTotalImages()
+    public function getTotalImages(): int
     {
         return $this->totalImages;
     }
 
-    public function setTotalImages($totalImages)
+    public function setTotalImages(int $totalImages): static
     {
-        $this->totalImages = (int) $totalImages;
+        $this->totalImages = $totalImages;
+
+        return $this;
+    }
+
+    public function getLastPublicationDate(): ?\DateTimeInterface
+    {
+        return $this->lastPublicationDate;
+    }
+
+    public function setLastPublicationDate(?\DateTimeInterface $lastPublicationDate): static
+    {
+        $this->lastPublicationDate = $lastPublicationDate;
+
+        return $this;
     }
 }

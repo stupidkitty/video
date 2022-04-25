@@ -1,119 +1,95 @@
 <?php
+
 namespace SK\VideoModule\Statistic\Report;
 
 class CategoryRotationReport
 {
-    private $id;
-    private $title = '';
-    private $slug = '';
-    private $totalThumbs = 0;
-    private $testThumbs = 0;
-    private $testedThumbs = 0;
-    private $untilNowTotalThumbs = 0;
-    private $autopostingThumbs = 0;
+    private int $id;
+    private string $title = '';
+    private string $slug = '';
+    private int $totalThumbs = 0;
+    private int $testThumbs = 0;
+    private int $testedThumbs = 0;
 
-    public function getTotalTestPercent()
+    public function getTotalTestPercent(): float
     {
         return $this->computePercent($this->testedThumbs, $this->totalThumbs);
     }
 
-    public function getUntilNowPercent()
-    {
-        return $this->computePercent($this->untilNowTotalThumbs, $this->totalThumbs);
-    }
-
-    public function getUntilNowTestedPercent()
-    {
-        return $this->computePercent($this->testedThumbs, $this->untilNowTotalThumbs);
-    }
-
-    public function getAutopostingPercent()
-    {
-        return $this->computePercent($this->autopostingThumbs, $this->totalThumbs);
-    }
-
-    private function computePercent($a, $b)
+    private function computePercent($a, $b): float
     {
         return ($b > 0) ? round(($a / $b * 100), 2) : 0;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId($id)
+    public function setId(int $id): static
     {
-        $this->id = (int) $id;
+        $this->id = $id;
+
+        return $this;
     }
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
 
-    public function setTitle($title)
+    public function setTitle(string $title): static
     {
-        $this->title = (string) $title;
+        $this->title = $title;
+
+        return $this;
     }
 
-    public function getSlug()
+    public function getSlug(): string
     {
         return $this->slug;
     }
 
-    public function setSlug($slug)
+    public function setSlug($slug): static
     {
         $this->slug = (string) $slug;
+
+        return $this;
     }
 
-    public function getTotalThumbs()
+    public function getTotalThumbs(): int
     {
         return $this->totalThumbs;
     }
 
-    public function setTotalThumbs($totalThumbs)
+    public function setTotalThumbs(int $totalThumbs): static
     {
-        $this->totalThumbs = (int) $totalThumbs;
+        $this->totalThumbs = $totalThumbs;
+
+        return $this;
     }
 
-    public function getTestedThumbs()
+    public function getTestedThumbs(): int
     {
         return $this->testedThumbs;
     }
 
-    public function setTestedThumbs($testedThumbs)
+    public function setTestedThumbs(int $testedThumbs): static
     {
-        $this->testedThumbs = (int) $testedThumbs;
+        $this->testedThumbs = $testedThumbs;
+
+        return $this;
     }
 
-    public function getTestThumbs()
+    public function getTestThumbs(): int
     {
         return $this->testThumbs;
     }
 
-    public function setTestThumbs($testThumbs)
+    public function setTestThumbs(int $testThumbs): static
     {
-        $this->testThumbs = (int) $testThumbs;
-    }
+        $this->testThumbs = $testThumbs;
 
-    public function getUntilNowTotalThumbs()
-    {
-        return $this->untilNowTotalThumbs;
-    }
-
-    public function setUntilNowTotalThumbs($untilNowTotalThumbs)
-    {
-        $this->untilNowTotalThumbs = (int) $untilNowTotalThumbs;
-    }
-
-    public function getAutopostingThumbs()
-    {
-        return $this->autopostingThumbs;
-    }
-
-    public function setAutopostingThumbs($autopostingThumbs)
-    {
-        $this->autopostingThumbs = (int) $autopostingThumbs;
+        return $this;
     }
 }
