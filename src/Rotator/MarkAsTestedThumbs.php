@@ -9,10 +9,11 @@ use yii\db\Exception;
 class MarkAsTestedThumbs
 {
     private SettingsInterface $settings;
+
     /**
-     * @var integer Default test item period (test shows).
+     * @var int Default test item period (test shows).
      */
-    const TEST_ITEM_PERIOD = 200;
+    public const TEST_ITEM_PERIOD = 200;
 
     public function __construct(SettingsInterface $settings)
     {
@@ -32,9 +33,11 @@ class MarkAsTestedThumbs
         // Завершим тестовый период у тумб, если набралась необходимая статистика.
         $db = VideosCategories::getDb();
 
-        $sql = "UPDATE `videos_categories_map`
-                SET `is_tested` = 1, `tested_at` = NOW()
-                WHERE `is_tested` = 0 AND `total_shows` >= :test_item_period";
+        $sql = '
+            UPDATE `videos_categories_map`
+            SET `is_tested` = 1, `tested_at` = NOW()
+            WHERE `is_tested` = 0 AND `total_shows` >= :test_item_period
+        ';
 
         $db
             ->createCommand($sql)
