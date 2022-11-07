@@ -12,7 +12,6 @@ use yii\db\Expression;
 
 class RotationStatisticBuilder
 {
-
     public function build(): RotationStatisticReport
     {
         $report = new RotationStatisticReport();
