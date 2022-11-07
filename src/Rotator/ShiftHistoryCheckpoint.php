@@ -12,11 +12,11 @@ class ShiftHistoryCheckpoint
     /**
      * @var int default recalculate ctr period (shows);
      */
-    const RECALCULATE_CTR_PERIOD = 2000;
+    public const RECALCULATE_CTR_PERIOD = 2000;
     /**
      * @var int Number of points
      */
-    const POINTS_NUM = 10;
+    public const POINTS_NUM = 10;
 
     /**
      * ShiftHistoryCheckpoint constructor
@@ -45,11 +45,11 @@ class ShiftHistoryCheckpoint
             ->where(['>=', 'current_shows', $showsCheckpointValue])
             ->asArray();
 
-        foreach ($statsQuery->batch() as $thumbStats) {
-            $db = VideosCategories::getDb();
+        $db = VideosCategories::getDb();
 
-            $transaction = $db->beginTransaction();
-            try {
+        $transaction = $db->beginTransaction();
+        try {
+            foreach ($statsQuery->batch() as $thumbStats) {
                 foreach ($thumbStats as $thumbStat) {
                     $currentIndex = (int) $thumbStat['current_index'];
                     $checkPointNumber = $currentIndex % static::POINTS_NUM;
@@ -68,11 +68,11 @@ class ShiftHistoryCheckpoint
                         ]
                     );
                 }
-
-                $transaction->commit();
-            } catch (\Throwable $e) {
-                $transaction->rollBack();
             }
+
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
         }
     }
 }
