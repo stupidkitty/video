@@ -1,4 +1,5 @@
 <?php
+
 namespace SK\VideoModule\Provider;
 
 use Yii;
@@ -14,13 +15,13 @@ use RS\Component\Core\Settings\SettingsInterface;
  */
 class RelatedProvider
 {
-    private $settings;
+    private SettingsInterface $settings;
 
-    const RELATED_NUMBER = 12;
+    public const RELATED_NUMBER = 12;
 
-    public function __construct()
+    public function __construct(SettingsInterface $settings)
     {
-        $this->settings = Yii::$container->get(SettingsInterface::class);
+        $this->settings = $settings;
     }
 
     /**
