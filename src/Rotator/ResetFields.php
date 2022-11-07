@@ -13,19 +13,19 @@ class ResetFields
     private SettingsInterface $settings;
 
     /**
-     * @var integer Default test item period (test shows).
+     * @var int Default test item period (test shows).
      */
-    const TEST_ITEM_PERIOD = 200;
+    public const TEST_ITEM_PERIOD = 200;
 
     /**
      * @var int default thumbs per page;
      */
-    const ITEMS_PER_PAGE = 24;
+    public const ITEMS_PER_PAGE = 24;
 
     /**
      * @var int default test thumbs percent
      */
-    const TEST_PERCENT = 15;
+    public const TEST_PERCENT = 15;
 
     public function __construct(SettingsInterface $settings)
     {
@@ -48,12 +48,78 @@ class ResetFields
         $testPerPage = (int) ceil(($thumbsPerPage / 100) * $testThumbsPercent);
         $untouchablesThumbsNum = $thumbsPerPage - $testPerPage;
 
-        $sql = "SELECT `category_id`, COUNT(*) - SUM(`is_tested`) as `tested_diff`
+       /* $sql = '
+            SELECT  `category_id`, COUNT(*) as `total_num`
+            FROM `videos_categories_map` as `vcm`
+            WHERE `vcm`.`video_id` NOT IN (
+                SELECT `video_id`
+                FROM `videos`
+                WHERE `status` != :status
+            )
+            GROUP BY `category_id`
+        ';
+
+        $totalCounters = $db->createCommand($sql)
+            ->bindValue(':status', VideoInterface::STATUS_ACTIVE)
+            ->queryAll();
+
+        $sql = '
+            SELECT  `category_id`, COUNT(*) as `tested_num`
+            FROM `videos_categories_map` as `vcm`
+            WHERE `vcm`.`is_tested`=1 AND `vcm`.`video_id` NOT IN (
+                SELECT `video_id`
+                FROM `videos`
+                WHERE `status` != :status
+            )
+            GROUP BY `category_id`
+        ';
+
+        $rawTestedCounters = $db->createCommand($sql)
+            ->bindValue(':status', VideoInterface::STATUS_ACTIVE)
+            ->queryAll();
+        $testedCounters = [];
+        foreach ($rawTestedCounters as $row) {
+            $categoryId = (int) $row['category_id'];
+            $testedCounters[$categoryId] = (int) $row['tested_num'];
+        }
+
+        $categories = \array_reduce($totalCounters, function ($acc, $row) use ($testedCounters, $testPerPage) {
+            $categoryId = (int) $row['category_id'];
+            $totalItems = (int) $row['total_num'];
+            $testedItems = $testedCounters[$categoryId] ?? 0;
+            $diff = $totalItems - $testedItems;
+
+            if ($diff < $testPerPage) {
+                $acc[] = ['category_id' => $categoryId, 'tested_diff' => $diff];
+            }
+
+            return $acc;
+        }, []);*/
+
+        $sql = '
+            SELECT `category_id`, MAX(`total`) as `total_num`, MAX(`tested`) as `tested_num`
+            FROM (
+                SELECT  `category_id`, COUNT(*) as `total`, 0 as `tested`
                 FROM `videos_categories_map` as `vcm`
-                LEFT JOIN `videos` as `v` ON (`vcm`.`video_id`=`v`.`video_id`)
-                WHERE `v`.`status` = :status
+                WHERE `vcm`.`video_id` NOT IN (
+                    SELECT `video_id`
+                    FROM `videos`
+                    WHERE `status` != :status
+                )
                 GROUP BY `category_id`
-                HAVING `tested_diff` < :testSpotsNum"; // = 0
+                UNION
+                SELECT  `category_id`, 0 as `total`, COUNT(*) as `tested`
+                FROM `videos_categories_map` as `vcm`
+                WHERE `is_tested` = 1 AND `vcm`.`video_id` NOT IN (
+                    SELECT `video_id`
+                    FROM `videos`
+                    WHERE `status` != :status
+                )
+                GROUP BY `category_id`
+            ) as `x`
+            GROUP BY `category_id`
+            HAVING (`total_num` - `tested_num`) < :testSpotsNum
+        ';
 
         $categories = $db->createCommand($sql)
             ->bindValue(':testSpotsNum', $testPerPage)
