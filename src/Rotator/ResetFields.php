@@ -126,41 +126,52 @@ class ResetFields
             ->bindValue(':status', VideoInterface::STATUS_ACTIVE)
             ->queryAll();
 
-        foreach ($categories as $category) {
-            $resetLimit = $testPerPage;//($testPerPage - (int) $category['tested_diff']) * 2;
+        if (\count($categories) === 0) {
+            return;
+        }
 
-            // найдем топовые тумбы в этой категории.
-            $untouchablesThumbs = VideosCategories::find()
-                ->alias('rs')
-                ->select(['rs.video_id'])
-                ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
-                ->where(['rs.category_id' => $category['category_id']])
-                ->andWhere(['rs.is_tested' => 1])
-                ->andWhere(['>', 'rs.ctr', 0])
-                //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
-                ->andWhere(['v.status' => VideoInterface::STATUS_ACTIVE])
-                ->orderBy(['rs.ctr' => SORT_DESC])
-                ->limit($untouchablesThumbsNum)
-                ->column();
+        $transaction = $db->beginTransaction();
+        try {
+            foreach ($categories as $category) {
+                $resetLimit = $testPerPage;//($testPerPage - (int) $category['tested_diff']) * 2;
 
-            // найдем старые тумбы в категории. при этом исключим топовые (их ротировать нельзя).
-            $resetThumbs = VideosCategories::find()
-                ->alias('rs')
-                ->select(['rs.video_id'])
-                ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
-                ->where(['rs.category_id' => $category['category_id']])
-                ->andWhere(['rs.is_tested' => 1])
-                ->andFilterWhere(['NOT IN', 'rs.video_id', $untouchablesThumbs])
-                //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
-                ->andWhere(['v.status' => VideoInterface::STATUS_ACTIVE])
-                ->orderBy(['rs.tested_at' => SORT_DESC])
-                ->limit($resetLimit)
-                ->column();
+                // найдем топовые тумбы в этой категории.
+                $untouchablesThumbs = VideosCategories::find()
+                    ->alias('rs')
+                    ->select(['rs.video_id'])
+                    ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
+                    ->where(['rs.category_id' => $category['category_id']])
+                    ->andWhere(['rs.is_tested' => 1])
+                    ->andWhere(['>', 'rs.ctr', 0])
+                    //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
+                    ->andWhere(['v.status' => VideoInterface::STATUS_ACTIVE])
+                    ->orderBy(['rs.ctr' => SORT_DESC])
+                    ->limit($untouchablesThumbsNum)
+                    ->column();
 
-            VideosCategories::updateAll($this->getResetFields(), [
-                'video_id' => $resetThumbs,
-                'category_id' => $category['category_id'],
-            ]);
+                // найдем старые тумбы в категории. при этом исключим топовые (их ротировать нельзя).
+                $resetThumbs = VideosCategories::find()
+                    ->alias('rs')
+                    ->select(['rs.video_id'])
+                    ->leftJoin(['v' => Video::tableName()], 'rs.video_id = v.video_id')
+                    ->where(['rs.category_id' => $category['category_id']])
+                    ->andWhere(['rs.is_tested' => 1])
+                    ->andFilterWhere(['NOT IN', 'rs.video_id', $untouchablesThumbs])
+                    //->andWhere(['<=', 'v.published_at', new Expression('NOW()')])
+                    ->andWhere(['v.status' => VideoInterface::STATUS_ACTIVE])
+                    ->orderBy(['rs.tested_at' => SORT_DESC])
+                    ->limit($resetLimit)
+                    ->column();
+
+                VideosCategories::updateAll($this->getResetFields(), [
+                    'video_id' => $resetThumbs,
+                    'category_id' => $category['category_id'],
+                ]);
+            }
+
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
         }
     }
 
