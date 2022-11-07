@@ -23,10 +23,11 @@ class RotatorController extends Controller
     /**
      * Помечает тумбы как тестированные в статистике.
      *
+     * @param MarkAsTestedThumbs $handler
      * @return void
      * @throws Exception
      */
-    public function actionMarkTested(MarkAsTestedThumbs $handler)
+    public function actionMarkTested(MarkAsTestedThumbs $handler): void
     {
         $handler->handle();
     }
@@ -34,9 +35,10 @@ class RotatorController extends Controller
     /**
      * Смещает указатель истори просмотров на следующий.
      *
+     * @param ShiftHistoryCheckpoint $handler
      * @return void
      */
-    public function actionShiftViews(ShiftHistoryCheckpoint $handler)
+    public function actionShiftViews(ShiftHistoryCheckpoint $handler): void
     {
         $handler->handle();
     }
@@ -44,10 +46,11 @@ class RotatorController extends Controller
     /**
      * Сброс N видео для продолжения ротации если категория отротирована.
      *
+     * @param ResetFields $handler
      * @return void
      * @throws Exception
      */
-    public function actionResetTested(ResetFields $handler)
+    public function actionResetTested(ResetFields $handler): void
     {
         $handler->resetOldTestedVideos();
     }
@@ -55,9 +58,10 @@ class RotatorController extends Controller
     /**
      * Сброс отротированных видео по показам.
      *
+     * @param ResetFields $handler
      * @return void
      */
-    public function actionResetByShows(ResetFields $handler)
+    public function actionResetByShows(ResetFields $handler): void
     {
         $handler->cyclicResetByShows();
     }
