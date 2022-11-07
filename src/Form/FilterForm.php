@@ -10,7 +10,7 @@ use yii\helpers\StringHelper;
 class FilterForm extends Model
 {
     public $orientation;
-    public $t = 'all-time';
+    public string $t = 'all-time';
     public $durationMin;
     public $durationMax;
     public $isHd;
@@ -25,7 +25,7 @@ class FilterForm extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['orientation', 'source'], 'string'],
@@ -59,7 +59,7 @@ class FilterForm extends Model
     /**
      * Check form is valid
      *
-     * @return boolean
+     * @return bool
      */
     public function isValid(): bool
     {

@@ -104,7 +104,7 @@ $this->params['breadcrumbs'][] = $video->title;
                         [
                             'attribute' => 'status',
                             'value' => function ($video) use ($statusLabel) {
-                                return isset($statusLabel[$video->status]) ? $statusLabel[$video->status] : '<span class="not-set">(unknown)</span>';
+                                return $statusLabel[$video->status] ?? '<span class="not-set">(unknown)</span>';
                             },
                             'format' => 'html',
                         ],

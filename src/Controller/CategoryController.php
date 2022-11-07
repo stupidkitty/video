@@ -15,7 +15,6 @@ use SK\VideoModule\Query\VideoQuery;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\ViewContextInterface;
-use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\data\Sort;
 use yii\di\NotInstantiableException;
@@ -59,7 +58,7 @@ class CategoryController extends Controller implements ViewContextInterface
                 'variations' => [
                     Yii::$app->language,
                     $this->action->id,
-                    \implode(':', \array_values($this->get(Request::class)->get())),
+                    \implode(':', \array_values($this->request->get())),
                     $this->isMobile(),
                 ],
             ],
@@ -88,7 +87,7 @@ class CategoryController extends Controller implements ViewContextInterface
     /**
      * Detect user is mobile device
      *
-     * @return boolean
+     * @return bool
      * @throws InvalidConfigException
      * @throws NotInstantiableException
      */
@@ -214,7 +213,7 @@ class CategoryController extends Controller implements ViewContextInterface
      * @return array
      * @throws NotFoundHttpException
      */
-    public function findByIdentify($identify): array
+    public function findByIdentify(int|string $identify): array
     {
         $query = Category::find()
             ->asArray();
@@ -283,7 +282,7 @@ class CategoryController extends Controller implements ViewContextInterface
         $query = Video::find()
             ->asThumbs()
             ->innerJoin(['vcm' => VideosCategories::tableName()], 'v.video_id = vcm.video_id')
-            ->andwhere(['vcm.category_id' => $category['category_id']]);
+            ->andWhere(['vcm.category_id' => $category['category_id']]);
 
         if ('all-time' !== $filterForm->t) {
             $query->rangedUntilNow($filterForm->t);

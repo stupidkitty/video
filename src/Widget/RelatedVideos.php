@@ -2,10 +2,13 @@
 namespace SK\VideoModule\Widget;
 
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\base\Widget;
 
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Provider\RelatedProvider;
+use yii\db\Exception;
+use yii\di\Instance;
 
 class RelatedVideos extends Widget
 {
@@ -45,7 +48,7 @@ class RelatedVideos extends Widget
         }
     }
 
-    public function getViewPath()
+    public function getViewPath(): bool|string
     {
         return Yii::getAlias('@root/views/videos');
     }
@@ -53,9 +56,12 @@ class RelatedVideos extends Widget
     /**
      * Runs the widget
      *
-     * @return string|void
+     * @return mixed|string|void
+     * @throws Exception
+     * @throws InvalidConfigException
      */
-    public function run() {
+    public function run()
+    {
 
         if (!$this->enable) {
             return;
@@ -92,20 +98,22 @@ class RelatedVideos extends Widget
      * Получает "похожие" видео.
      *
      * @return array
+     * @throws InvalidConfigException
+     * @throws Exception
      */
-    private function getVideos()
+    private function getVideos(): array
     {
         if (null !== $this->videos) {
             return $this->videos;
         }
 
-        $relatedProvider = new RelatedProvider;
+        $relatedProvider = Instance::ensure(RelatedProvider::class);
         $this->videos = $relatedProvider->getModels($this->video_id);
 
         return $this->videos;
     }
 
-    private function buildCacheKey()
+    private function buildCacheKey(): string
     {
         $range = \implode(':', (array) $this->range);
 

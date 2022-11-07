@@ -14,6 +14,7 @@ $this->params['subtitle'] = 'Видео';
 
 $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->params['subtitle'];
+
 $formatter = Yii::$app->formatter;
 
 $currentTimestamp = \time();
@@ -150,32 +151,34 @@ if (($currentTimestamp - $maxInterval) > $lastPublishedTimestamp) {
 <?php
 
 $js = <<< 'Javascript'
-    var ctrRestarter = document.querySelector('#restart-zero-ctr');
+    var ctrRestarter = document.querySelector('#restart-zero-ctr')
 
     ctrRestarter.addEventListener('click', function (e) {
-        e.preventDefault();
-        console.log(this.getAttribute('href'));
+        e.preventDefault()
 
         fetch(this.getAttribute('href'), {
             method: 'POST',
             body: '',
             credentials: 'same-origin'
-        }).then(function(response) {
+        })
+        .then(function(response) {
             if(!response.ok) {
-                throw new Error('Network response was not ok.');
+                throw new Error('Network response was not ok.')
             }
 
-            return response.json();
-        }).then(function(response) {
+            return response.json()
+        })
+        .then(function(response) {
             if (response.error !== undefined) {
-                throw new Error(response.error.message);
+                throw new Error(response.error.message)
             }
 
-            toastr.success(response.message);
-        }).catch(function(error) {
-            toastr.error(error.message);
-        });
-    });
+            toastr.success(response.message)
+        })
+        .catch(function(error) {
+            toastr.error(error.message)
+        })
+    })
 
 Javascript;
 

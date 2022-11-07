@@ -2,20 +2,19 @@
 
 namespace SK\VideoModule\Admin\Controller;
 
-use JetBrains\PhpStorm\ArrayShape;
-use yii\db\Expression;
-use yii\web\Controller;
-use yii\filters\AccessControl;
 use SK\VideoModule\Model\Video;
-use SK\VideoModule\Statistic\VideoStatisticBuilder;
 use SK\VideoModule\Statistic\RotationStatisticBuilder;
+use SK\VideoModule\Statistic\VideoStatisticBuilder;
+use yii\db\Expression;
+use yii\filters\AccessControl;
+use yii\web\Controller;
 
 class StatsController extends Controller
 {
     /**
      * @inheritdoc
      */
-    #[ArrayShape(['access' => "array"])] public function behaviors(): array
+    public function behaviors(): array
     {
         return [
             'access' => [

@@ -2,10 +2,12 @@
 namespace SK\VideoModule\Rotator;
 
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\db\Exception;
 use yii\db\Expression;
 use SK\VideoModule\Model\VideosCategories;
 use RS\Component\Core\Settings\SettingsInterface;
+use yii\di\NotInstantiableException;
 
 class UserBehaviorHandler
 {
@@ -18,6 +20,10 @@ class UserBehaviorHandler
 
     private $isCrawler = false;
 
+    /**
+     * @throws NotInstantiableException
+     * @throws InvalidConfigException
+     */
     public function __construct(SettingsInterface $settings)
     {
         $this->settings = $settings;
@@ -33,7 +39,7 @@ class UserBehaviorHandler
      * @return void
      * @throws Exception
      */
-    public function handle(UserBehaviorStatistic $statistic)
+    public function handle(UserBehaviorStatistic $statistic): void
     {
         if ($this->isCrawler) {
             return;
@@ -61,7 +67,7 @@ class UserBehaviorHandler
      * @param array $data Массив упакованной информации по тумбам.
      * @return void
      */
-    protected function handleVideosClicked(array $data)
+    protected function handleVideosClicked(array $data): void
     {
         $inCategory = [];
         //$thumbs = [];
@@ -93,7 +99,7 @@ class UserBehaviorHandler
      * @param array $data
      * @return void
      */
-    protected function handleVideosViewed(array $data)
+    protected function handleVideosViewed(array $data): void
     {
         $inCategory = [];
         $thumbs = [];
@@ -125,8 +131,9 @@ class UserBehaviorHandler
      * @param array $data
      * @return void
      * @throws Exception
+     * @throws \Exception
      */
-    protected function handleCategoriesClicked(array $data)
+    protected function handleCategoriesClicked(array $data): void
     {
         $categoriesIds = [];
         foreach ($data as $item) {

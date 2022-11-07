@@ -12,7 +12,6 @@ use SK\VideoModule\Statistic\Report\VideoStatisticReport;
 
 class VideoStatisticBuilder
 {
-
     public function build(): VideoStatisticReport
     {
         $report = new VideoStatisticReport();

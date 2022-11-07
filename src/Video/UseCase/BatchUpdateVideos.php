@@ -24,8 +24,16 @@ class BatchUpdateVideos
     /**
      * Update videos from api request.
      *
+     * Returns:
+     * ```
+     * [
+     *   'id' => (int),
+     *   'errors' => (string[]),
+     * ]
+     * ```
+     *
      * @param UpdateVideosDto $dto
-     * @return array|void
+     * @return array
      */
     public function update(UpdateVideosDto $dto): array
     {

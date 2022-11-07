@@ -29,7 +29,7 @@ class UpdateVideo
 
             if (isset($updateVideoFields['slug'])) {
                 $video->generateSlug($updateVideoFields['slug']);
-            } elseif ((string) $video->slug === '') {
+            } elseif ($video->slug === '') {
                 $video->generateSlug($video->title);
             }
 

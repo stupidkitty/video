@@ -147,7 +147,7 @@ class VideoQuery extends ActiveQuery
      * @param string $time Ограничение по времени.
      * @return string
      */
-    protected function getTimeagoExpression($time): string
+    private function getTimeagoExpression(string $time): string
     {
         $times = [
             'daily' => '(NOW() - INTERVAL 1 DAY)',
@@ -156,10 +156,6 @@ class VideoQuery extends ActiveQuery
             'yearly' => '(NOW() - INTERVAL 1 YEAR)',
         ];
 
-        if (isset($times[$time])) {
-            return $times[$time];
-        }
-
-        return $times['yearly'];
+        return $times[$time] ?? $times['yearly'];
     }
 }
