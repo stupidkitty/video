@@ -2,7 +2,7 @@
 
 namespace SK\VideoModule\Category\Import\Csv;
 
-use SK\VideoModule\Category\Import\CategoryImportOptions;
+use SK\VideoModule\Category\Import\ImportOptions;
 use SplFileInfo;
 
 /**
@@ -15,35 +15,35 @@ class CsvConfig
     /**
      * @var string
      */
-    public $enclosure = '"';
+    public string $enclosure = '"';
 
     /**
      * @var string
      */
-    public $delimiter = ',';
+    public string $delimiter = ',';
 
     /**
      * @var string
      */
-    public $escape = '\\';
+    public string $escape = '\\';
 
     /**
      * @var SplFileInfo
      */
-    public $file;
+    public SplFileInfo $file;
 
     /**
      * @var string[]
      */
-    public $header = [];
+    public array $header = [];
 
     /**
      * @var bool
      */
-    public $skipHeader = false;
+    public bool $skipHeader = false;
 
     /**
-     * @var ?CategoryImportOptions
+     * @var ?ImportOptions
      */
-    public $options = null;
+    public ?ImportOptions $options = null;
 }

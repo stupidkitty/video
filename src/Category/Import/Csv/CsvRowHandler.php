@@ -18,7 +18,7 @@ class CsvRowHandler
     /**
      * @var EventDispatcherInterface
      */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
     /**
      * CsvRowHandler constructor
@@ -57,8 +57,8 @@ class CsvRowHandler
 
             $category = Category::find()
                 ->orFilterWhere(['category_id' => isset($row['category_id']) ? (int) $row['category_id'] : null])
-                ->orFilterWhere(['title' => isset($row['title']) ? $row['title'] : null])
-                ->orFilterWhere(['slug' => isset($row['slug']) ? $row['slug'] : null])
+                ->orFilterWhere(['title' => $row['title'] ?? null])
+                ->orFilterWhere(['slug' => $row['slug'] ?? null])
                 ->one();
 
             // Если нашлась категория, но обновлять не нужно - выходим.

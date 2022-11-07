@@ -16,7 +16,7 @@ class CsvHandler
     /**
      * @var CsvRowHandler
      */
-    private $rowHandler;
+    private CsvRowHandler $rowHandler;
 
     /**
      * CsvHandler constructor.
@@ -32,7 +32,7 @@ class CsvHandler
      * @throws InvalidArgument
      * @throws Exception
      */
-    public function handle(CsvConfig $config)
+    public function handle(CsvConfig $config): void
     {
         $reader = Reader::createFromFileObject($config->file->openFile());
         $reader->setDelimiter($config->delimiter);
