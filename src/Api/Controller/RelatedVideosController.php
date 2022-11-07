@@ -10,6 +10,7 @@ use SK\VideoModule\Model\VideosRelatedMap;
 use SK\VideoModule\Provider\RelatedProvider;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\di\Instance;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\NotFoundHttpException;
@@ -63,8 +64,7 @@ class RelatedVideosController extends Controller
         try {
             $video = $this->findById($id);
 
-            $relatedProvider = new RelatedProvider;
-
+            $relatedProvider = Instance::ensure(RelatedProvider::class);
             $videos = $relatedProvider->getModels($video->video_id);
 
             $relatedVideos = \array_map(function ($video) {
