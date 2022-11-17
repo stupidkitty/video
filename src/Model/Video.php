@@ -14,25 +14,25 @@ use yii\db\StaleObjectException;
 /**
  * This is the model class for table "videos".
  *
- * @property integer $video_id
- * @property integer $image_id
- * @property integer $user_id
+ * @property int $video_id
+ * @property int $image_id
+ * @property int $user_id
  * @property string $slug
  * @property string $title
  * @property string $description
  * @property string $search_field
- * @property integer $orientation
- * @property integer $duration
+ * @property int $orientation
+ * @property int $duration
  * @property string $video_preview
  * @property string $embed
- * @property integer $on_index
- * @property integer $likes
- * @property integer $dislikes
- * @property integer $comments_num
- * @property boolean $is_hd
- * @property integer $views
+ * @property int $on_index
+ * @property int $likes
+ * @property int $dislikes
+ * @property int $comments_num
+ * @property bool $is_hd
+ * @property int $views
  * @property string $template
- * @property integer $status
+ * @property int $status
  * @property float $max_ctr
  * @property string $published_at
  * @property string $created_at
@@ -147,7 +147,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function hasImages(): bool
     {
@@ -180,7 +180,7 @@ class Video extends ActiveRecord implements VideoInterface, SlugAwareInterface
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function hasScreenshots(): bool
     {
