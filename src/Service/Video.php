@@ -6,12 +6,12 @@ use SK\VideoModule\Model\Video as VideoModel;
 use SK\VideoModule\Model\VideosCategories;
 use SK\VideoModule\Model\VideosRelatedMap;
 use Yii;
+use yii\db\Exception;
 
 class Video
 {
     /**
      * Обновляет максимальный цтр среди категорий и тумб.
-     *
      * ```
      * UPDATE `videos` AS `v`
      * LEFT JOIN (
@@ -25,20 +25,21 @@ class Video
      * ```
      *
      * @return void
+     * @throws Exception
      */
-    public function updateMaxCtr()
+    public function updateMaxCtr(): void
     {
-        $sql = "
+        $sql = '
             UPDATE `videos` AS `v`
             LEFT JOIN (
                 SELECT `video_id`, MAX(`ctr`) as `max_ctr`
                 FROM `videos_categories_map`
-                WHERE `ctr` != 0
+                WHERE `category_id` > 0 AND `ctr` != 0
                 GROUP BY `video_id`
             ) as `vc` ON `v`.`video_id` = `vc`.`video_id`
             SET `v`.`max_ctr` = IFNULL(`vc`.`max_ctr`, 0)
             WHERE `v`.`max_ctr` != `vc`.`max_ctr`
-        ";
+        ';
 
         Yii::$app->db
             ->createCommand($sql)
