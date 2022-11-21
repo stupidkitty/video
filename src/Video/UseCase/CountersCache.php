@@ -3,6 +3,7 @@
 namespace SK\VideoModule\Video\UseCase;
 
 use Redis;
+use RedisException;
 
 class CountersCache
 {
@@ -23,6 +24,7 @@ class CountersCache
      *
      * @param int $id
      * @return void
+     * @throws RedisException
      */
     public function view(int $id): void
     {
@@ -37,7 +39,9 @@ class CountersCache
      *     ...
      * ]
      * ```
+     *
      * @return array
+     * @throws RedisException
      */
     public function getWithRemovalViewed(): array
     {
@@ -49,6 +53,7 @@ class CountersCache
      *
      * @param int $id
      * @return void
+     * @throws RedisException
      */
     public function like(int $id): void
     {
@@ -63,7 +68,9 @@ class CountersCache
      *     ...
      * ]
      * ```
+     *
      * @return array
+     * @throws RedisException
      */
     public function getWithRemovalLiked(): array
     {
@@ -75,6 +82,7 @@ class CountersCache
      *
      * @param int $id
      * @return void
+     * @throws RedisException
      */
     public function dislike(int $id): void
     {
@@ -89,7 +97,9 @@ class CountersCache
      *     ...
      * ]
      * ```
+     *
      * @return array
+     * @throws RedisException
      */
     public function getWithRemovalDisliked(): array
     {
@@ -101,11 +111,12 @@ class CountersCache
      *
      * @param string $counter
      * @return array
+     * @throws RedisException
      */
     private function getWithRemoval(string $counter): array
     {
         $counters = [];
-        while ($id = $this->redis->rpop("videos:counter:{$counter}")) {
+        while ($id = $this->redis->rPop("videos:counter:{$counter}")) {
             $id = (int) $id;
 
             if (isset($counters[$id])) {
@@ -124,11 +135,12 @@ class CountersCache
      * @param string $counter
      * @param int $id
      * @return void
+     * @throws RedisException
      */
-    private function rememberId(string $counter, int $id)
+    private function rememberId(string $counter, int $id): void
     {
         if ($id > 0) {
-            $this->redis->lpush("videos:counter:{$counter}", $id);
+            $this->redis->lPush("videos:counter:{$counter}", $id);
         }
     }
 }
