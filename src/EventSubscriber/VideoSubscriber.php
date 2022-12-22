@@ -3,6 +3,7 @@
 namespace SK\VideoModule\EventSubscriber;
 
 use Redis;
+use SK\VideoModule\Event\UserSearchEvent;
 use SK\VideoModule\Event\VideoShow;
 use SK\VideoModule\Video\UseCase\CountersCache;
 use Yii;
@@ -139,5 +140,28 @@ final class VideoSubscriber
         $cacher->view((int) $id);
 
         //Video::updateAllCounters(['views' => 1], ['or', ['video_id' => $event->id], ['slug' => $event->slug]]);
+    }
+
+    /**
+     * Событие возникает когда пользователь ищет контект.
+     * Логирует запрос юзера.
+     *
+     * @param Event $event
+     */
+    public static function onUserSearch(UserSearchEvent $event)
+    {
+        if ($event->query === '') {
+            return;
+        }
+
+        $sql = '
+            INSERT INTO `search_log`(`query`, `search_at`, `searches_num`)
+            VALUES (:query, NOW(), 1)
+            ON DUPLICATE KEY UPDATE `searches_num`=`searches_num` + 1
+        ';
+
+        Yii::$app->db->createCommand($sql)
+            ->bindValue(':query', $event->query)
+            ->execute();
     }
 }

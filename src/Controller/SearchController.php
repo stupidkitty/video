@@ -5,6 +5,7 @@ namespace SK\VideoModule\Controller;
 use RS\Component\Core\Filter\QueryParamsFilter;
 use RS\Component\Core\Settings\SettingsInterface;
 use SK\VideoModule\Cache\PageCache;
+use SK\VideoModule\Event\UserSearchEvent;
 use SK\VideoModule\Form\SearchForm;
 use SK\VideoModule\Model\Video;
 use Yii;
@@ -35,7 +36,7 @@ class SearchController extends Controller implements ViewContextInterface
             ],
             'pageCache' => [
                 'class' => PageCache::class,
-                'enabled' => (bool) $this->get(SettingsInterface::class)->get('enable_page_cache', false),
+                'enabled' => (bool) Yii::$container->get(SettingsInterface::class)->get('enable_page_cache', false),
                 //'only' => ['index'],
                 'duration' => 3600,
                 /*'dependency' => [
@@ -44,11 +45,28 @@ class SearchController extends Controller implements ViewContextInterface
                 ],*/
                 'variations' => [
                     Yii::$app->language,
-                    \implode(':', \array_values($this->get(Request::class)->get())),
+                    \implode(':', \array_values(Yii::$container->get(Request::class)->get())),
                     $this->isMobile(),
                 ],
             ],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        $request = Yii::$container->get(Request::class);
+        $response = Yii::$container->get(Response::class);
+
+        $response->on($response::EVENT_AFTER_SEND, function () use ($request) {
+            Yii::$app->trigger(UserSearchEvent::NAME, new UserSearchEvent([
+                'query' => $request->get('q', ''),
+            ]));
+        });
+
+        parent::init();
     }
 
     /**
@@ -146,21 +164,8 @@ class SearchController extends Controller implements ViewContextInterface
      */
     protected function isMobile(): bool
     {
-        $deviceDetect = $this->get('device.detect');
+        $deviceDetect = Yii::$container->get('device.detect');
 
         return $deviceDetect->isMobile();
-    }
-
-    /**
-     * Get instance by tag name form DI container
-     *
-     * @param string $name
-     * @return object
-     * @throws InvalidConfigException
-     * @throws NotInstantiableException
-     */
-    protected function get(string $name): object
-    {
-        return Yii::$container->get($name);
     }
 }
