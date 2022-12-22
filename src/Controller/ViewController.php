@@ -26,7 +26,6 @@ class ViewController extends Controller implements ViewContextInterface
     /**
      * @inheritdoc
      */
-    #[ArrayShape(['queryParams' => "array", 'pageCache' => "array"])]
     public function behaviors(): array
     {
         return [
